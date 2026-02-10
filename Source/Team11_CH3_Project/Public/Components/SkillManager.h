@@ -46,11 +46,17 @@ protected:
 
 private:
 	// 기본공격 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicAttack", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|BasicAttack", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UBasicAttack> BasicAttack;
+	// 기본공격 클래스(블루프린트 설정용)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|BasicAttack", meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UBasicAttack> BasicAttackClass;
 	// 스킬 배열
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<class USkillSlot>> SkillSlots;
+	// 초기 스킬 클래스(블루프린트 설정용)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
+	TArray<TSubclassOf<class UBaseSkill>> DefaultSkillSlotClasses;
 	// 스킬 데이터 테이블
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Data", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UDataTable> SkillDataTable;

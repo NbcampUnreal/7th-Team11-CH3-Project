@@ -24,18 +24,22 @@ void USkillManager::BeginPlay()
 {
 	Super::BeginPlay();
 	// BasicAttack 생성
-	BasicAttack = NewObject<UBasicAttack>(this);
-	SkillSlots.Empty();
-	for (int i = 0; i < 2; i++)
+	if (IsValid(BasicAttackClass))
 	{
-		// BasieSkill 생성
-		USkillSlot* NewSlot = NewObject<USkillSlot>(this);
-		NewSlot->EquipGem(UFireball::StaticClass());
-		SkillSlots.Add(NewSlot);
+		BasicAttack = NewObject<UBasicAttack>(this, BasicAttackClass);
 	}
 
+	SkillSlots.Empty();
+	for (const auto& SkillClass : DefaultSkillSlotClasses)
+	{
+		if (IsValid(SkillClass))
+		{
+			USkillSlot* NewSlot = NewObject<USkillSlot>(this);
+			NewSlot->EquipGem(SkillClass);
+			SkillSlots.Add(NewSlot);
+		}
+	}
 	// ...
-	
 }
 
 
