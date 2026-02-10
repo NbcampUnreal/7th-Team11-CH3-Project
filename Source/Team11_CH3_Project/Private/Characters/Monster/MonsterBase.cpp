@@ -2,17 +2,19 @@
 
 
 #include "Characters/Monster/MonsterBase.h"
-
 #include "Characters/Monster/MonsterControllerBase.h"
+
+
 // Sets default values
 AMonsterBase::AMonsterBase()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	AIControllerClass = AMonsterControllerBase::StaticClass();
 	SetRootComponent(RootComponent);
 	GetMesh()->SetupAttachment(RootComponent);
 	// Mesh->AnimClass = nullptr;
+	
 }
 
 // Called when the game starts or when spawned

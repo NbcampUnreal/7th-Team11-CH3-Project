@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "MonsterBase.generated.h"
 
+
 UCLASS()
 class TEAM11_CH3_PROJECT_API AMonsterBase : public ACharacter
 {
@@ -18,7 +19,6 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
 
 	
 public:	
