@@ -2,29 +2,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Types/StatTypes.h"
 #include "StatComponent.generated.h"
-
-UENUM(BlueprintType)
-enum class EStat : uint8
-{
-	HP,
-	MaxHP,
-	DEF,
-	MoveSpeed,
-	AttackDamage,
-	CastSpeed,
-	ProjectileSpeed,
-	CriticalChance,
-	CriticalDamage,
-};
 
 USTRUCT()
 struct TEAM11_CH3_PROJECT_API FStatData
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	float HP;
 	UPROPERTY()
 	float MaxHP;
 	UPROPERTY()
@@ -65,6 +50,11 @@ public:
 	// 현재 스탯 가져오기
 	float GetCurrentStat(EStat TargetStat) const;
 
+	// 현재 체력 증감
+	void AddCurrentHP(float Amount);
+	// 현재 체력 가져오기
+	float GetCurrentHP() const;
+
 	// 받는 데미지 계산
 	bool TakeDamage(float DamageAmount);
 		
@@ -75,4 +65,7 @@ public:
 private:
 	UPROPERTY()
 	FStatData BaseStat;
+
+	UPROPERTY()
+	float CurrentHP;
 };
