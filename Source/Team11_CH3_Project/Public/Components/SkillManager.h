@@ -40,6 +40,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetCooldownRemaining(int32 SlotIndex) const;
 
+	// 쿨타임 종료 콜백
+	void OnCooldownFinished(int32 SlotIndex);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -57,9 +60,12 @@ private:
 	// 초기 스킬 클래스(블루프린트 설정용)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
 	TArray<TSubclassOf<class UBaseSkill>> DefaultSkillSlotClasses;
-	// 스킬 데이터 테이블
-	UPROPERTY(EditDefaultsOnly, Category = "Skill|Data", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UDataTable> SkillDataTable;
+	// 스킬 데이터 테이블(도전 기능때 구현)
+	//UPROPERTY(EditDefaultsOnly, Category = "Skill|Data", meta = (AllowPrivateAccess = "true"))
+	//TObjectPtr<class UDataTable> SkillDataTable;
+	// 스탯 연동
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UStatComponent> StatComp;
 	// 쿨다운 관리
 	UPROPERTY()
 	TMap<int32, FTimerHandle> CooldownTimers;

@@ -2,11 +2,11 @@
 
 
 #include "Components/SkillManager.h"
-//#include "Components/Skills/BaseSkill.h"
 #include "Components/Skills/BasicAttack.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Components/Skills/Fireball.h"
 #include "Engine/Engine.h"
+#include "Components/StatComponent.h"
 
 // Sets default values for this component's properties
 USkillManager::USkillManager()
@@ -23,6 +23,10 @@ USkillManager::USkillManager()
 void USkillManager::BeginPlay()
 {
 	Super::BeginPlay();
+	//if (AActor* Owner = GetOwner())
+	//{
+	//	StatComp = Owner->FindComponentByClass<UStatComponent>();
+	//}
 	// BasicAttack 생성
 	if (IsValid(BasicAttackClass))
 	{
@@ -39,7 +43,6 @@ void USkillManager::BeginPlay()
 			SkillSlots.Add(NewSlot);
 		}
 	}
-	// ...
 }
 
 
@@ -53,64 +56,107 @@ void USkillManager::BeginPlay()
 
 void USkillManager::UseBasicAttack()
 {
-	if (IsValid(BasicAttack))
+	// BasicAttack 체크
+	if (IsValid(BasicAttack) == false)
 	{
-		// 구현 예정
-		BasicAttack->Activate();
+		UE_LOG(LogTemp, Warning, TEXT("NoBasicAttack"));
+		return;
 	}
-	else
-	{
-		if (IsValid(GEngine))
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, (TEXT("NoBasicAttack")));
-		}
-	}
+	// 기본공격
+	BasicAttack->Activate();
+
 }
 
 void USkillManager::UseSkillSlot(int32 Index)
 {
-	if (SkillSlots.IsValidIndex(Index))
+	// 예외 상황 체크
+	if (SkillSlots.IsValidIndex(Index) == false)
 	{
-		SkillSlots[Index]->GetEquippedSkill()->Activate();
+		UE_LOG(LogTemp, Warning, TEXT("%d SkillSlotEmpty"), Index);
+		return;
 	}
-	else
+	if (SkillSlots[Index] == nullptr || SkillSlots[Index]->GetEquippedSkill() == nullptr)
 	{
-		if (IsValid(GEngine))
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("%d SkillSlotEmpty"), Index));
-		}
+		UE_LOG(LogTemp, Warning, TEXT("%d Skill Is Empty"), Index);
+		return;
+	}
+	// 쿨타임 체크
+	if (IsSkillOnCooldown(Index))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Skill On Cooldown: %.1fs"), GetCooldownRemaining(Index));
+		return;
+	}
+	//// MP 체크 일단 주석처리
+	//if (IsValid(StatComp))
+	//{
+	//	float CurrentMana = StatComp->GetCurrentStat(EStat::MP);
+	//	float ManaCost = SkillSlots[Index]->GetEquippedSkill()->GetManaCost();
+
+	//	if (CurrentMana < ManaCost)
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("Not Enough Mana! Current: % f, Cost %f"), CurrentMana, ManaCost);
+	//		return;
+	//	}
+
+	//	StatComp->SetCurrentStat(EStat::MP, CurrentMana - ManaCost);
+	//}
+	// 스킬 발동
+	SkillSlots[Index]->GetEquippedSkill()->Activate();
+	// 쿨타임 시작
+	float CooldownTime = SkillSlots[Index]->GetEquippedSkill()->GetCooldownTime();
+	if (CooldownTime > 0)
+	{
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(
+			TimerHandle,
+			FTimerDelegate::CreateUObject(this, &USkillManager::OnCooldownFinished, Index),
+			CooldownTime,
+			false
+		);
+		// 각 인덱스에 쿨타임 저장
+		CooldownTimers.Emplace(Index, TimerHandle);
 	}
 }
 
 void USkillManager::EquipSkillGem(int32 SlotIndex, TSubclassOf<class UBaseSkill> NewSkillClass)
 {
+	// 새로 장착할 Gem의 NewSkillClass nullptr 체크
 	if (NewSkillClass == nullptr)
 		return;
-
-	if (SkillSlots.IsValidIndex(SlotIndex))
+	// 스킬 슬롯배열 체크
+	if (SkillSlots.IsValidIndex(SlotIndex) == false)
 	{
-		SkillSlots[SlotIndex]->EquipGem(NewSkillClass);
-		if (IsValid(GEngine))
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("EquipGem : %s"), *NewSkillClass->GetName()));
-		}
+		UE_LOG(LogTemp, Warning, TEXT("%d SkillSlotEmpty"), SlotIndex);
+		return;
 	}
-	else
-	{
-		if (IsValid(GEngine))
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("%d SkillSlotEmpty"), SlotIndex));
-		}
-	}
+	// 장착
+	SkillSlots[SlotIndex]->EquipGem(NewSkillClass);
+	UE_LOG(LogTemp, Warning, TEXT("EquipGem : %s"), *NewSkillClass->GetName());
 }
 
 bool USkillManager::IsSkillOnCooldown(int32 SlotIndex) const
 {
+	// CooldownTimers의 인덱스가 nullptr이 아니고 쿨타임이 남아있다면 true 반환
+	if (const FTimerHandle* Handle = CooldownTimers.Find(SlotIndex))
+	{
+		return GetWorld()->GetTimerManager().IsTimerActive(*Handle);
+	}
 	return false;
 }
 
 float USkillManager::GetCooldownRemaining(int32 SlotIndex) const
 {
-	return 0.0f;
+	// CooldownTimers의 인덱스가 nullptr이 아니고 쿨타임이 남아있다면 남은 시간 반환
+	if (const FTimerHandle* Handle = CooldownTimers.Find(SlotIndex))
+	{
+		return GetWorld()->GetTimerManager().GetTimerRemaining(*Handle);
+	}
+	return 0.0;
+}
+
+void USkillManager::OnCooldownFinished(int32 SlotIndex)
+{
+	// 쿨타임이 끝나면 인덱스 삭제
+	CooldownTimers.Remove(SlotIndex);
 }
 

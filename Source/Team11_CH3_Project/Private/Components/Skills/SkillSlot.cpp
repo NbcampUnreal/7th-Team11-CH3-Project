@@ -9,27 +9,22 @@ void USkillSlot::EquipGem(TSubclassOf<class UBaseSkill> NewSkillClass)
 {
 	if (IsValid(NewSkillClass) == false)
 		return;
-
-	if (EquippedSkill != nullptr)
+	if (EquippedSkill)
 	{
 		ClearSlot();
-		if (IsValid(GEngine))
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("Clear EquipGem : %s"), *NewSkillClass->GetName()));
-		}
+		UE_LOG(LogTemp, Warning, TEXT("Clear EquipGem: %s"), *NewSkillClass->GetName());
 	}
 
 	EquippedSkill = NewObject<UBaseSkill>(this, NewSkillClass);
-	if (IsValid(GEngine))
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("EquipGem : %s"), *NewSkillClass->GetName()));
-	}
+	UE_LOG(LogTemp, Warning, TEXT("EquipGem: %s"), *NewSkillClass->GetName());
+
 }
 
 void USkillSlot::ClearSlot()
 {
-	if (IsValid(EquippedSkill))
-	{
-		EquippedSkill = nullptr;
-	}
+	if (IsValid(EquippedSkill) == false)
+		return;
+
+	EquippedSkill = nullptr;
+
 }
