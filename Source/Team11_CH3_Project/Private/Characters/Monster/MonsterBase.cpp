@@ -9,10 +9,14 @@
 AMonsterBase::AMonsterBase()
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	AIControllerClass = AMonsterControllerBase::StaticClass();
 	SetRootComponent(RootComponent);
 	GetMesh()->SetupAttachment(RootComponent);
+	
+	//TODO HardCoded
+	TeamID = FGenericTeamId(1);
+	
 	// Mesh->AnimClass = nullptr;
 	
 }
@@ -21,14 +25,12 @@ AMonsterBase::AMonsterBase()
 void AMonsterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	OriginLocation = GetActorLocation();
 }
 
-// Called every frame
-void AMonsterBase::Tick(float DeltaTime)
+FVector AMonsterBase::GetOriginLocation() const
 {
-	Super::Tick(DeltaTime);
-
+	return OriginLocation;
 }
 
 // Called to bind functionality to input
@@ -36,5 +38,20 @@ void AMonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+FGenericTeamId AMonsterBase::GetGenericTeamId() const
+{
+	return TeamID;
+}
+
+ETeamAttitude::Type AMonsterBase::GetTeamAttitudeTowards(const AActor& Other) const
+{
+	const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(&Other);
+	if (OtherTeamID)
+	{
+		return (TeamID == OtherTeamID->GetGenericTeamId())?ETeamAttitude::Friendly:ETeamAttitude::Hostile;
+	}
+	return ETeamAttitude::Neutral;
 }
 

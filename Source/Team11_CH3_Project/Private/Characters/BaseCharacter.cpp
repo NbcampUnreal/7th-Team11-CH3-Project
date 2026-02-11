@@ -10,7 +10,6 @@ ABaseCharacter::ABaseCharacter()
     bIsDead = false;
 
     InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
-
 }
 
 void ABaseCharacter::BeginPlay()

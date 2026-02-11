@@ -17,6 +17,7 @@ class UAISenseConfig_Damage;
  */
 class UBehaviorTree;
 class UAIPerceptionComponent;
+DECLARE_MULTICAST_DELEGATE(FOnAttackFinished);
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API AMonsterControllerBase : public AAIController
@@ -26,7 +27,10 @@ class TEAM11_CH3_PROJECT_API AMonsterControllerBase : public AAIController
 public:
 
 	AMonsterControllerBase();
-
+	bool TryAttack(AActor* Target);
+	bool GetIsAttacking();
+	FOnAttackFinished OnAttackFinished;
+	
 protected:
 	virtual void OnPossess(class APawn* InPawn) override;
 	virtual void BeginPlay() override;
@@ -38,7 +42,7 @@ protected:
 	void TargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 	UFUNCTION()
 	void TargetPerceptionForgotten(AActor* Actor);
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AI")
 	TObjectPtr<UBehaviorTree> BehaviorTree;
 

@@ -3,29 +3,29 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/Character.h"
 #include "MonsterBase.generated.h"
 
 
 UCLASS()
-class TEAM11_CH3_PROJECT_API AMonsterBase : public ACharacter
+class TEAM11_CH3_PROJECT_API AMonsterBase : public ACharacter, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this character's properties
 	AMonsterBase();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
+	FVector OriginLocation;
 	
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
+	FVector GetOriginLocation() const;	
+	FGenericTeamId TeamID;
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
+	
 };
