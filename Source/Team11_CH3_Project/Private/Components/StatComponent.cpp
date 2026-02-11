@@ -21,9 +21,6 @@ void UStatComponent::SetBaseStat(EStat TargetStat, float Amount)
 {
 	switch (TargetStat)
 	{
-	case EStat::HP:
-		BaseStat.HP = FMath::Clamp(Amount, 0.0f, BaseStat.MaxHP);
-		break;
 	case EStat::MaxHP:
 		BaseStat.MaxHP = FMath::Max(Amount, 0.0f);
 		break;
@@ -57,9 +54,6 @@ void UStatComponent::SetCurrentStat(EStat TargetStat, float Amount)
 {
 	switch (TargetStat)
 	{
-	case EStat::HP:
-		CurrentStat.HP = FMath::Clamp(Amount, 0.0f, CurrentStat.MaxHP);
-		break;
 	case EStat::MaxHP:
 		CurrentStat.MaxHP = FMath::Max(Amount, 0.0f);
 		break;
@@ -93,8 +87,6 @@ float UStatComponent::GetBaseStat(EStat TargetStat) const
 {
 	switch (TargetStat)
 	{
-	case EStat::HP:
-		return BaseStat.HP;
 	case EStat::MaxHP:
 		return BaseStat.MaxHP;
 	case EStat::DEF:
@@ -120,8 +112,6 @@ float UStatComponent::GetCurrentStat(EStat TargetStat) const
 {
 	switch (TargetStat)
 	{
-	case EStat::HP:
-		return CurrentStat.HP;
 	case EStat::MaxHP:
 		return CurrentStat.MaxHP;
 	case EStat::DEF:
@@ -143,12 +133,22 @@ float UStatComponent::GetCurrentStat(EStat TargetStat) const
 	}
 }
 
+void UStatComponent::AddCurrentHP(float Amount)
+{
+	CurrentHP = FMath::Clamp(CurrentHP + Amount, 0.0f, GetCurrentStat(EStat::MaxHP));
+}
+
+float UStatComponent::GetCurrentHP() const
+{
+	return CurrentHP;
+}
+
 bool UStatComponent::TakeDamage(float DamageAmount)
 {
 	float CalculatedDamage = DamageAmount*100/FMath::Max(100 + GetCurrentStat(EStat::DEF), 0.01f); // 데미지 * 100/(100+방어력)
-	SetCurrentStat(EStat::HP, GetCurrentStat(EStat::HP) - CalculatedDamage);
+	AddCurrentHP(-CalculatedDamage);
 
-	if (GetCurrentStat(EStat::HP) <= 0)
+	if (GetCurrentHP() <= 0)
 	{
 		// 사망
 		return true;
