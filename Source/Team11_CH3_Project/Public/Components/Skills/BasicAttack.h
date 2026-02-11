@@ -15,8 +15,7 @@ class TEAM11_CH3_PROJECT_API UBasicAttack : public UBaseSkill
 	GENERATED_BODY()
 
 public:
-	// 스킬 데이터 테이블에서 데이터 로딩
+	UBasicAttack();
+	// 스킬 데이터 테이블에서 데이터 로딩(도전 기능때 구현)
 	virtual void InitFromData() override;
-	// 스킬 발동
-	virtual void Activate() override;
 };
