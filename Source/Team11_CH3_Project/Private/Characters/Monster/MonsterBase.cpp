@@ -3,6 +3,7 @@
 
 #include "Characters/Monster/MonsterBase.h"
 #include "Characters/Monster/MonsterControllerBase.h"
+#include "Components/StatComponent.h"
 
 
 // Sets default values
@@ -13,10 +14,11 @@ AMonsterBase::AMonsterBase()
 	AIControllerClass = AMonsterControllerBase::StaticClass();
 	SetRootComponent(RootComponent);
 	GetMesh()->SetupAttachment(RootComponent);
+	StatComponent = CreateDefaultSubobject<UStatComponent>("StatComponent");
 	
 	//TODO HardCoded
 	TeamID = FGenericTeamId(1);
-	
+	AttackRange = 100.0f;
 	// Mesh->AnimClass = nullptr;
 	
 }
@@ -31,6 +33,11 @@ void AMonsterBase::BeginPlay()
 FVector AMonsterBase::GetOriginLocation() const
 {
 	return OriginLocation;
+}
+
+float AMonsterBase::GetAttackRange() const
+{
+	return AttackRange;
 }
 
 // Called to bind functionality to input

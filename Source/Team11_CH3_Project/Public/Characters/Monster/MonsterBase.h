@@ -8,6 +8,8 @@
 #include "MonsterBase.generated.h"
 
 
+class UStatComponent;
+
 UCLASS()
 class TEAM11_CH3_PROJECT_API AMonsterBase : public ACharacter, public IGenericTeamAgentInterface
 {
@@ -19,13 +21,20 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	FVector OriginLocation;
-	
-public:	
-	FVector GetOriginLocation() const;	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UStatComponent> StatComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AttackRange;
+
+public:
+	FVector GetOriginLocation() const;
+	float GetAttackRange() const;
+
+
 	FGenericTeamId TeamID;
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual FGenericTeamId GetGenericTeamId() const override;
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
-	
 };

@@ -5,6 +5,7 @@
 
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Characters/Monster/MonsterBase.h"
 
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig.h"
@@ -74,18 +75,17 @@ bool AMonsterControllerBase::TryAttack(AActor* Target)
 	DrawDebugLine(GetWorld(), GetPawn()->GetActorLocation(), Target->GetActorLocation(), FColor::Red, false, 2.0f, 0,
 	              2.0f);
 	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, [this]{OnAttackFinished.Broadcast();}, 1.f, false );
+	GetWorldTimerManager().SetTimer(TimerHandle, [this] { OnAttackFinished.Broadcast(); }, 1.f, false);
 	return true;
 }
-
 
 
 void AMonsterControllerBase::OnPossess(class APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 	RunBehaviorTree(BehaviorTree);
-	
-	if (ACharacter* PossessedCharacter = Cast<ACharacter>(InPawn))
+
+	if (AMonsterBase* PossessedCharacter = Cast<AMonsterBase>(InPawn))
 	{
 		PossessedCharacter->bUseControllerRotationYaw = false;
 		if (UCharacterMovementComponent* MovComp = PossessedCharacter->GetCharacterMovement())
@@ -95,8 +95,8 @@ void AMonsterControllerBase::OnPossess(class APawn* InPawn)
 		if (UBlackboardComponent* BB = GetBlackboardComponent())
 		{
 			BB->SetValueAsFloat(TEXT("FightMaxMoveSpeed"), PossessedCharacter->GetCharacterMovement()->GetMaxSpeed());
-			BB->SetValueAsFloat(
-				TEXT("PatrolMaxMoveSpeed"), PossessedCharacter->GetCharacterMovement()->GetMaxSpeed() / 3);
+			BB->SetValueAsFloat(TEXT("PatrolMaxMoveSpeed"), PossessedCharacter->GetCharacterMovement()->GetMaxSpeed() / 3);
+			BB->SetValueAsFloat(TEXT("AttackRange"), PossessedCharacter->GetAttackRange());
 		}
 	}
 }
@@ -104,7 +104,6 @@ void AMonsterControllerBase::OnPossess(class APawn* InPawn)
 void AMonsterControllerBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 void AMonsterControllerBase::GetActorEyesViewPoint(FVector& OutLocation, FRotator& OutRotation) const
