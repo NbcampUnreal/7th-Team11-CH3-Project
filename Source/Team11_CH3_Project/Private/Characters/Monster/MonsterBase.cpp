@@ -16,7 +16,11 @@ AMonsterBase::AMonsterBase()
 	
 	//TODO HardCoded
 	TeamID = FGenericTeamId(1);
-	
+	ConstructorHelpers::FClassFinder<UAnimInstance> AnimBlueprintFinder(TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
+	if (AnimBlueprintFinder.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass( AnimBlueprintFinder.Class);
+	}
 	// Mesh->AnimClass = nullptr;
 	
 }
