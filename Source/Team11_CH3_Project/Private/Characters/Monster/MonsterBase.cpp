@@ -47,8 +47,7 @@ FGenericTeamId AMonsterBase::GetGenericTeamId() const
 
 ETeamAttitude::Type AMonsterBase::GetTeamAttitudeTowards(const AActor& Other) const
 {
-	const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(&Other);
-	if (OtherTeamID)
+	if (const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(&Other))
 	{
 		return (TeamID == OtherTeamID->GetGenericTeamId())?ETeamAttitude::Friendly:ETeamAttitude::Hostile;
 	}

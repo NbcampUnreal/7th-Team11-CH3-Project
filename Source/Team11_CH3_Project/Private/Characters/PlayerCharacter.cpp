@@ -35,6 +35,9 @@ APlayerCharacter::APlayerCharacter()
     bIsSprinting = false;
     bIsDodging = false;
     bCanDodge = true;
+    
+    //TODO HardCoded
+    TeamID = FGenericTeamId(0);
 }
 
 void APlayerCharacter::BeginPlay()
@@ -179,4 +182,18 @@ void APlayerCharacter::PlayDeathAnimation()
     {
         GetMesh()->GetAnimInstance()->Montage_Play(DeathMontage);
     }
+}
+
+FGenericTeamId APlayerCharacter::GetGenericTeamId() const
+{
+	return TeamID;
+}
+
+ETeamAttitude::Type APlayerCharacter::GetTeamAttitudeTowards(const AActor& Other) const
+{
+    if (const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(&Other))
+    {
+        return (TeamID == OtherTeamID->GetGenericTeamId())?ETeamAttitude::Friendly:ETeamAttitude::Hostile;
+    }
+    return ETeamAttitude::Neutral;
 }

@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
+#include "GenericTeamAgentInterface.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
@@ -20,7 +21,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeEnded);
 
 UCLASS()
-class TEAM11_CH3_PROJECT_API APlayerCharacter : public ABaseCharacter 
+class TEAM11_CH3_PROJECT_API APlayerCharacter : public ABaseCharacter , public IGenericTeamAgentInterface
 {
     GENERATED_BODY()
 
@@ -115,6 +116,8 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Animation")
     void PlayDeathAnimation();
+    virtual FGenericTeamId GetGenericTeamId() const override;
+    virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
 protected:
 
@@ -135,4 +138,7 @@ protected:
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Movement")
     void BP_OnSprintEnded();
+private:
+	FGenericTeamId TeamID;
+    
 };
