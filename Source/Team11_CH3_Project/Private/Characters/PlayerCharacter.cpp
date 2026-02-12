@@ -5,6 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
 #include "Components/StatComponent.h"
+#include "Components/BuffManager.h"
 #include "Kismet/KismetMathLibrary.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -32,6 +33,10 @@ APlayerCharacter::APlayerCharacter()
     GetCharacterMovement()->AirControl = 0.35f;
     GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
+    BasicAttack = CreateDefaultSubobject<UBasicAttack>(TEXT("BasicAttack"));
+    StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
+    BuffManager = CreateDefaultSubobject<UBuffManager>(TEXT("BuffManager"));
+
     bIsSprinting = false;
     bIsDodging = false;
     bCanDodge = true;
@@ -40,9 +45,58 @@ APlayerCharacter::APlayerCharacter()
     TeamID = FGenericTeamId(0);
 }
 
+void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+    Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+    if (UEnhancedInputComponent* EnhancedInput =
+        Cast<UEnhancedInputComponent>(PlayerInputComponent))
+    {
+        EnhancedInput->BindAction(
+            AttackAction,
+            ETriggerEvent::Triggered,
+            this,
+            &APlayerCharacter::Attack);
+
+        EnhancedInput->BindAction(
+            SkillQAction,
+            ETriggerEvent::Triggered,
+            this,
+            &APlayerCharacter::SkillQ);
+
+        EnhancedInput->BindAction(
+            SkillEAction,
+            ETriggerEvent::Triggered,
+            this,
+            &APlayerCharacter::SkillE);
+    }
+}
+
+// 스킬 정의
+void APlayerCharacter::Attack(const FInputActionValue& Value)
+{
+    if (BasicAttack)
+    {
+        BasicAttack->Activate();
+    }
+}
+
+void APlayerCharacter::SkillQ(const FInputActionValue& Value)
+{
+    UE_LOG(LogTemp, Warning, TEXT("Skill Q Used"));
+}
+
+void APlayerCharacter::SkillE(const FInputActionValue& Value)
+{
+    UE_LOG(LogTemp, Warning, TEXT("Skill E Used"));
+}
+
+
 void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
+
+    BasicAttack = NewObject<UBasicAttack>(this);
 
     UpdateMovementSpeed();
 }
@@ -84,14 +138,12 @@ void APlayerCharacter::StartSprint()
 
     bIsSprinting = true;
     UpdateMovementSpeed();
-    BP_OnSprintStarted();
 }
 
 void APlayerCharacter::StopSprint()
 {
     bIsSprinting = false;
     UpdateMovementSpeed();
-    BP_OnSprintEnded();
 }
 
 void APlayerCharacter::PerformDodge()
@@ -115,7 +167,6 @@ void APlayerCharacter::UpdateMovementSpeed()
     }
 }
 
-
 void APlayerCharacter::ExecuteDodge()
 {
     bIsDodging = true;
@@ -126,7 +177,7 @@ void APlayerCharacter::ExecuteDodge()
         StopSprint();
     }
 
-    PlayDodgeAnimation();
+    // PlayDodgeAnimation();
 
     FVector DodgeDirection = GetVelocity().GetSafeNormal();
 
@@ -138,7 +189,6 @@ void APlayerCharacter::ExecuteDodge()
     FVector LaunchVelocity = DodgeDirection * (DodgeDistance / DodgeDuration);
     LaunchCharacter(LaunchVelocity, true, true);
 
-    BP_OnDodgeStarted();
 
     GetWorldTimerManager().SetTimer(
         DodgeTimerHandle,
@@ -160,7 +210,6 @@ void APlayerCharacter::ExecuteDodge()
 void APlayerCharacter::EndDodge()
 {
     bIsDodging = false;
-    BP_OnDodgeEnded();
 }
 
 void APlayerCharacter::ResetDodgeCooldown()
@@ -168,6 +217,7 @@ void APlayerCharacter::ResetDodgeCooldown()
     bCanDodge = true;
 }
 
+/*
 void APlayerCharacter::PlayDodgeAnimation()
 {
     if (DodgeMontage && GetMesh() && GetMesh()->GetAnimInstance())
@@ -183,6 +233,7 @@ void APlayerCharacter::PlayDeathAnimation()
         GetMesh()->GetAnimInstance()->Montage_Play(DeathMontage);
     }
 }
+*/
 
 FGenericTeamId APlayerCharacter::GetGenericTeamId() const
 {
