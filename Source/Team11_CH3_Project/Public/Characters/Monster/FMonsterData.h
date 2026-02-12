@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/StatComponent.h"
+#include "Components/Items/Equipments/WeaponItemData.h"
 #include "FMonsterData.generated.h"
 /**
  * 
@@ -12,18 +14,18 @@ struct TEAM11_CH3_PROJECT_API FMonsterData : public FTableRowBase
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
-	float BaseDamage;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
-	float BaseMaxHP;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
-	float MovementSpeed;
+	FStatData StatData;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
 	float BaseExp;
+	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
 	TSoftObjectPtr<UTexture2D> Thumbnail;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
 	TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
+	FWeaponItemData WeaponItemData;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
 	TSoftClassPtr<UAnimInstance> AnimBlueprint;
