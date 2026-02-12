@@ -16,6 +16,7 @@ void UStatComponent::InitStat(const FStatData& StatData)
 {
 	BaseStat = StatData;
 	CurrentStat = BaseStat;
+	CurrentHP = BaseStat.MaxHP;
 }
 
 void UStatComponent::SetBaseStat(EStat TargetStat, float Amount)
