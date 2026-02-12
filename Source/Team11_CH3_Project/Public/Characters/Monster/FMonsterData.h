@@ -26,5 +26,9 @@ struct TEAM11_CH3_PROJECT_API FMonsterData : public FTableRowBase
 	TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
+	TSoftObjectPtr<UAnimMontage> AttackMontage;
+	
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
 	TSoftClassPtr<UAnimInstance> AnimBlueprint;
 };

@@ -66,18 +66,7 @@ AMonsterControllerBase::AMonsterControllerBase()
 	AIPerceptionComp->OnTargetPerceptionForgotten.AddDynamic(this, &AMonsterControllerBase::TargetPerceptionForgotten);
 }
 
-bool AMonsterControllerBase::TryAttack(AActor* Target)
-{
-	if (!Target || !GetPawn())
-	{
-		return false;
-	}
-	DrawDebugLine(GetWorld(), GetPawn()->GetActorLocation(), Target->GetActorLocation(), FColor::Red, false, 2.0f, 0,
-	              2.0f);
-	FTimerHandle TimerHandle;
-	GetWorldTimerManager().SetTimer(TimerHandle, [this] { OnAttackFinished.Broadcast(); }, 1.f, false);
-	return true;
-}
+
 
 
 void AMonsterControllerBase::OnPossess(class APawn* InPawn)

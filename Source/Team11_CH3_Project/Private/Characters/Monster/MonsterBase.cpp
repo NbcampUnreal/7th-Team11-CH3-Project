@@ -28,6 +28,8 @@ AMonsterBase::AMonsterBase()
 	
 }
 
+
+
 // Called when the game starts or when spawned
 void AMonsterBase::BeginPlay()
 {
@@ -66,3 +68,30 @@ ETeamAttitude::Type AMonsterBase::GetTeamAttitudeTowards(const AActor& Other) co
 	return ETeamAttitude::Neutral;
 }
 
+bool AMonsterBase::TryAttack(AActor* Target)
+{
+
+	if (!Target || bIsAttacking)
+	{
+		return false;
+	}
+	DrawDebugLine(GetWorld(), GetActorLocation(), Target->GetActorLocation(), FColor::Red, false, 2.0f, 0,
+				  2.0f);
+	bIsAttacking = true;
+	PlayAnimMontage(AttackMontage);
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
+	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
+	return true;
+}
+//CallByAnimNotify
+void AMonsterBase::DealDamage()
+{
+	//TODO projectile,,HitCheck..
+}
+
+void AMonsterBase::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
+{
+	bIsAttacking = false;
+	OnAttackFinished.Broadcast();
+}

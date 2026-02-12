@@ -27,9 +27,6 @@ class TEAM11_CH3_PROJECT_API AMonsterControllerBase : public AAIController
 public:
 
 	AMonsterControllerBase();
-	bool TryAttack(AActor* Target);
-	bool GetIsAttacking();
-	FOnAttackFinished OnAttackFinished;
 	
 protected:
 	virtual void OnPossess(class APawn* InPawn) override;

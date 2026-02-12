@@ -4,6 +4,7 @@
 #include "Characters/Monster/BTT_Attack.h"
 
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Characters/Monster/MonsterBase.h"
 #include "Characters/Monster/MonsterControllerBase.h"
 
 UBTT_Attack::UBTT_Attack()
@@ -27,16 +28,21 @@ EBTNodeResult::Type UBTT_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 	{
 		return EBTNodeResult::Failed;
 	}
+	AMonsterBase* MonsterBase = Cast<AMonsterBase>(MonsterControllerBase->GetPawn());
+	if (!MonsterBase)
+	{
+		return EBTNodeResult::Failed;
+	}
 	if (UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent())
 	{
 		AActor* TargetActor  = Cast<AActor>(BB->GetValueAsObject(TargetActorSelector.SelectedKeyName));
-		if (MonsterControllerBase->TryAttack(TargetActor))
+		if (MonsterBase->TryAttack(TargetActor))
 		{
-			MonsterControllerBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
-			AttackMemory->OnAttackFinishedHandle = MonsterControllerBase->OnAttackFinished.AddLambda(
-			[this, &OwnerComp, AttackMemory, MonsterControllerBase]()
+			MonsterBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
+			AttackMemory->OnAttackFinishedHandle = MonsterBase->OnAttackFinished.AddLambda(
+			[this, &OwnerComp, AttackMemory, MonsterBase]()
 			{
-				MonsterControllerBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
+				MonsterBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
 				AttackMemory->OnAttackFinishedHandle.Reset();
 				FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 			}	
@@ -54,8 +60,11 @@ EBTNodeResult::Type UBTT_Attack::AbortTask(UBehaviorTreeComponent& OwnerComp, ui
 	AMonsterControllerBase* MonsterControllerBase = Cast<AMonsterControllerBase>(OwnerComp.GetAIOwner());
 	if (MonsterControllerBase && AttackMemory->OnAttackFinishedHandle.IsValid())
 	{
-		MonsterControllerBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
-		AttackMemory->OnAttackFinishedHandle.Reset();
+		if (AMonsterBase* MonsterBase = Cast<AMonsterBase>(MonsterControllerBase->GetPawn()))
+		{
+			MonsterBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
+			AttackMemory->OnAttackFinishedHandle.Reset();
+		}
 	}
 	
 	return Super::AbortTask(OwnerComp, NodeMemory);

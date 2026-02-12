@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
+#include "MonsterControllerBase.h"
 #include "GameFramework/Character.h"
 #include "MonsterBase.generated.h"
 
@@ -18,15 +19,23 @@ class TEAM11_CH3_PROJECT_API AMonsterBase : public ACharacter, public IGenericTe
 public:
 	AMonsterBase();
 
+	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
+	bool TryAttack(AActor* Target);
+	void DealDamage();
+	FOnAttackFinished OnAttackFinished;
 protected:
 	virtual void BeginPlay() override;
+	
+	
 	FVector OriginLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStatComponent> StatComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AttackRange;
-
+	//TODO Move to Private And Init when spawn
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> AttackMontage;
 public:
 	FVector GetOriginLocation() const;
 	float GetAttackRange() const;
@@ -40,5 +49,5 @@ public:
 
 private:
 	FGenericTeamId TeamID;
-
+	bool bIsAttacking;
 };
