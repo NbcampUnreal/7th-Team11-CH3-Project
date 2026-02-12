@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
 
+struct FSkillSlotData;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TEAM11_CH3_PROJECT_API UInventoryComponent : public UActorComponent
@@ -12,5 +13,9 @@ class TEAM11_CH3_PROJECT_API UInventoryComponent : public UActorComponent
 
 public:	
 	UInventoryComponent();
+	FSkillSlotData GetSkillSlot(int32 Index);
+	void UseConsumable(int32 Index);
 
+	UFUNCTION(BlueprintCallable)
+	bool HasWeaponEquipped() const;
 };

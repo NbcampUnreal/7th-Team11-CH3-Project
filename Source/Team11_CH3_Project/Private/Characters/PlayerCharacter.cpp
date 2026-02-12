@@ -4,14 +4,13 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
-#include "EnhancedInputSubsystems.h"
+#include "Components/StatComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
 APlayerCharacter::APlayerCharacter()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
 
-    // Camera arm
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
     CameraBoom->TargetArmLength = CameraBoomLength;
@@ -19,45 +18,33 @@ APlayerCharacter::APlayerCharacter()
     CameraBoom->bEnableCameraLag = true;
     CameraBoom->CameraLagSpeed = 3.0f;
 
-    // Follow Camera 설정
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     FollowCamera->bUsePawnControlRotation = false;
 
-    // 캐릭터 회전 설정
     bUseControllerRotationPitch = false;
     bUseControllerRotationYaw = false;
     bUseControllerRotationRoll = false;
 
-    // CharacterMovement 설정
     GetCharacterMovement()->bOrientRotationToMovement = true;
     GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
     GetCharacterMovement()->JumpZVelocity = 600.0f;
     GetCharacterMovement()->AirControl = 0.35f;
     GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-    // State 초기화
     bIsSprinting = false;
     bIsDodging = false;
     bCanDodge = true;
+    
+    //TODO HardCoded
+    TeamID = FGenericTeamId(0);
 }
 
 void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Enhanced Input 설정
-    if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
-    {
-        if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
-            ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-        {
-            Subsystem->AddMappingContext(DefaultMappingContext, 0);
-        }
-    }
-
-    // 초기 이동 속도 설정
-    // UpdateMovementSpeed();
+    UpdateMovementSpeed();
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -65,33 +52,11 @@ void APlayerCharacter::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 }
 
-void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-    Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-    if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(PlayerInputComponent))
-    {
-        EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Move);
-
-        EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &APlayerCharacter::Look);
-
-        EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
-        EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
-        EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &APlayerCharacter::StartSprint);
-        EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopSprint);
-
-        EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &APlayerCharacter::PerformDodge);
-    }
-}
-
-void APlayerCharacter::Move(const FInputActionValue& Value)
+void APlayerCharacter::Move(const FVector2D& MovementVector)
 {
     if (bIsDodging) return;
 
-    FVector2D MovementVector = Value.Get<FVector2D>();
-
-    if (Controller != nullptr)
+    if (Controller != nullptr && MovementVector.SizeSquared() > 0.0f)
     {
         const FRotator Rotation = Controller->GetControlRotation();
         const FRotator YawRotation(0, Rotation.Yaw, 0);
@@ -104,10 +69,8 @@ void APlayerCharacter::Move(const FInputActionValue& Value)
     }
 }
 
-void APlayerCharacter::Look(const FInputActionValue& Value)
+void APlayerCharacter::Look(const FVector2D& LookAxisVector)
 {
-    FVector2D LookAxisVector = Value.Get<FVector2D>();
-
     if (Controller != nullptr)
     {
         AddControllerYawInput(LookAxisVector.X * CameraSensitivity);
@@ -117,14 +80,18 @@ void APlayerCharacter::Look(const FInputActionValue& Value)
 
 void APlayerCharacter::StartSprint()
 {
+    if (bIsDodging) return;
+
     bIsSprinting = true;
-    // UpdateMovementSpeed();
+    UpdateMovementSpeed();
+    BP_OnSprintStarted();
 }
 
 void APlayerCharacter::StopSprint()
 {
     bIsSprinting = false;
-    // UpdateMovementSpeed();
+    UpdateMovementSpeed();
+    BP_OnSprintEnded();
 }
 
 void APlayerCharacter::PerformDodge()
@@ -134,24 +101,32 @@ void APlayerCharacter::PerformDodge()
     ExecuteDodge();
 }
 
-// stat 업데이트 시 활성화
-/*void APlayerCharacter::UpdateMovementSpeed()
+void APlayerCharacter::UpdateMovementSpeed()
 {
-    if (!StatComponent) return;
+    if (!GetCharacterMovement()) return;
 
-    float BaseSpeed = StatComponent->GetMoveSpeed();
-    float TargetSpeed = bIsSprinting ? SprintSpeed : WalkSpeed;
-
-    if (UCharacterMovementComponent* MovementComp = GetCharacterMovement())
+    if (bIsSprinting)
     {
-        MovementComp->MaxWalkSpeed = TargetSpeed;
+        GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
     }
-}*/
+    else
+    {
+        GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+    }
+}
+
 
 void APlayerCharacter::ExecuteDodge()
 {
     bIsDodging = true;
     bCanDodge = false;
+
+    if (bIsSprinting)
+    {
+        StopSprint();
+    }
+
+    PlayDodgeAnimation();
 
     FVector DodgeDirection = GetVelocity().GetSafeNormal();
 
@@ -163,6 +138,7 @@ void APlayerCharacter::ExecuteDodge()
     FVector LaunchVelocity = DodgeDirection * (DodgeDistance / DodgeDuration);
     LaunchCharacter(LaunchVelocity, true, true);
 
+    BP_OnDodgeStarted();
 
     GetWorldTimerManager().SetTimer(
         DodgeTimerHandle,
@@ -184,9 +160,40 @@ void APlayerCharacter::ExecuteDodge()
 void APlayerCharacter::EndDodge()
 {
     bIsDodging = false;
+    BP_OnDodgeEnded();
 }
 
 void APlayerCharacter::ResetDodgeCooldown()
 {
     bCanDodge = true;
+}
+
+void APlayerCharacter::PlayDodgeAnimation()
+{
+    if (DodgeMontage && GetMesh() && GetMesh()->GetAnimInstance())
+    {
+        GetMesh()->GetAnimInstance()->Montage_Play(DodgeMontage);
+    }
+}
+
+void APlayerCharacter::PlayDeathAnimation()
+{
+    if (DeathMontage && GetMesh() && GetMesh()->GetAnimInstance())
+    {
+        GetMesh()->GetAnimInstance()->Montage_Play(DeathMontage);
+    }
+}
+
+FGenericTeamId APlayerCharacter::GetGenericTeamId() const
+{
+	return TeamID;
+}
+
+ETeamAttitude::Type APlayerCharacter::GetTeamAttitudeTowards(const AActor& Other) const
+{
+    if (const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(&Other))
+    {
+        return (TeamID == OtherTeamID->GetGenericTeamId())?ETeamAttitude::Friendly:ETeamAttitude::Hostile;
+    }
+    return ETeamAttitude::Neutral;
 }

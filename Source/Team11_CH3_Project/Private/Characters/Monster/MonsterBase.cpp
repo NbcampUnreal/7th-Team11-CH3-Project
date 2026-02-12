@@ -19,6 +19,11 @@ AMonsterBase::AMonsterBase()
 	//TODO HardCoded
 	TeamID = FGenericTeamId(1);
 	AttackRange = 100.0f;
+	ConstructorHelpers::FClassFinder<UAnimInstance> AnimBlueprintFinder(TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
+	if (AnimBlueprintFinder.Succeeded())
+	{
+		GetMesh()->SetAnimInstanceClass( AnimBlueprintFinder.Class);
+	}
 	// Mesh->AnimClass = nullptr;
 	
 }
@@ -54,8 +59,7 @@ FGenericTeamId AMonsterBase::GetGenericTeamId() const
 
 ETeamAttitude::Type AMonsterBase::GetTeamAttitudeTowards(const AActor& Other) const
 {
-	const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(&Other);
-	if (OtherTeamID)
+	if (const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(&Other))
 	{
 		return (TeamID == OtherTeamID->GetGenericTeamId())?ETeamAttitude::Friendly:ETeamAttitude::Hostile;
 	}
