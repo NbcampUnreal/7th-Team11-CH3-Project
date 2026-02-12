@@ -28,7 +28,9 @@ void UBuffManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 
 		if (ActiveBuffs[i].Duration <= 0.0f)
 		{
-			RemoveBuff(ActiveBuffs[i].BuffID);
+			EStat DeletedStat = ActiveBuffs[i].TargetStat;
+			ActiveBuffs.RemoveAt(i);
+			SetBuffs(DeletedStat);
 		}
 	}
 }

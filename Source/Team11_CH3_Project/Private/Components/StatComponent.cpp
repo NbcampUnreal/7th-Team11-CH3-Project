@@ -12,9 +12,10 @@ void UStatComponent::BeginPlay()
 	
 }
 
-void UStatComponent::SetBaseStat(const FStatData& StatData)
+void UStatComponent::InitStat(const FStatData& StatData)
 {
 	BaseStat = StatData;
+	CurrentStat = BaseStat;
 }
 
 void UStatComponent::SetBaseStat(EStat TargetStat, float Amount)
@@ -133,6 +134,11 @@ float UStatComponent::GetCurrentStat(EStat TargetStat) const
 	}
 }
 
+void UStatComponent::SetCurrentHP(float Amount)
+{
+	CurrentHP = FMath::Max(Amount, 0.0f);
+}
+
 void UStatComponent::AddCurrentHP(float Amount)
 {
 	CurrentHP = FMath::Clamp(CurrentHP + Amount, 0.0f, GetCurrentStat(EStat::MaxHP));
@@ -146,6 +152,7 @@ float UStatComponent::GetCurrentHP() const
 bool UStatComponent::TakeDamage(float DamageAmount)
 {
 	float CalculatedDamage = DamageAmount*100/FMath::Max(100 + GetCurrentStat(EStat::DEF), 0.01f); // 데미지 * 100/(100+방어력)
+	UE_LOG(LogTemp, Warning, TEXT("Damage: %f"), CalculatedDamage);
 	AddCurrentHP(-CalculatedDamage);
 
 	if (GetCurrentHP() <= 0)
