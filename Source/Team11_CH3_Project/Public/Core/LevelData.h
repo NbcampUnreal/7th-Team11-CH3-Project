@@ -18,7 +18,7 @@ struct FWaveData
 };
 
 USTRUCT(BlueprintType)
-class TEAM11_CH3_PROJECT_API FLevelData : public FTableRowBase
+struct TEAM11_CH3_PROJECT_API FLevelData : public FTableRowBase
 {
 	GENERATED_BODY()
 	
