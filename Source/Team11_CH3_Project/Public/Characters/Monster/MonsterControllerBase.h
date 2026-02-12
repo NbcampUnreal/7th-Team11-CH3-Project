@@ -27,7 +27,7 @@ class TEAM11_CH3_PROJECT_API AMonsterControllerBase : public AAIController
 public:
 
 	AMonsterControllerBase();
-	
+	void BlackboardUpdate();
 protected:
 	virtual void OnPossess(class APawn* InPawn) override;
 	virtual void BeginPlay() override;

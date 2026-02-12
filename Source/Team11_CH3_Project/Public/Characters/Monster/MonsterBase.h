@@ -24,6 +24,7 @@ public:
 	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
 	bool TryAttack(AActor* Target);
 	void DealDamage();
+	void BlackboardUpdate();
 	void Init(const FMonsterData& MonsterData);
 	FOnAttackFinished OnAttackFinished;
 protected:

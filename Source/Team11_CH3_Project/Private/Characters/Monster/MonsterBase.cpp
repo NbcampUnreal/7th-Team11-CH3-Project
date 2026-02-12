@@ -49,21 +49,6 @@ void AMonsterBase::BeginPlay()
 void AMonsterBase::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	FActorSpawnParameters SpawnInfo;
-	SpawnInfo.Owner = this;
-	WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(SpawnInfo);
-
-	if (WeaponActor)
-	{
-		FAttachmentTransformRules AttachRules(
-			EAttachmentRule::SnapToTarget,
-			EAttachmentRule::SnapToTarget,
-			EAttachmentRule::KeepWorld,
-			true
-		);
-
-		WeaponActor->AttachToComponent(GetMesh(), AttachRules, TEXT("handslot_r"));
-	}
 
 }
 
@@ -123,6 +108,14 @@ void AMonsterBase::DealDamage()
 	//TODO projectile,,HitCheck..
 }
 
+void AMonsterBase::BlackboardUpdate()
+{	
+	if (AMonsterControllerBase* MonsterControllerBase = Cast<AMonsterControllerBase> (GetController()))
+	{
+		MonsterControllerBase->BlackboardUpdate();
+	}
+}
+
 void AMonsterBase::Init(const FMonsterData& MonsterData)
 {
 	StatComponent->SetBaseStat(MonsterData.StatData);
@@ -130,8 +123,27 @@ void AMonsterBase::Init(const FMonsterData& MonsterData)
 	GetMesh()->SetSkeletalMesh(MonsterData.SkeletalMesh.LoadSynchronous());
 	bIsAttacking = false;
 	//	TODO
-	//	WeaponActor->Init(MonsterData.WeaponItemData);
+	
+	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.Owner = this;
+	WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(MonsterData.WeaponItemData.WeaponActorClass.LoadSynchronous(),SpawnInfo);
+
+	if (WeaponActor)
+	{
+		FAttachmentTransformRules AttachRules(
+			EAttachmentRule::SnapToTarget,
+			EAttachmentRule::SnapToTarget,
+			EAttachmentRule::KeepWorld,
+			true
+		);
+
+		WeaponActor->AttachToComponent(GetMesh(), AttachRules, TEXT("handslot_r"));
+	}
+	
+	WeaponActor->Init(MonsterData.WeaponItemData);
 	GetMesh()->SetAnimInstanceClass(MonsterData.AnimBlueprint.LoadSynchronous());
+	
+	BlackboardUpdate();
 }
 
 void AMonsterBase::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)

@@ -1,5 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Components/Items/Equipments/EquipmentItem.h"
+#include "Components/Items/Equipments/ArmorItemData.h"
 

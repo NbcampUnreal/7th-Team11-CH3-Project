@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "WeaponActor.h"
 #include "Components/StatComponent.h"
+#include "Components/Items/Equipments/WeaponItemData.h"
 #include "FMonsterData.generated.h"
 /**
  * 
@@ -24,13 +24,8 @@ struct TEAM11_CH3_PROJECT_API FMonsterData : public FTableRowBase
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
 	TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
 
-	//UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
-	//UWeaponItem WeaponItemClass;
-	
-	//TODO WeaponItem 
-	// UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
-	// TSoftObjectPtr<UAnimMontage> AttackMontage;
-	//
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
+	FWeaponItemData WeaponItemData;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
 	TSoftClassPtr<UAnimInstance> AnimBlueprint;

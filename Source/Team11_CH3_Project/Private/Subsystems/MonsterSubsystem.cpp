@@ -3,11 +3,13 @@
 
 #include "Subsystems/MonsterSubsystem.h"
 
+#include "WeaponActor.h"
 #include "Characters/Monster/MonsterBase.h"
 
 void UMonsterSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
+#pragma region TESTCODE
 	FMonsterData MonsterData;
 
 	MonsterData.StatData;
@@ -19,7 +21,11 @@ void UMonsterSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	// 2. 스켈레탈 메시 로드
 	MonsterData.SkeletalMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, 
 		TEXT("/Game/KayKit_Fix/KayKit_Skeletons_11_FREE/characters/gltf/Skeleton_Warrior/SkeletalMeshes/Skeleton_Warrior.Skeleton_Warrior")));
+	
+	MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/TEST_WEAPON.TEST_WEAPON_C"));
+	MonsterData.WeaponItemData.Damage = 100.0f;
 	SpawnMonster(MonsterData, FVector::ZeroVector);
+#pragma endregion
 }
 
 UMonsterSubsystem::UMonsterSubsystem()

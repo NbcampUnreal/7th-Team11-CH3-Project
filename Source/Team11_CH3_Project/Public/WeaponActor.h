@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/Items/Equipments/WeaponItemData.h"
 #include "GameFramework/Actor.h"
 #include "WeaponActor.generated.h"
 
@@ -15,7 +16,7 @@ public:
 	// Sets default values for this actor's properties
 	AWeaponActor();
 	virtual void BeginPlay() override;
-	// void Init(UWeaponItem WeaponItem);
+	void Init(FWeaponItemData WeaponItem);
 	UAnimMontage* GetAttackMontage() const;
 	float GetAttackRange()const;
 protected:
@@ -23,4 +24,6 @@ protected:
 	float AttackRange;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TSoftObjectPtr<UAnimMontage> AttackMontage;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
+	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
 };

@@ -66,15 +66,9 @@ AMonsterControllerBase::AMonsterControllerBase()
 	AIPerceptionComp->OnTargetPerceptionForgotten.AddDynamic(this, &AMonsterControllerBase::TargetPerceptionForgotten);
 }
 
-
-
-
-void AMonsterControllerBase::OnPossess(class APawn* InPawn)
+void AMonsterControllerBase::BlackboardUpdate()
 {
-	Super::OnPossess(InPawn);
-	RunBehaviorTree(BehaviorTree);
-
-	if (AMonsterBase* PossessedCharacter = Cast<AMonsterBase>(InPawn))
+	if (AMonsterBase* PossessedCharacter = Cast<AMonsterBase>(GetPawn()))
 	{
 		PossessedCharacter->bUseControllerRotationYaw = false;
 		if (UCharacterMovementComponent* MovComp = PossessedCharacter->GetCharacterMovement())
@@ -88,6 +82,14 @@ void AMonsterControllerBase::OnPossess(class APawn* InPawn)
 			BB->SetValueAsFloat(TEXT("AttackRange"), PossessedCharacter->GetAttackRange());
 		}
 	}
+}
+
+
+void AMonsterControllerBase::OnPossess(class APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+	RunBehaviorTree(BehaviorTree);
+	BlackboardUpdate();
 }
 
 void AMonsterControllerBase::BeginPlay()
