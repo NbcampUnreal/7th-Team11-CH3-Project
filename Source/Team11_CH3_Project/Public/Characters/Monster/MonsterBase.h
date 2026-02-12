@@ -3,12 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FMonsterData.h"
 #include "GenericTeamAgentInterface.h"
 #include "MonsterControllerBase.h"
 #include "GameFramework/Character.h"
 #include "MonsterBase.generated.h"
 
 
+class AWeaponActor;
 class UStatComponent;
 
 UCLASS()
@@ -22,24 +24,22 @@ public:
 	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
 	bool TryAttack(AActor* Target);
 	void DealDamage();
+	void Init(const FMonsterData& MonsterData);
 	FOnAttackFinished OnAttackFinished;
 protected:
 	virtual void BeginPlay() override;
-	
+	virtual void PostInitializeComponents() override;
 	
 	FVector OriginLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UStatComponent> StatComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float AttackRange;
-	//TODO Move to Private And Init when spawn
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UAnimMontage> AttackMontage;
+	TObjectPtr<AWeaponActor> WeaponActor;
+	
 public:
 	FVector GetOriginLocation() const;
 	float GetAttackRange() const;
-
 
 
 	// Called to bind functionality to input

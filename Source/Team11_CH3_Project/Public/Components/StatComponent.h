@@ -5,7 +5,7 @@
 #include "Types/StatTypes.h"
 #include "StatComponent.generated.h"
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct TEAM11_CH3_PROJECT_API FStatData
 {
 	GENERATED_BODY()

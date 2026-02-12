@@ -2,6 +2,8 @@
 
 
 #include "Characters/Monster/MonsterBase.h"
+
+#include "WeaponActor.h"
 #include "Characters/Monster/MonsterControllerBase.h"
 #include "Components/StatComponent.h"
 
@@ -15,26 +17,54 @@ AMonsterBase::AMonsterBase()
 	SetRootComponent(RootComponent);
 	GetMesh()->SetupAttachment(RootComponent);
 	StatComponent = CreateDefaultSubobject<UStatComponent>("StatComponent");
-	
+	ConstructorHelpers::FClassFinder<AMonsterControllerBase> MonsterControllerFinder(TEXT("/Game/Characters/Monster/BP_MonsterControllerBase.BP_MonsterControllerBase_C"));
+	if (MonsterControllerFinder.Succeeded())
+	{
+		AIControllerClass = MonsterControllerFinder.Class;
+	}
 	//TODO HardCoded
 	TeamID = FGenericTeamId(1);
-	AttackRange = 100.0f;
-	ConstructorHelpers::FClassFinder<UAnimInstance> AnimBlueprintFinder(TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
+	ConstructorHelpers::FClassFinder<UAnimInstance> AnimBlueprintFinder(
+		TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
 	if (AnimBlueprintFinder.Succeeded())
 	{
-		GetMesh()->SetAnimInstanceClass( AnimBlueprintFinder.Class);
+		GetMesh()->SetAnimInstanceClass(AnimBlueprintFinder.Class);
 	}
-	// Mesh->AnimClass = nullptr;
-	
+	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+	if (GetMesh())
+	{
+		GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -85.f));
+		GetMesh()->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+	}
 }
-
 
 
 // Called when the game starts or when spawned
 void AMonsterBase::BeginPlay()
 {
 	Super::BeginPlay();
-	OriginLocation = GetActorLocation();
+
+}
+
+void AMonsterBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.Owner = this;
+	WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(SpawnInfo);
+
+	if (WeaponActor)
+	{
+		FAttachmentTransformRules AttachRules(
+			EAttachmentRule::SnapToTarget,
+			EAttachmentRule::SnapToTarget,
+			EAttachmentRule::KeepWorld,
+			true
+		);
+
+		WeaponActor->AttachToComponent(GetMesh(), AttachRules, TEXT("handslot_r"));
+	}
+
 }
 
 FVector AMonsterBase::GetOriginLocation() const
@@ -44,14 +74,17 @@ FVector AMonsterBase::GetOriginLocation() const
 
 float AMonsterBase::GetAttackRange() const
 {
-	return AttackRange;
+	if (!WeaponActor)
+	{
+		return 0.0f;
+	}
+	return WeaponActor->GetAttackRange();
 }
 
 // Called to bind functionality to input
 void AMonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 FGenericTeamId AMonsterBase::GetGenericTeamId() const
@@ -63,31 +96,42 @@ ETeamAttitude::Type AMonsterBase::GetTeamAttitudeTowards(const AActor& Other) co
 {
 	if (const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(&Other))
 	{
-		return (TeamID == OtherTeamID->GetGenericTeamId())?ETeamAttitude::Friendly:ETeamAttitude::Hostile;
+		return (TeamID == OtherTeamID->GetGenericTeamId()) ? ETeamAttitude::Friendly : ETeamAttitude::Hostile;
 	}
 	return ETeamAttitude::Neutral;
 }
 
 bool AMonsterBase::TryAttack(AActor* Target)
 {
-
 	if (!Target || bIsAttacking)
 	{
 		return false;
 	}
 	DrawDebugLine(GetWorld(), GetActorLocation(), Target->GetActorLocation(), FColor::Red, false, 2.0f, 0,
-				  2.0f);
+	              2.0f);
 	bIsAttacking = true;
-	PlayAnimMontage(AttackMontage);
+	PlayAnimMontage(WeaponActor->GetAttackMontage());
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
-	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, AttackMontage);
+	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, WeaponActor->GetAttackMontage());
 	return true;
 }
+
 //CallByAnimNotify
 void AMonsterBase::DealDamage()
 {
 	//TODO projectile,,HitCheck..
+}
+
+void AMonsterBase::Init(const FMonsterData& MonsterData)
+{
+	StatComponent->SetBaseStat(MonsterData.StatData);
+	OriginLocation = GetActorLocation();
+	GetMesh()->SetSkeletalMesh(MonsterData.SkeletalMesh.LoadSynchronous());
+	bIsAttacking = false;
+	//	TODO
+	//	WeaponActor->Init(MonsterData.WeaponItemData);
+	GetMesh()->SetAnimInstanceClass(MonsterData.AnimBlueprint.LoadSynchronous());
 }
 
 void AMonsterBase::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
