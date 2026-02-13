@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/Skills/BaseProjectile.h"
@@ -43,6 +43,8 @@ void ABaseProjectile::Initialize(int32 InDamage, float InSpeed)
     {
         ProjectileMovement->InitialSpeed = InSpeed;
         ProjectileMovement->MaxSpeed = InSpeed;
+        // 이미 스폰된 후라면 InitialSpeed 변경만으로는 반영되지 않으므로 Velocity 직접 설정
+        ProjectileMovement->Velocity = GetActorForwardVector() * InSpeed;
     }
 }
 

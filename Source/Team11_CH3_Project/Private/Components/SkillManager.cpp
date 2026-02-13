@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/SkillManager.h"
@@ -23,10 +23,11 @@ USkillManager::USkillManager()
 void USkillManager::BeginPlay()
 {
 	Super::BeginPlay();
-	//if (AActor* Owner = GetOwner())
-	//{
-	//	StatComp = Owner->FindComponentByClass<UStatComponent>();
-	//}
+	// StatComponent 연동
+	if (AActor* Owner = GetOwner())
+	{
+		StatComp = Owner->FindComponentByClass<UStatComponent>();
+	}
 	// BasicAttack 생성
 	if (IsValid(BasicAttackClass))
 	{
@@ -86,20 +87,20 @@ void USkillManager::UseSkillSlot(int32 Index)
 		UE_LOG(LogTemp, Warning, TEXT("Skill On Cooldown: %.1fs"), GetCooldownRemaining(Index));
 		return;
 	}
-	//// MP 체크 일단 주석처리
-	//if (IsValid(StatComp))
-	//{
-	//	float CurrentMana = StatComp->GetCurrentStat(EStat::MP);
-	//	float ManaCost = SkillSlots[Index]->GetEquippedSkill()->GetManaCost();
+	// MP 체크
+	if (IsValid(StatComp))
+	{
+		float CurrentMana = StatComp->GetCurrentStat(EStat::MP);
+		float ManaCost = SkillSlots[Index]->GetEquippedSkill()->GetManaCost();
 
-	//	if (CurrentMana < ManaCost)
-	//	{
-	//		UE_LOG(LogTemp, Warning, TEXT("Not Enough Mana! Current: % f, Cost %f"), CurrentMana, ManaCost);
-	//		return;
-	//	}
+		if (CurrentMana < ManaCost)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Not Enough Mana! Current: %f, Cost: %f"), CurrentMana, ManaCost);
+			return;
+		}
 
-	//	StatComp->SetCurrentStat(EStat::MP, CurrentMana - ManaCost);
-	//}
+		StatComp->SetCurrentStat(EStat::MP, CurrentMana - ManaCost);
+	}
 	// 스킬 발동
 	SkillSlots[Index]->GetEquippedSkill()->Activate();
 	// 쿨타임 시작

@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -20,6 +20,4 @@ public:
 	virtual void Activate() override;
 	// 스킬 데이터 테이블에서 데이터 로딩(도전 기능때 구현)
 	virtual void InitFromData() override;
-	// 쿨타임 체크
-	virtual bool IsActivate() { return true; }
 };

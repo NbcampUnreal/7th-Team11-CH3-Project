@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -21,15 +21,12 @@ public:
 	// 스킬 발동
 	UFUNCTION(BlueprintCallable)
 	virtual void Activate();
-	// 쿨타임 체크
-	UFUNCTION(BlueprintCallable)
-	virtual bool IsActivate() { return true; }
 	// 쿨타임 반환
 	UFUNCTION(BlueprintCallable)
 	virtual float GetCooldownTime() const { return CooldownTime; }
 	// 마나 코스트 반환
 	UFUNCTION(BlueprintCallable)
-	virtual int32 GetManaCost() const { return ManaCost; }
+	virtual float GetManaCost() const { return ManaCost; }
 
 protected:
 	// 쿨타임
@@ -37,13 +34,16 @@ protected:
 	float CooldownTime;
 	// 마나 코스트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|ManaCost")
-	int32 ManaCost;
+	float ManaCost;
 	// 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|Damage")
 	int32 Damage;
 	// 스킬 데이터 테이블
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|DataTable")
 	TObjectPtr<UDataTable> SkillTable;
+	// 투사체 속도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|Projectile")
+	float ProjectileSpeed;
 	// 프로젝타일 클래스
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Projectile")
 	TSubclassOf<class ABaseProjectile> ProjectileClass;

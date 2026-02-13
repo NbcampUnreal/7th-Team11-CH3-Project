@@ -1,5 +1,6 @@
 #include "Characters/PlayerCharacter.h"
 #include "Characters/InventoryComponent.h"
+#include "Components/SkillManager.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -35,6 +36,9 @@ APlayerCharacter::APlayerCharacter()
     GetCharacterMovement()->JumpZVelocity = 600.0f;
     GetCharacterMovement()->AirControl = 0.35f;
     GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+    // SkillManager 생성
+    SkillManagerComponent = CreateDefaultSubobject<USkillManager>(TEXT("SkillManager"));
 
     // State 초기화
     bIsSprinting = false;
@@ -82,6 +86,24 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
         EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &APlayerCharacter::StopSprint);
 
         EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &APlayerCharacter::PerformDodge);
+
+        // 스킬 입력 바인딩
+        if (BasicAttackAction)
+        {
+            EnhancedInputComponent->BindAction(BasicAttackAction, ETriggerEvent::Started, this, &APlayerCharacter::UseBasicAttack);
+        }
+        if (SkillSlot1Action)
+        {
+            EnhancedInputComponent->BindAction(SkillSlot1Action, ETriggerEvent::Started, this, &APlayerCharacter::UseSkillSlot1);
+        }
+        if (SkillSlot2Action)
+        {
+            EnhancedInputComponent->BindAction(SkillSlot2Action, ETriggerEvent::Started, this, &APlayerCharacter::UseSkillSlot2);
+        }
+        if (SkillSlot3Action)
+        {
+            EnhancedInputComponent->BindAction(SkillSlot3Action, ETriggerEvent::Started, this, &APlayerCharacter::UseSkillSlot3);
+        }
     }
 }
 
@@ -189,4 +211,36 @@ void APlayerCharacter::EndDodge()
 void APlayerCharacter::ResetDodgeCooldown()
 {
     bCanDodge = true;
+}
+
+void APlayerCharacter::UseBasicAttack()
+{
+    if (IsValid(SkillManagerComponent))
+    {
+        SkillManagerComponent->UseBasicAttack();
+    }
+}
+
+void APlayerCharacter::UseSkillSlot1()
+{
+    if (IsValid(SkillManagerComponent))
+    {
+        SkillManagerComponent->UseSkillSlot(0);
+    }
+}
+
+void APlayerCharacter::UseSkillSlot2()
+{
+    if (IsValid(SkillManagerComponent))
+    {
+        SkillManagerComponent->UseSkillSlot(1);
+    }
+}
+
+void APlayerCharacter::UseSkillSlot3()
+{
+    if (IsValid(SkillManagerComponent))
+    {
+        SkillManagerComponent->UseSkillSlot(2);
+    }
 }

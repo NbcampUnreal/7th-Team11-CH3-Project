@@ -1,5 +1,6 @@
 #include "Characters/BaseCharacter.h"
 #include "Characters/InventoryComponent.h"
+#include "Components/StatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -10,6 +11,7 @@ ABaseCharacter::ABaseCharacter()
     bIsDead = false;
 
     InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+    StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
 
 }
 
