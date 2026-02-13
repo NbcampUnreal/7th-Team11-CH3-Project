@@ -48,6 +48,9 @@ public:
 	UInputAction* Consumable1Action;
 	// 소모품 슬롯. 필요시 2, 3식으로 추가
 	
+	// TODO - 추후 gamemode에서 캐릭터 사망 처리 후 직접 호출 방식으로 수정
+	void HandlePlayerDeath();
+
 protected:
 
 	// move

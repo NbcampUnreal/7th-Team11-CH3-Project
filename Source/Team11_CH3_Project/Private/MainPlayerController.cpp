@@ -1,4 +1,5 @@
 #include "MainPlayerController.h"
+#include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "Characters/PlayerCharacter.h"
 #include "EnhancedInputComponent.h"
@@ -129,8 +130,28 @@ void AMainPlayerController::HandleUseSkill1() { UseSkillSlot(0); }
 
 void AMainPlayerController::HandleUseConsumable1() { UseConsumableSlot(0); }
 
+// TODO - 추후 gamemode에서 캐릭터 사망 처리 후 직접 호출 방식으로 수정
 
-/*void AMainPlayerController::UseSkillSlot(int32 SlotIndex)
+void AMainPlayerController::HandlePlayerDeath()
+{
+	UnPossess();
+
+	FTimerHandle TimerHandle;
+
+	GetWorld()->GetTimerManager().SetTimer(
+		TimerHandle,
+		[this]()
+		{
+			UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+		},
+		4.0f,
+		false
+	);
+}
+
+// Skill 호출 관련
+/*
+void AMainPlayerController::UseSkillSlot(int32 SlotIndex)
 {
 	if (APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetPawn()))
 	{
@@ -144,7 +165,8 @@ void AMainPlayerController::HandleUseConsumable1() { UseConsumableSlot(0); }
 			}
 		}
 	}
-}*/
+}
+*/
 
 /* void AMainPlayerController::UseConsumableSlot(int32 SlotIndex)
 {

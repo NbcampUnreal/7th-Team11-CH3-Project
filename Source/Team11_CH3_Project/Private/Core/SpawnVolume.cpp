@@ -37,7 +37,7 @@ void ASpawnVolume::SpawnRandomMonster()
 		MonsterData.SkeletalMesh = SelectedMesh;
 
 		MonsterData.WeaponItemData.WeaponActorClass = SelectedWeapon;
-		MonsterData.WeaponItemData.Damage = SelectedWeaponDamage;
+		MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,SelectedWeaponDamage);
 
 		MonsterSubsystem->SpawnMonster(MonsterData, GetRandomPointInVolume());
 	}

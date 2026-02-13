@@ -18,6 +18,7 @@ class UInputAction;
 class UInventoryComponent;
 class UBuffManager;
 class UStatComponent;
+// class AWeapon; // 일단 전방 선언
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintEnded);
@@ -86,14 +87,6 @@ public:
     FOnSprintEnded OnSprintEndedEvent;
 #pragma endregion
 
-    /* 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
-    UAnimMontage* DodgeMontage;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
-    UAnimMontage* DeathMontage;
-    */
-
 #pragma region Component
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
     TObjectPtr<UStatComponent> StatComponent;
@@ -112,6 +105,11 @@ public:
     UPROPERTY(EditDefaultsOnly, Category = "Input")
     TObjectPtr<UInputAction> SkillEAction;
 #pragma endregion
+
+    /*
+    UPROPERTY(EditAnywhere)
+    TSubclassOf<AActor> WeaponClass;
+    */
 
     UPROPERTY()
     TObjectPtr<UBasicAttack> BasicAttack;
@@ -136,18 +134,31 @@ public:
     void PerformDodge();
 #pragma endregion
 
+#pragma region Animation
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+    TObjectPtr<UAnimMontage> HitMontage;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+    TObjectPtr<UAnimMontage> DeathMontage;
+
+    // montage로 할지 animation으로 할지 고려
     /*
-    UFUNCTION(BlueprintCallable, Category = "Animation")
+    UFUNCTION(EditAnywhere, BlueprintReadWrite, Category = "Animation")
     void PlayDodgeAnimation();
 
-    UFUNCTION(BlueprintCallable, Category = "Animation")
+    UFUNCTION(EditAnywhere, BlueprintReadWrite, Category = "Animation")
     void PlayDeathAnimation();
     */
+#pragma endregion
 
     virtual FGenericTeamId GetGenericTeamId() const override;
     virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+    virtual void ReceiveDamage(float Damage, AActor* DamageCauser) override;
+    virtual void Die() override;
+
+    // void AttachWeapon(TSubclassOf<AActor> WeaponClass);
 
 protected:
 
@@ -155,6 +166,8 @@ protected:
     void ExecuteDodge();
     void EndDodge();
     void ResetDodgeCooldown();
+
+    void Hit();
     
     void Attack(const FInputActionValue& Value);
     void SkillQ(const FInputActionValue& Value);
@@ -162,5 +175,6 @@ protected:
 
 private:
 	FGenericTeamId TeamID;
+    bool bIsDead = false;
     
 };

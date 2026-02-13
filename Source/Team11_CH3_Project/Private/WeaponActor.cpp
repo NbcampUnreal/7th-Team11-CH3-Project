@@ -25,7 +25,7 @@ void AWeaponActor::Init(FWeaponItemData WeaponItem)
 {
 	AttackMontage.LoadSynchronous();
 	//TODO
-	WeaponItem.Damage;
+	WeaponItemData = WeaponItem;
 	
 }
 

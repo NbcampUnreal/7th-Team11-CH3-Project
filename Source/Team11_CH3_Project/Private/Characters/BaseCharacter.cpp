@@ -42,9 +42,6 @@ void ABaseCharacter::Die()
     {
         CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
     }
-
-    OnDeath();
-
 }
 
 bool ABaseCharacter::IsAlive() const

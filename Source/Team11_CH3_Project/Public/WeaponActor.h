@@ -26,4 +26,6 @@ protected:
 	TSoftObjectPtr<UAnimMontage> AttackMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
+private:
+	FWeaponItemData WeaponItemData;
 };
