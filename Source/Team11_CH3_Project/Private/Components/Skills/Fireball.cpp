@@ -22,7 +22,7 @@ UFireball::UFireball()
 void UFireball::Activate()
 {
     Super::Activate();
-    UE_LOG(LogTemp, Warning, TEXT("Fire"))
+    UE_LOG(LogTemp, Warning, TEXT("Fire"));
 }
 
 void UFireball::InitFromData()
