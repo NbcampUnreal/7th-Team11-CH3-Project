@@ -21,7 +21,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeEnded);
 
 UCLASS()
-class TEAM11_CH3_PROJECT_API APlayerCharacter : public ABaseCharacter , public IGenericTeamAgentInterface
+class TEAM11_CH3_PROJECT_API APlayerCharacter : public ABaseCharacter 
 {
     GENERATED_BODY()
 
@@ -116,8 +116,7 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Animation")
     void PlayDeathAnimation();
-    virtual FGenericTeamId GetGenericTeamId() const override;
-    virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
+
 
 protected:
 
@@ -138,7 +137,6 @@ protected:
 
     UFUNCTION(BlueprintImplementableEvent, Category = "Movement")
     void BP_OnSprintEnded();
-private:
-	FGenericTeamId TeamID;
+
     
 };

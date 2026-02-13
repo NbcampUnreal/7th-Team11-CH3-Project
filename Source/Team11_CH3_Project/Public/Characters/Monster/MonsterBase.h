@@ -14,7 +14,7 @@ class AWeaponActor;
 class UStatComponent;
 
 UCLASS()
-class TEAM11_CH3_PROJECT_API AMonsterBase : public ACharacter, public IGenericTeamAgentInterface
+class TEAM11_CH3_PROJECT_API AMonsterBase : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -26,10 +26,9 @@ public:
 	void DealDamage();
 	void BlackboardUpdate();
 	void Init(const FMonsterData& MonsterData);
+	void Clear();
 	FOnAttackFinished OnAttackFinished;
 protected:
-	virtual void BeginPlay() override;
-	virtual void PostInitializeComponents() override;
 	
 	FVector OriginLocation;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -45,10 +44,7 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	virtual FGenericTeamId GetGenericTeamId() const override;
-	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 
 private:
-	FGenericTeamId TeamID;
 	bool bIsAttacking;
 };

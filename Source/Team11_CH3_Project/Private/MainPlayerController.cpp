@@ -27,6 +27,9 @@ void AMainPlayerController::BeginPlay()
 	// Input Mode 설정
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
+	
+	//TODO HardCoded
+	TeamID = FGenericTeamId(0);
 }
 
 void AMainPlayerController::SetupInputComponent()
@@ -54,6 +57,23 @@ void AMainPlayerController::SetupInputComponent()
 
 	if (Consumable1Action)
 		EnhancedInputComponent->BindAction(Consumable1Action, ETriggerEvent::Started, this, &AMainPlayerController::HandleUseConsumable1);
+}
+
+FGenericTeamId AMainPlayerController::GetGenericTeamId() const
+{
+	return TeamID;
+}
+
+ETeamAttitude::Type AMainPlayerController::GetTeamAttitudeTowards(const AActor& Other) const
+{
+	if (const APawn* OtherPawn = Cast<APawn>(&Other))
+	{
+		if (const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(OtherPawn->GetController()))
+		{
+			return (TeamID == OtherTeamID->GetGenericTeamId()) ? ETeamAttitude::Friendly : ETeamAttitude::Hostile;
+		}
+	}
+	return ETeamAttitude::Neutral;
 }
 
 
