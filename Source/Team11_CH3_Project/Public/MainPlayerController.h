@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GenericTeamAgentInterface.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
 #include "MainPlayerController.generated.h"
@@ -9,7 +10,7 @@ class UInputMappingContext;
 class UInputAction;
 
 UCLASS()
-class TEAM11_CH3_PROJECT_API AMainPlayerController : public APlayerController
+class TEAM11_CH3_PROJECT_API AMainPlayerController : public APlayerController, public IGenericTeamAgentInterface
 {
 	GENERATED_BODY()
 
@@ -18,6 +19,9 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
+	
+	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
@@ -74,4 +78,7 @@ protected:
 
 	void UseSkillSlot(int32 SlotIndex);
 	void UseConsumableSlot(int32 SlotIndex);
+private:
+	FGenericTeamId TeamID;
+
 };

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/Items/Equipments/WeaponItemData.h"
 #include "GameFramework/Actor.h"
+#include "Types/StatTypes.h"
 #include "WeaponActor.generated.h"
 
 UCLASS()
@@ -16,9 +17,14 @@ public:
 	// Sets default values for this actor's properties
 	AWeaponActor();
 	virtual void BeginPlay() override;
-	void Init(FWeaponItemData WeaponItem);
+	void Init(const FWeaponItemData& WeaponItem, USkeletalMeshComponent* SkeletalMesh);
 	UAnimMontage* GetAttackMontage() const;
 	float GetAttackRange()const;
+	void StartAttack();
+	void EndAttack();
+	TArray<AActor*> GetTargets();
+	EWeaponType GetWeaponType();
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	float AttackRange;

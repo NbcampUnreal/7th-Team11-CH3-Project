@@ -17,3 +17,10 @@ enum class EStat : uint8
 	CriticalChance,
 	CriticalDamage,
 };
+
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	Melee,
+	Ranged
+};

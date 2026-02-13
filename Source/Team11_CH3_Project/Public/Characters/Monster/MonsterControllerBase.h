@@ -28,6 +28,9 @@ public:
 
 	AMonsterControllerBase();
 	void BlackboardUpdate();
+	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	
 protected:
 	virtual void OnPossess(class APawn* InPawn) override;
 	virtual void BeginPlay() override;
@@ -56,4 +59,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AI")
 	TObjectPtr<UAIPerceptionComponent> AIPerceptionComp;
+private:
+		FGenericTeamId TeamID;
+
 };

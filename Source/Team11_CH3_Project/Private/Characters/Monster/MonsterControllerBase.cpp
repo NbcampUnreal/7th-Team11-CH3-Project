@@ -64,6 +64,9 @@ AMonsterControllerBase::AMonsterControllerBase()
 	AIPerceptionComp->SetDominantSense(SightConfig->GetSenseImplementation());
 	AIPerceptionComp->OnTargetPerceptionUpdated.AddDynamic(this, &AMonsterControllerBase::TargetPerceptionUpdated);
 	AIPerceptionComp->OnTargetPerceptionForgotten.AddDynamic(this, &AMonsterControllerBase::TargetPerceptionForgotten);
+	
+	//TODO HardCoded
+	TeamID = FGenericTeamId(1);
 }
 
 void AMonsterControllerBase::BlackboardUpdate()
@@ -165,4 +168,28 @@ void AMonsterControllerBase::TargetPerceptionForgotten(AActor* Actor)
 		BB->SetValueAsVector(TEXT("LastHearingLocation"), FVector::ZeroVector);
 		BB->SetValueAsBool(TEXT("bIsTracking"), false);
 	}
+}
+
+
+FGenericTeamId AMonsterControllerBase::GetGenericTeamId() const
+{
+	return TeamID;
+}
+
+ETeamAttitude::Type AMonsterControllerBase::GetTeamAttitudeTowards(const AActor& Other) const
+{
+	if (const APawn* OtherPawn = Cast<APawn>(&Other))
+	{
+		if (const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(OtherPawn->GetController()))
+		{
+			if (TeamID == OtherTeamID->GetGenericTeamId())
+			{
+				return ETeamAttitude::Friendly;
+			}else
+			{
+				return ETeamAttitude::Hostile;	
+			}
+		}
+	}
+	return ETeamAttitude::Neutral;
 }

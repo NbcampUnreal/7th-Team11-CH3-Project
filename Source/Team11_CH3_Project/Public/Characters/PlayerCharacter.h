@@ -26,7 +26,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeEnded);
 
 UCLASS()
-class TEAM11_CH3_PROJECT_API APlayerCharacter : public ABaseCharacter , public IGenericTeamAgentInterface
+class TEAM11_CH3_PROJECT_API APlayerCharacter : public ABaseCharacter 
 {
     GENERATED_BODY()
 
@@ -151,8 +151,6 @@ public:
     */
 #pragma endregion
 
-    virtual FGenericTeamId GetGenericTeamId() const override;
-    virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     virtual void ReceiveDamage(float Damage, AActor* DamageCauser) override;
@@ -174,7 +172,6 @@ protected:
     void SkillE(const FInputActionValue& Value);
 
 private:
-	FGenericTeamId TeamID;
     bool bIsDead = false;
     
 };

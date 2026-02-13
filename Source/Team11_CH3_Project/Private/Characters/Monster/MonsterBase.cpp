@@ -22,8 +22,7 @@ AMonsterBase::AMonsterBase()
 	{
 		AIControllerClass = MonsterControllerFinder.Class;
 	}
-	//TODO HardCoded
-	TeamID = FGenericTeamId(1);
+
 	ConstructorHelpers::FClassFinder<UAnimInstance> AnimBlueprintFinder(
 		TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
 	if (AnimBlueprintFinder.Succeeded())
@@ -39,17 +38,39 @@ AMonsterBase::AMonsterBase()
 }
 
 
-// Called when the game starts or when spawned
-void AMonsterBase::BeginPlay()
+void AMonsterBase::Init(const FMonsterData& MonsterData)
 {
-	Super::BeginPlay();
-
+	StatComponent->InitStat(MonsterData.StatData);
+	OriginLocation = GetActorLocation();
+	GetMesh()->SetSkeletalMesh(MonsterData.SkeletalMesh.LoadSynchronous());
+	bIsAttacking = false;
+	//	TODO
+	
+	FActorSpawnParameters SpawnInfo;
+	SpawnInfo.Owner = this;
+	WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(MonsterData.WeaponItemData.WeaponActorClass.LoadSynchronous(),SpawnInfo);
+	if (WeaponActor)
+	{
+		WeaponActor->Init(MonsterData.WeaponItemData, GetMesh());
+		
+	}
+	
+	GetMesh()->SetAnimInstanceClass(MonsterData.AnimBlueprint.LoadSynchronous());
+	
+	BlackboardUpdate();
 }
 
-void AMonsterBase::PostInitializeComponents()
+void AMonsterBase::Clear()
 {
-	Super::PostInitializeComponents();
+	WeaponActor->Destroy();
+}
 
+void AMonsterBase::BlackboardUpdate()
+{	
+	if (AMonsterControllerBase* MonsterControllerBase = Cast<AMonsterControllerBase> (GetController()))
+	{
+		MonsterControllerBase->BlackboardUpdate();
+	}
 }
 
 FVector AMonsterBase::GetOriginLocation() const
@@ -72,19 +93,7 @@ void AMonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-FGenericTeamId AMonsterBase::GetGenericTeamId() const
-{
-	return TeamID;
-}
 
-ETeamAttitude::Type AMonsterBase::GetTeamAttitudeTowards(const AActor& Other) const
-{
-	if (const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(&Other))
-	{
-		return (TeamID == OtherTeamID->GetGenericTeamId()) ? ETeamAttitude::Friendly : ETeamAttitude::Hostile;
-	}
-	return ETeamAttitude::Neutral;
-}
 
 bool AMonsterBase::TryAttack(AActor* Target)
 {
@@ -92,62 +101,34 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	{
 		return false;
 	}
-	DrawDebugLine(GetWorld(), GetActorLocation(), Target->GetActorLocation(), FColor::Red, false, 2.0f, 0,
-	              2.0f);
+
 	bIsAttacking = true;
 	PlayAnimMontage(WeaponActor->GetAttackMontage());
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, WeaponActor->GetAttackMontage());
+	WeaponActor->StartAttack();
 	return true;
 }
 
 //CallByAnimNotify
 void AMonsterBase::DealDamage()
 {
-	//TODO projectile,,HitCheck..
-}
-
-void AMonsterBase::BlackboardUpdate()
-{	
-	if (AMonsterControllerBase* MonsterControllerBase = Cast<AMonsterControllerBase> (GetController()))
+	if (WeaponActor->GetWeaponType() == EWeaponType::Melee)
 	{
-		MonsterControllerBase->BlackboardUpdate();
+		TArray<AActor*> Targets = WeaponActor->GetTargets();
+		//TODO Finally Deal Damage To Targets
+	}else if (WeaponActor->GetWeaponType() == EWeaponType::Ranged)
+	{
+		//TODO projectile
 	}
 }
 
-void AMonsterBase::Init(const FMonsterData& MonsterData)
-{
-	StatComponent->InitStat(MonsterData.StatData);
-	OriginLocation = GetActorLocation();
-	GetMesh()->SetSkeletalMesh(MonsterData.SkeletalMesh.LoadSynchronous());
-	bIsAttacking = false;
-	//	TODO
-	
-	FActorSpawnParameters SpawnInfo;
-	SpawnInfo.Owner = this;
-	WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(MonsterData.WeaponItemData.WeaponActorClass.LoadSynchronous(),SpawnInfo);
 
-	if (WeaponActor)
-	{
-		FAttachmentTransformRules AttachRules(
-			EAttachmentRule::SnapToTarget,
-			EAttachmentRule::SnapToTarget,
-			EAttachmentRule::KeepWorld,
-			true
-		);
-
-		WeaponActor->AttachToComponent(GetMesh(), AttachRules, TEXT("handslot_r"));
-	}
-	
-	WeaponActor->Init(MonsterData.WeaponItemData);
-	GetMesh()->SetAnimInstanceClass(MonsterData.AnimBlueprint.LoadSynchronous());
-	
-	BlackboardUpdate();
-}
 
 void AMonsterBase::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
 {
 	bIsAttacking = false;
 	OnAttackFinished.Broadcast();
+	WeaponActor->EndAttack();
 }

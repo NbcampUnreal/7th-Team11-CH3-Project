@@ -24,7 +24,7 @@ void UMonsterSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	
 	MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/TEST_WEAPON.TEST_WEAPON_C"));
 	MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
-	
+	MonsterData.WeaponItemData.WeaponType = EWeaponType::Melee;
 	SpawnMonster(MonsterData, FVector::ZeroVector);
 #pragma endregion
 }
@@ -71,6 +71,7 @@ void UMonsterSubsystem::OnMonsterDeath(AMonsterBase* DeadMonster)
 	{
 		CurrentMonsterCount--;
 		Monsters.Swap(Index, CurrentMonsterCount);
+		DeadMonster->Clear();
 		DeadMonster->SetActorHiddenInGame(true);
 		DeadMonster->SetActorEnableCollision(false);
 		DeadMonster->SetActorTickEnabled(false);

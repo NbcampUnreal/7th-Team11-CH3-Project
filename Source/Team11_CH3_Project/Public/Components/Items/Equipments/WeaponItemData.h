@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/Items/Equipments/EquipmentItemData.h"
+#include "Types/StatTypes.h"
 #include "WeaponItemData.generated.h"
 
 class AWeaponActor;
@@ -16,4 +17,6 @@ struct TEAM11_CH3_PROJECT_API FWeaponItemData : public FEquipmentItemData
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Item|Weapon")
 	TSoftClassPtr<AWeaponActor> WeaponActorClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item|Weapon")
+	EWeaponType WeaponType;
 };
