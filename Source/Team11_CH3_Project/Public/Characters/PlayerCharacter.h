@@ -2,8 +2,10 @@
 
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
+#include "InputActionValue.h"
 #include "GenericTeamAgentInterface.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/Skills/BasicAttack.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Components/StatComponent.h"
@@ -14,6 +16,8 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class UInventoryComponent;
+class UBuffManager;
+class UStatComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintEnded);
@@ -34,12 +38,21 @@ protected:
 public:
     virtual void Tick(float DeltaTime) override;
 
+#pragma region Camera
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     USpringArmComponent* CameraBoom;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
     UCameraComponent* FollowCamera;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+    float CameraBoomLength = 300.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+    float CameraSensitivity = 1.0f;
+#pragma endregion
+
+#pragma region Movement
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float WalkSpeed = 400.0f;
 
@@ -54,13 +67,9 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float DodgeCooldown = 1.0f;
+#pragma endregion
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-    float CameraBoomLength = 300.0f;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-    float CameraSensitivity = 1.0f;
-
+#pragma region State
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
     bool bIsSprinting;
 
@@ -70,31 +79,47 @@ public:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
     bool bCanDodge;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character")
-    class UStatComponent* StatComponent;
+    UPROPERTY(BlueprintAssignable, Category = "State")
+    FOnSprintStarted OnSprintStartedEvent;
 
+    UPROPERTY(BlueprintAssignable, Category = "State")
+    FOnSprintEnded OnSprintEndedEvent;
+#pragma endregion
+
+    /* 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
     UAnimMontage* DodgeMontage;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
     UAnimMontage* DeathMontage;
+    */
 
-    UPROPERTY(BlueprintAssignable)
-    FOnSprintStarted OnSprintStartedEvent;
+#pragma region Component
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+    TObjectPtr<UStatComponent> StatComponent;
 
-    UPROPERTY(BlueprintAssignable)
-    FOnSprintEnded OnSprintEndedEvent;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+    TObjectPtr<UBuffManager> BuffManager;
+#pragma endregion
 
-    UPROPERTY(BlueprintAssignable)
-    FOnDodgeStarted OnDodgeStartedEvent;
+#pragma region Input
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    TObjectPtr<UInputAction> AttackAction;
 
-    UPROPERTY(BlueprintAssignable)
-    FOnDodgeEnded OnDodgeEndedEvent;
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    TObjectPtr<UInputAction> SkillQAction;
 
+    UPROPERTY(EditDefaultsOnly, Category = "Input")
+    TObjectPtr<UInputAction> SkillEAction;
+#pragma endregion
+
+    UPROPERTY()
+    TObjectPtr<UBasicAttack> BasicAttack;
 
     FTimerHandle DodgeTimerHandle;
     FTimerHandle DodgeCooldownTimerHandle;
 
+#pragma region Movement
     UFUNCTION(BlueprintCallable, Category = "Movement")
     void Move(const FVector2D& MovementVector);
 
@@ -109,14 +134,17 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Movement")
     void PerformDodge();
+#pragma endregion
 
-
+    /*
     UFUNCTION(BlueprintCallable, Category = "Animation")
     void PlayDodgeAnimation();
 
     UFUNCTION(BlueprintCallable, Category = "Animation")
     void PlayDeathAnimation();
+    */
 
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
 
@@ -124,19 +152,10 @@ protected:
     void ExecuteDodge();
     void EndDodge();
     void ResetDodgeCooldown();
-
-
-    UFUNCTION(BlueprintImplementableEvent, Category = "Movement")
-    void BP_OnDodgeStarted();
-
-    UFUNCTION(BlueprintImplementableEvent, Category = "Movement")
-    void BP_OnDodgeEnded();
-
-    UFUNCTION(BlueprintImplementableEvent, Category = "Movement")
-    void BP_OnSprintStarted();
-
-    UFUNCTION(BlueprintImplementableEvent, Category = "Movement")
-    void BP_OnSprintEnded();
+    
+    void Attack(const FInputActionValue& Value);
+    void SkillQ(const FInputActionValue& Value);
+    void SkillE(const FInputActionValue& Value);
 
     
 };

@@ -40,7 +40,7 @@ AMonsterBase::AMonsterBase()
 
 void AMonsterBase::Init(const FMonsterData& MonsterData)
 {
-	StatComponent->SetBaseStat(MonsterData.StatData);
+	StatComponent->InitStat(MonsterData.StatData);
 	OriginLocation = GetActorLocation();
 	GetMesh()->SetSkeletalMesh(MonsterData.SkeletalMesh.LoadSynchronous());
 	bIsAttacking = false;
