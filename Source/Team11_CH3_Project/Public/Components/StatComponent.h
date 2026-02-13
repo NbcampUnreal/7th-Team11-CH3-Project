@@ -9,6 +9,8 @@ enum class EStat : uint8
 {
 	HP,
 	MaxHP,
+	MP,
+	MaxMP,
 	DEF,
 	MoveSpeed,
 	AttackDamage,
@@ -27,6 +29,10 @@ struct TEAM11_CH3_PROJECT_API FStatData
 	float HP;
 	UPROPERTY()
 	float MaxHP;
+	UPROPERTY()
+	float MP;
+	UPROPERTY()
+	float MaxMP;
 	UPROPERTY()
 	float DEF;
 	UPROPERTY()

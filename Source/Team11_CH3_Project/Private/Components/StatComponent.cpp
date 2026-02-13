@@ -27,6 +27,12 @@ void UStatComponent::SetBaseStat(EStat TargetStat, float Amount)
 	case EStat::MaxHP:
 		BaseStat.MaxHP = FMath::Max(Amount, 0.0f);
 		break;
+	case EStat::MP:
+		BaseStat.MP = FMath::Clamp(Amount, 0.0f, BaseStat.MaxMP);
+		break;
+	case EStat::MaxMP:
+		BaseStat.MaxMP = FMath::Max(Amount, 0.0f);
+		break;
 	case EStat::DEF:
 		BaseStat.DEF = Amount;
 		break;
@@ -63,6 +69,12 @@ void UStatComponent::SetCurrentStat(EStat TargetStat, float Amount)
 	case EStat::MaxHP:
 		CurrentStat.MaxHP = FMath::Max(Amount, 0.0f);
 		break;
+	case EStat::MP:
+		CurrentStat.MP = FMath::Clamp(Amount, 0.0f, CurrentStat.MaxMP);
+		break;
+	case EStat::MaxMP:
+		CurrentStat.MaxMP = FMath::Max(Amount, 0.0f);
+		break;
 	case EStat::DEF:
 		CurrentStat.DEF = Amount;
 		break;
@@ -97,6 +109,10 @@ float UStatComponent::GetBaseStat(EStat TargetStat) const
 		return BaseStat.HP;
 	case EStat::MaxHP:
 		return BaseStat.MaxHP;
+	case EStat::MP:
+		return BaseStat.MP;
+	case EStat::MaxMP:
+		return BaseStat.MaxMP;
 	case EStat::DEF:
 		return BaseStat.DEF;
 	case EStat::MoveSpeed:
@@ -124,6 +140,10 @@ float UStatComponent::GetCurrentStat(EStat TargetStat) const
 		return CurrentStat.HP;
 	case EStat::MaxHP:
 		return CurrentStat.MaxHP;
+	case EStat::MP:
+		return CurrentStat.MP;
+	case EStat::MaxMP:
+		return CurrentStat.MaxMP;
 	case EStat::DEF:
 		return CurrentStat.DEF;
 	case EStat::MoveSpeed:

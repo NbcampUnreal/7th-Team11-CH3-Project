@@ -32,6 +32,9 @@ protected:
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class UInventoryComponent* InventoryComponent;
 
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    class UStatComponent* StatComponent;
+
     UFUNCTION()
     void HandleDeath();
 
@@ -40,4 +43,7 @@ public:
     // 당장은 정의만 추가
     UFUNCTION(BlueprintPure, Category = "Character")
     UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
+
+    UFUNCTION(BlueprintPure, Category = "Character")
+    UStatComponent* GetStatComponent() const { return StatComponent; }
 };

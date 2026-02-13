@@ -9,6 +9,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class USkillManager;
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API APlayerCharacter : public ABaseCharacter
@@ -53,6 +54,18 @@ protected:
 
     UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
     UInputAction* SprintAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputAction* BasicAttackAction;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputAction* SkillSlot1Action;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputAction* SkillSlot2Action;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+    UInputAction* SkillSlot3Action;
 #pragma endregion
 
 #pragma region Movement
@@ -119,6 +132,16 @@ protected:
     void EndDodge();
     void ResetDodgeCooldown();
 
-    // 추후 퀵슬롯 추가
-    void UseQuickSlot();
+    // 스킬 사용
+    void UseBasicAttack();
+    void UseSkillSlot1();
+    void UseSkillSlot2();
+    void UseSkillSlot3();
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    USkillManager* SkillManagerComponent;
+
+public:
+    UFUNCTION(BlueprintPure, Category = "Character")
+    USkillManager* GetSkillManager() const { return SkillManagerComponent; }
 };

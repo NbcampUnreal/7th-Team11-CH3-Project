@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Components/Skills/BaseSkill.h"
 #include "Camera/CameraComponent.h"
@@ -66,7 +66,7 @@ void UBaseSkill::Activate()
 
     if (IsValid(Projectile))
     {
-        Projectile->Initialize(Damage, 3000.f); // 하드코딩 나중에 해결
+        Projectile->Initialize(Damage, ProjectileSpeed);
     }
 
     UE_LOG(LogTemp, Warning, TEXT("MagicMissile : %d"), Damage);

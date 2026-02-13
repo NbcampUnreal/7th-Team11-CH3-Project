@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/Skills/Fireball.h"
@@ -22,7 +22,7 @@ UFireball::UFireball()
 void UFireball::Activate()
 {
     Super::Activate();
-    UE_LOG(LogTemp, Warning, TEXT("Fire"))
+    UE_LOG(LogTemp, Warning, TEXT("Fire"));
 }
 
 void UFireball::InitFromData()
@@ -32,4 +32,5 @@ void UFireball::InitFromData()
     CooldownTime = 5;
     ManaCost = 5.f;
     Damage = 30;
+    ProjectileSpeed = 3000.f;
 }
