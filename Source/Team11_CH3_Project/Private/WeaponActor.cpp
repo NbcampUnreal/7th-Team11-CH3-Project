@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "WeaponActor.h"
@@ -25,7 +25,15 @@ void AWeaponActor::Init(FWeaponItemData WeaponItem)
 {
 	AttackMontage.LoadSynchronous();
 	//TODO
-	WeaponItem.Damage;
+	//WeaponItem.Damage;
+	if (auto* AttackDamage = WeaponItem.StatBonuses.Find(EStat::AttackDamage))
+	{
+		Damage = *AttackDamage;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AttackDamage not found in StatBonuses"));
+	}
 	
 }
 

@@ -1,8 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Subsystems/MonsterSubsystem.h"
-
+#include "Types/StatTypes.h"
 #include "WeaponActor.h"
 #include "Characters/Monster/MonsterBase.h"
 
@@ -23,7 +23,7 @@ void UMonsterSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		TEXT("/Game/KayKit_Fix/KayKit_Skeletons_11_FREE/characters/gltf/Skeleton_Warrior/SkeletalMeshes/Skeleton_Warrior.Skeleton_Warrior")));
 	
 	MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/TEST_WEAPON.TEST_WEAPON_C"));
-	MonsterData.WeaponItemData.Damage = 100.0f;
+	MonsterData.WeaponItemData.StatBonuses.Add(EStat::AttackDamage, 100.0f);
 	SpawnMonster(MonsterData, FVector::ZeroVector);
 #pragma endregion
 }

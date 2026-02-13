@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -26,4 +26,6 @@ protected:
 	TSoftObjectPtr<UAnimMontage> AttackMontage;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Weapon")
+	float Damage = 0.f;
 };
