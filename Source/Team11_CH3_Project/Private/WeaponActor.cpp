@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "WeaponActor.h"
@@ -33,6 +33,14 @@ void AWeaponActor::Init(const FWeaponItemData& WeaponItem, USkeletalMeshComponen
 		EAttachmentRule::KeepWorld,
 		true
 	);
+	if (auto* AttackDamage = WeaponItem.StatBonuses.Find(EStat::AttackDamage))
+	{
+		float Damage = *AttackDamage;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AttackDamage not found in StatBonuses"));
+	}
 	
 	AttachToComponent(SkeletalMesh, AttachRules, TEXT("handslot_r"));
 }

@@ -1,8 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Subsystems/MonsterSubsystem.h"
-
+#include "Types/StatTypes.h"
 #include "WeaponActor.h"
 #include "Characters/Monster/MonsterBase.h"
 
