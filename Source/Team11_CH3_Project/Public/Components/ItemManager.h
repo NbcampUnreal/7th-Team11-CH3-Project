@@ -61,6 +61,6 @@ private:
 	UPROPERTY()
 	FWeaponItemData CachedWeaponData;
 	// 부위별 장착 방어구 추적
-	UPROPERTY(EditDefaultsOnly, Category = "Item|Armor", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditDefaultsOnly, Category = "Item|Equipment", meta = (AllowPrivateAccess = "true"))
 	TMap<EEquipmentType, FArmorItemData> EquippedArmors;
 };

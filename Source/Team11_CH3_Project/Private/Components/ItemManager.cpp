@@ -86,26 +86,49 @@ void UItemManager::EquipWeapon(FWeaponItemData* Data)
 {
 	UnequipWeapon();
 
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = GetOwner();
+
+	AWeaponActor* Weapon = GetWorld()->SpawnActor<AWeaponActor>(
+		Data->WeaponActorClass.LoadSynchronous(), SpawnParams);
+	if (IsValid(Weapon))
+	{
+		auto* Mesh = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+		Weapon->Init(*Data, Mesh);
+
+		CurrentWeapon = Weapon;
+		CachedWeaponData = *Data;
+		ApplyStatBonuses(Data->StatBonuses, false);
+	}
+
 }
 
 void UItemManager::EquipArmor(FArmorItemData* Data)
 {
+	UnequipArmor(Data->EquipmentType);
+	// 장착 중인 방어구 타입 및 데이터 추가
+	EquippedArmors.Add(Data->EquipmentType, *Data);
+	// StatBonuses 추가
+	ApplyStatBonuses(Data->StatBonuses, false);
 }
 
 void UItemManager::ApplyStatBonuses(TMap<EStat, float> StatBonuses, bool bRemove)
 {
+	// Owner의 스탯 컴포넌트
 	auto* StatComp = GetOwner()->FindComponentByClass<UStatComponent>();
 	if (!IsValid(StatComp))
 		return;
-
+	// StatBonuses Tmap 배열 순회 하면서 CurrntStat에 StatBonuses 적용
 	for (auto& Pair : StatBonuses)
 	{
 		float Current = StatComp->GetCurrentStat(Pair.Key);
 		float NewValue;
+		// 장착 해제
 		if (bRemove)
 		{
 			NewValue = Current - Pair.Value;
 		}
+		// 장착
 		else
 		{
 			NewValue = Current + Pair.Value;
@@ -117,13 +140,15 @@ void UItemManager::ApplyStatBonuses(TMap<EStat, float> StatBonuses, bool bRemove
 
 void UItemManager::UnequipWeapon()
 {
-	if (CurrentWeapon)
+	if (IsValid(CurrentWeapon) == false)
 	{
-		ApplyStatBonuses(CachedWeaponData.StatBonuses, true);
-		CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		CurrentWeapon->Destroy();
-		CurrentWeapon = nullptr;
+		return;
 	}
+
+	ApplyStatBonuses(CachedWeaponData.StatBonuses, true);
+	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	CurrentWeapon->Destroy();
+	CurrentWeapon = nullptr;
 }
 
 void UItemManager::UnequipArmor(EEquipmentType SlotType)
