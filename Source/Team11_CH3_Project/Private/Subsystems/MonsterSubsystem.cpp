@@ -22,7 +22,7 @@ void UMonsterSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	MonsterData.SkeletalMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, 
 		TEXT("/Game/KayKit_Fix/KayKit_Skeletons_11_FREE/characters/gltf/Skeleton_Warrior/SkeletalMeshes/Skeleton_Warrior.Skeleton_Warrior")));
 	
-	MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/TEST_WEAPON.TEST_WEAPON_C"));
+	MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
 	MonsterData.WeaponItemData.Damage = 100.0f;
 	MonsterData.WeaponItemData.WeaponType = EWeaponType::Melee;
 	SpawnMonster(MonsterData, FVector::ZeroVector);

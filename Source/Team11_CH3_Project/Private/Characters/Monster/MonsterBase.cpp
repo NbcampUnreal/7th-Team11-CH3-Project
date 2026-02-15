@@ -95,7 +95,6 @@ void AMonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 }
 
 
-
 bool AMonsterBase::TryAttack(AActor* Target)
 {
 	if (!Target || bIsAttacking)
@@ -113,21 +112,19 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, WeaponActor->GetAttackMontage());
-	WeaponActor->StartAttack();
+	
+	// TODO
+	// SKill = SkillSet[WeaponActor->GetWeaponType()][RandomIndex]
+	WeaponActor->StartAttack(Target/*, SKill*/);
+	
+	
 	return true;
 }
 
 //CallByAnimNotify
 void AMonsterBase::DealDamage()
 {
-	if (WeaponActor->GetWeaponType() == EWeaponType::Melee)
-	{
-		TArray<AActor*> Targets = WeaponActor->GetTargets();
-		//TODO Finally Deal Damage To Targets
-	}else if (WeaponActor->GetWeaponType() == EWeaponType::Ranged)
-	{
-		//TODO projectile
-	}
+	WeaponActor->PerformDamage();
 }
 
 
