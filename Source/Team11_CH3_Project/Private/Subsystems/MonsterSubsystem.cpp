@@ -48,7 +48,7 @@ void UMonsterSubsystem::SpawnMonster(FMonsterData MonsterData, FVector Location)
 	}
 	else
 	{
-		Monster = GetWorld()->SpawnActor<AMonsterBase>();
+		Monster = GetWorld()->SpawnActor<AMonsterBase>(MonsterClass.LoadSynchronous());
 		Monsters.Add(Monster);
 	}
 	if (Monster)

@@ -21,7 +21,7 @@
 
 AMonsterControllerBase::AMonsterControllerBase()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 	ConstructorHelpers::FObjectFinder<UBehaviorTree> BehaviorTreeFinder(
 		TEXT("/Game/Characters/Monster/BT_Monster.BT_Monster"));
 	if (BehaviorTreeFinder.Succeeded())
@@ -29,7 +29,7 @@ AMonsterControllerBase::AMonsterControllerBase()
 		BehaviorTree = BehaviorTreeFinder.Object;
 	}
 	bAttachToPawn = true;
-
+	
 	AIPerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>("AIPerceptionComp");
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
 	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>("HearingConfig");
@@ -73,10 +73,13 @@ void AMonsterControllerBase::BlackboardUpdate()
 {
 	if (AMonsterBase* PossessedCharacter = Cast<AMonsterBase>(GetPawn()))
 	{
-		PossessedCharacter->bUseControllerRotationYaw = false;
-		if (UCharacterMovementComponent* MovComp = PossessedCharacter->GetCharacterMovement())
+		// PossessedCharacter->bUseControllerRotationYaw = true;
+		// PossessedCharacter->AllowedYawError = 30.0f;
+		
+		if (UCharacterMovementComponent* CharacterMovementComponent = PossessedCharacter->GetCharacterMovement())
 		{
-			MovComp->bOrientRotationToMovement = true;
+			CharacterMovementComponent->bUseControllerDesiredRotation = false;
+			CharacterMovementComponent->bOrientRotationToMovement = true;
 		}
 		if (UBlackboardComponent* BB = GetBlackboardComponent())
 		{

@@ -6,6 +6,7 @@
 #include "WeaponActor.h"
 #include "Characters/Monster/MonsterControllerBase.h"
 #include "Components/StatComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 // Sets default values
@@ -102,6 +103,11 @@ bool AMonsterBase::TryAttack(AActor* Target)
 		return false;
 	}
 
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		CharacterMovementComponent->bUseControllerDesiredRotation = true;
+		CharacterMovementComponent->bOrientRotationToMovement = false;
+	}
 	bIsAttacking = true;
 	PlayAnimMontage(WeaponActor->GetAttackMontage());
 	FOnMontageEnded EndDelegate;
@@ -131,4 +137,11 @@ void AMonsterBase::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterru
 	bIsAttacking = false;
 	OnAttackFinished.Broadcast();
 	WeaponActor->EndAttack();
+	
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		CharacterMovementComponent->bUseControllerDesiredRotation = false;
+		CharacterMovementComponent->bOrientRotationToMovement = true;
+	}
+	
 }
