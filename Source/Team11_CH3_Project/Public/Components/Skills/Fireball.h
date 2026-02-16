@@ -18,8 +18,6 @@ public:
 	UFireball();
 	// 스킬 발동
 	virtual void Activate() override;
-	// 스킬 데이터 테이블에서 데이터 로딩(도전 기능때 구현)
-	virtual void InitFromData(USkillDataAsset* Data) override;
 	// 쿨타임 체크
 	virtual bool IsActivate() { return true; }
 };

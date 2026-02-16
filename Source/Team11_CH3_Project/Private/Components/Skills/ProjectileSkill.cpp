@@ -7,12 +7,20 @@
 
 void UProjectileSkill::Activate()
 {
+    Super::Activate();
+    
+    if (IsValid(SkillData) == false)
+        return;
 
     // 캐릭터 불러오기 수정 전 주석의 코드는 BasicAttack(깊이 2)과 다른 Skill들(깊이 3)과의 계층 깊이가 달라
     // 동일하게 적용했더니 Fireball의 경우엔 nullptr을 가르켰음
     //AActor* Owner = Cast<AActor>(GetOuter()->GetOuter());
     AActor* Owner = GetTypedOuter<AActor>();
     if (IsValid(Owner) == false)
+        return;
+    // StatComp 불러오기
+    UStatComponent* StatComp = Owner->FindComponentByClass<UStatComponent>();
+    if (IsValid(StatComp) == false)
         return;
 
     // 캐릭터의 메시 컴포넌트
@@ -59,16 +67,27 @@ void UProjectileSkill::Activate()
     SpawnParams.Instigator = Cast<APawn>(Owner);
 
     ABaseProjectile* Projectile = GetWorld()->SpawnActor<ABaseProjectile>(
-        ProjectileClass,
+        SkillData->ProjectileClass,
         SpawnLocation,
         SpawnRotation,
         SpawnParams
     );
 
+    // Damage & ProjectileSpeed 계산
+    Damage = SkillData->Damage + StatComp->GetCurrentStat(EStat::AttackDamage);
+    ProjectileSpeed = SkillData->ProjectileSpeed + StatComp->GetCurrentStat(EStat::ProjectileSpeed);
+
     if (IsValid(Projectile))
     {
-        Projectile->Initialize(Damage, 3000.f); // 하드코딩 나중에 해결
+        Projectile->Initialize(Damage, ProjectileSpeed);
     }
 
-    UE_LOG(LogTemp, Warning, TEXT("MagicMissile : %d"), Damage);
+}
+
+void UProjectileSkill::InitFromData(USkillDataAsset* Data)
+{
+    if (IsValid(Data) == false)
+        return;
+
+    SkillData = Data;
 }

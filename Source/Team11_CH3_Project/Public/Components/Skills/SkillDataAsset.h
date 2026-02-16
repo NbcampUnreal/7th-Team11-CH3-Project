@@ -15,6 +15,7 @@ class TEAM11_CH3_PROJECT_API USkillDataAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 	
 public:
+
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
 	FName SkillID;
 
@@ -26,6 +27,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
 	float Damage = 0.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|Projectile")
+	float ProjectileSpeed;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
 	TSubclassOf<class UBaseSkill> SkillClass;
