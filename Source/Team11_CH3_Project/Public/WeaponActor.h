@@ -21,9 +21,9 @@ public:
 	UAnimMontage* GetAttackMontage() const;
 	float GetAttackRange() const;
 	//TODO
-	virtual void StartAttack(const FVector& Direction,  USkillDataAsset* Skill) {};
-	virtual void PerformDamage() {};
-	virtual void EndAttack() {};
+	virtual void StartAttack(const FVector& Direction,  USkillDataAsset* Skill) {CurrentSkillData = Skill;}
+	virtual void PerformDamage() {}
+	virtual void EndAttack() {CurrentSkillData.Reset(); CurrentSkillData = nullptr;}
 	EWeaponType GetWeaponType() const;
 
 protected:
@@ -31,8 +31,8 @@ protected:
 	float AttackRange;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TSoftObjectPtr<UAnimMontage> AttackMontage;
-	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
-	// Ptr SKill skill;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
+	TWeakObjectPtr<USkillDataAsset> CurrentSkillData;
 private:
 	FWeaponItemData WeaponItemData;
 
