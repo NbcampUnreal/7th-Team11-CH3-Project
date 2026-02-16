@@ -19,6 +19,7 @@ class TEAM11_CH3_PROJECT_API AT11_GameState : public AGameState
 	몬스터 처치시 점수 증가
 	*/
 
+	virtual void BeginPlay() override;
 
 
 	// 스테이지 시작

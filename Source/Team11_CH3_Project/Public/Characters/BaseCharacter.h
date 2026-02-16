@@ -25,9 +25,6 @@ protected:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
     bool bIsDead;
-    
-    UFUNCTION(BlueprintImplementableEvent, Category = "Character")
-    void OnDeath();
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
     class UInventoryComponent* InventoryComponent;

@@ -3,19 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/Skills/BaseSkill.h"
+#include "Components/Skills/ProjectileSkill.h"
 #include "BasicAttack.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TEAM11_CH3_PROJECT_API UBasicAttack : public UBaseSkill
+class TEAM11_CH3_PROJECT_API UBasicAttack : public UProjectileSkill
 {
 	GENERATED_BODY()
 
 public:
 	UBasicAttack();
-	// 스킬 데이터 테이블에서 데이터 로딩(도전 기능때 구현)
-	virtual void InitFromData() override;
+	// 스킬 발동
+	virtual void Activate() override;
 };

@@ -19,6 +19,7 @@ void AWeaponActor::Init(const FWeaponItemData& WeaponItem, USkeletalMeshComponen
 {
 	AttackMontage.LoadSynchronous();
 	WeaponItemData = WeaponItem;
+
 }
 
 UAnimMontage* AWeaponActor::GetAttackMontage() const

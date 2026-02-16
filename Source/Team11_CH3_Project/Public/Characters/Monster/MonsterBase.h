@@ -10,6 +10,7 @@
 #include "MonsterBase.generated.h"
 
 
+class USkillManager;
 class AWeaponActor;
 class UStatComponent;
 
@@ -36,7 +37,11 @@ protected:
 	TObjectPtr<UStatComponent> StatComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<USkillManager> SkillComponent;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<AWeaponActor> WeaponActor;
+	
 	
 public:
 	FVector GetOriginLocation() const;

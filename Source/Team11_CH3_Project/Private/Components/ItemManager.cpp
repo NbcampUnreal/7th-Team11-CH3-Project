@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/ItemManager.h"
@@ -8,9 +8,21 @@ UItemManager::UItemManager()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	// ...
+}
+
+void UItemManager::UseItem(FName RowName)
+{
+}
+
+void UItemManager::UnequipWeapon(FName RowName)
+{
+}
+
+void UItemManager::UnequipArmor(FName RowName)
+{
 }
 
 
@@ -23,12 +35,20 @@ void UItemManager::BeginPlay()
 	
 }
 
-
-// Called every frame
-void UItemManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UItemManager::UsePotion(FPotionItemData* Data)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
+
+void UItemManager::UseSkillGem(FSkillGemItemData* Data)
+{
+}
+
+void UItemManager::EquipWeapon(FWeaponItemData* Data)
+{
+}
+
+void UItemManager::EquipArmor(FArmorItemData* Data)
+{
+}
+
 

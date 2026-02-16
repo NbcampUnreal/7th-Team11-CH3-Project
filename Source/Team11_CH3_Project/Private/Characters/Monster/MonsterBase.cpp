@@ -5,6 +5,7 @@
 
 #include "WeaponActor.h"
 #include "Characters/Monster/MonsterControllerBase.h"
+#include "Components/SkillManager.h"
 #include "Components/StatComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -18,6 +19,8 @@ AMonsterBase::AMonsterBase()
 	SetRootComponent(RootComponent);
 	GetMesh()->SetupAttachment(RootComponent);
 	StatComponent = CreateDefaultSubobject<UStatComponent>("StatComponent");
+	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
+	
 	ConstructorHelpers::FClassFinder<AMonsterControllerBase> MonsterControllerFinder(TEXT("/Game/Characters/Monster/BP_MonsterControllerBase.BP_MonsterControllerBase_C"));
 	if (MonsterControllerFinder.Succeeded())
 	{
@@ -101,7 +104,7 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	{
 		return false;
 	}
-
+//	SkillComponent
 	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
 	{
 		CharacterMovementComponent->bUseControllerDesiredRotation = true;

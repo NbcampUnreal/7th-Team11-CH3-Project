@@ -1,5 +1,6 @@
 #include "Characters/PlayerCharacter.h"
 #include "Characters/InventoryComponent.h"
+#include "MainPlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -89,6 +90,25 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
     UE_LOG(LogTemp, Warning, TEXT("Skill E Used"));
 }
 
+// 무기 소켓
+/*
+void APlayerCharacter::AttachWeapon(TSubclassOf<AActor> WeaponClass)
+{
+    if (!WeaponClass) return;
+
+    AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(WeaponClass);
+
+    if (!SpawnedActor) return;
+
+    const USkeletalMeshSocket* WeaponSocket =
+        GetMesh()->GetSocketByName(TEXT("WeaponSocket"));
+
+    if (WeaponSocket)
+    {
+        WeaponSocket->AttachActor(SpawnedActor, GetMesh());
+    }
+}
+*/
 
 void APlayerCharacter::BeginPlay()
 {
@@ -215,6 +235,50 @@ void APlayerCharacter::ResetDodgeCooldown()
     bCanDodge = true;
 }
 
+void APlayerCharacter::ReceiveDamage(float Damage, AActor* DamageCauser)
+{
+    if (!StatComponent || bIsDead)
+        return;
+
+    const bool bDied = StatComponent->TakeDamage(Damage);
+
+    if (bDied)
+    {
+        Die();
+    }
+    else
+    {
+        Hit();
+    }
+}
+
+void APlayerCharacter::Hit()
+{
+    UE_LOG(LogTemp, Warning, TEXT("Player Hit"));
+
+    if (HitMontage)
+    {
+        PlayAnimMontage(HitMontage);
+    }
+}
+
+void APlayerCharacter::Die()
+{
+    Super::Die();
+
+    if (DeathMontage)
+    {
+        PlayAnimMontage(DeathMontage);
+    }
+
+    if (AMainPlayerController* PC =
+        Cast<AMainPlayerController>(GetController()))
+    {
+        PC->HandlePlayerDeath();
+    }
+}
+
+// dodge, death anim
 /*
 void APlayerCharacter::PlayDodgeAnimation()
 {

@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -17,8 +17,6 @@ struct TEAM11_CH3_PROJECT_API FWeaponItemData : public FEquipmentItemData
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Item|Weapon")
 	TSoftClassPtr<AWeaponActor> WeaponActorClass;
-	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Item|Weapon")
-	float Damage;	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item|Weapon")
 	EWeaponType WeaponType;
 };
