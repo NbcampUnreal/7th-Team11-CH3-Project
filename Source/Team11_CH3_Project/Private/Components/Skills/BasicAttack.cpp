@@ -17,10 +17,10 @@ UBasicAttack::UBasicAttack()
     {
         ProjectileClass = ProjectileBP.Class;
     }
-    InitFromData();
+
 }
 
-void UBasicAttack::InitFromData()
+void UBasicAttack::InitFromData(USkillDataAsset* Data)
 {
     // 데이터 테이블 기준으로 하면 수정 예정
     // 현재는 수동 입력

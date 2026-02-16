@@ -16,7 +16,7 @@ UFireball::UFireball()
     {
         ProjectileClass = ProjectileBP.Class;
     }
-    InitFromData();
+
 }
 
 void UFireball::Activate()
@@ -25,7 +25,7 @@ void UFireball::Activate()
     UE_LOG(LogTemp, Warning, TEXT("Fire"))
 }
 
-void UFireball::InitFromData()
+void UFireball::InitFromData(USkillDataAsset* Data)
 {
     // 데이터 테이블 기준으로 하면 수정 예정
     // 현재는 수동 입력
