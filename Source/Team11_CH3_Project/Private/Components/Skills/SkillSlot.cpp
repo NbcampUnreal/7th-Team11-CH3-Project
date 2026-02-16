@@ -2,22 +2,23 @@
 
 
 #include "Components/Skills/SkillSlot.h"
-#include "Components/Skills/BaseSkill.h"
+#include "Components/Skills/SkillDataAsset.h"
 #include "Engine/Engine.h"
 
-void USkillSlot::EquipGem(TSubclassOf<class UBaseSkill> NewSkillClass)
+void USkillSlot::EquipGem(USkillDataAsset* NewSkillData)
 {
-	if (IsValid(NewSkillClass) == false)
+	if (IsValid(NewSkillData) == false)
 		return;
 	if (EquippedSkill)
 	{
 		ClearSlot();
-		UE_LOG(LogTemp, Warning, TEXT("Clear EquipGem: %s"), *NewSkillClass->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Clear EquipGem: %s"), *NewSkillData->GetName());
 	}
 
-	EquippedSkill = NewObject<UBaseSkill>(this, NewSkillClass);
-	UE_LOG(LogTemp, Warning, TEXT("EquipGem: %s"), *NewSkillClass->GetName());
-
+	EquippedSkill = NewSkillData;
+	UE_LOG(LogTemp, Warning, TEXT("EquipGem: %s"), *NewSkillData->GetName());
+	bIsOnCooldown = true;
+	GetWorld()->GetTimerManager().SetTimer(CooldownTimer,[this](){bIsOnCooldown = false;}, NewSkillData->GetCooldownTime(),false);
 }
 
 void USkillSlot::ClearSlot()
@@ -26,5 +27,26 @@ void USkillSlot::ClearSlot()
 		return;
 
 	EquippedSkill = nullptr;
+	GetWorld()->GetTimerManager().ClearTimer(CooldownTimer);
 
+}
+
+void USkillSlot::StartCooldown()
+{
+	if (!IsValid(EquippedSkill))
+	{
+		return;	
+	}
+	GetWorld()->GetTimerManager().SetTimer(CooldownTimer,[this](){bIsOnCooldown = false;}, EquippedSkill->GetCooldownTime(),false);
+	
+}
+
+bool USkillSlot::IsSkillOnCooldown() const
+{
+	return bIsOnCooldown;
+}
+
+float USkillSlot::GetCooldownRemaining() const
+{
+	return GetWorld()->GetTimerManager().GetTimerRemaining(CooldownTimer);
 }

@@ -5,12 +5,13 @@
 #include "InputActionValue.h"
 #include "GenericTeamAgentInterface.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Components/Skills/BasicAttack.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Components/StatComponent.h"
 #include "PlayerCharacter.generated.h"
 
+class AWeaponActor;
+class USkillManager;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -93,6 +94,9 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
     TObjectPtr<UBuffManager> BuffManager;
+    
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    TObjectPtr<USkillManager> SkillComponent;
 #pragma endregion
 
 #pragma region Input
@@ -110,9 +114,7 @@ public:
     UPROPERTY(EditAnywhere)
     TSubclassOf<AActor> WeaponClass;
     */
-
-    UPROPERTY()
-    TObjectPtr<UBasicAttack> BasicAttack;
+    
 
     FTimerHandle DodgeTimerHandle;
     FTimerHandle DodgeCooldownTimerHandle;
@@ -157,7 +159,11 @@ public:
     virtual void Die() override;
 
     // void AttachWeapon(TSubclassOf<AActor> WeaponClass);
-
+protected:
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    TObjectPtr<AWeaponActor> WeaponActor;
+	
+    
 protected:
 
     void UpdateMovementSpeed();

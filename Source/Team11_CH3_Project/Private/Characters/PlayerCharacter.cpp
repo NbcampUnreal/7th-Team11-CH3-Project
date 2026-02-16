@@ -5,14 +5,18 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
+#include "WeaponActor.h"
 #include "Components/StatComponent.h"
 #include "Components/BuffManager.h"
+#include "Components/SkillManager.h"
+#include "Components/Skills/SkillSlot.h"
 #include "Kismet/KismetMathLibrary.h"
 
 APlayerCharacter::APlayerCharacter()
 {
-    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = false;
 
+    
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
     CameraBoom->TargetArmLength = CameraBoomLength;
@@ -34,9 +38,9 @@ APlayerCharacter::APlayerCharacter()
     GetCharacterMovement()->AirControl = 0.35f;
     GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-    BasicAttack = CreateDefaultSubobject<UBasicAttack>(TEXT("BasicAttack"));
     StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
     BuffManager = CreateDefaultSubobject<UBuffManager>(TEXT("BuffManager"));
+	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
 
     bIsSprinting = false;
     bIsDodging = false;
@@ -74,20 +78,34 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 // 스킬 정의
 void APlayerCharacter::Attack(const FInputActionValue& Value)
 {
-    if (BasicAttack)
+    if (SkillComponent->IsSkillOnCooldown(0))
     {
-        BasicAttack->Activate();
+        return;
     }
+    SkillComponent->StartSkillCooldown(0);
+    WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(0)->GetEquippedSkill());
 }
 
 void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 {
     UE_LOG(LogTemp, Warning, TEXT("Skill Q Used"));
+    if (SkillComponent->IsSkillOnCooldown(1))
+    {
+        return;
+    }
+    SkillComponent->StartSkillCooldown(1);
+    WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(1)->GetEquippedSkill());
 }
 
 void APlayerCharacter::SkillE(const FInputActionValue& Value)
 {
     UE_LOG(LogTemp, Warning, TEXT("Skill E Used"));
+    if (SkillComponent->IsSkillOnCooldown(2))
+    {
+        return;
+    }
+    SkillComponent->StartSkillCooldown(2);
+    WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(2)->GetEquippedSkill());
 }
 
 // 무기 소켓
@@ -114,9 +132,21 @@ void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    BasicAttack = NewObject<UBasicAttack>(this);
 
     UpdateMovementSpeed();
+#pragma region TESTCODE
+    FWeaponItemData WeaponItemData;
+    WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
+    WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
+    WeaponItemData.WeaponType = EWeaponType::Melee;
+    FActorSpawnParameters SpawnInfo;
+    SpawnInfo.Owner = this;
+    WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(WeaponItemData.WeaponActorClass.LoadSynchronous(),SpawnInfo);
+    if (WeaponActor)
+    {
+        WeaponActor->Init(WeaponItemData, GetMesh());
+    }
+#pragma endregion
 }
 
 void APlayerCharacter::Tick(float DeltaTime)

@@ -7,6 +7,7 @@
 #include "Characters/Monster/MonsterControllerBase.h"
 #include "Components/SkillManager.h"
 #include "Components/StatComponent.h"
+#include "Components/Skills/SkillSlot.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 
@@ -56,7 +57,6 @@ void AMonsterBase::Init(const FMonsterData& MonsterData)
 	if (WeaponActor)
 	{
 		WeaponActor->Init(MonsterData.WeaponItemData, GetMesh());
-		
 	}
 	
 	GetMesh()->SetAnimInstanceClass(MonsterData.AnimBlueprint.LoadSynchronous());
@@ -104,6 +104,18 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	{
 		return false;
 	}
+	
+	TArray<int32> Idxes = SkillComponent->FindReadySlotIdxes();
+	if (Idxes.Num() == 0)
+	{
+		return false;
+	}
+	int32 Index = Idxes[FMath::RandRange(0, Idxes.Num() - 1)];
+	if (SkillComponent->GetCooldownRemaining(Index)>0.0f)
+	{
+		return false;
+	}
+	
 //	SkillComponent
 	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
 	{
@@ -116,12 +128,11 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, WeaponActor->GetAttackMontage());
 	
-	// TODO
-	// SKill = SkillSet[WeaponActor->GetWeaponType()][RandomIndex]
-	WeaponActor->StartAttack(Target/*, SKill*/);
-	
+	SkillComponent->StartSkillCooldown(Index);
+	WeaponActor->StartAttack(Target->GetActorLocation()-GetActorLocation(), SkillComponent->GetSkillSlot(Index)->GetEquippedSkill());
 	
 	return true;
+	
 }
 
 //CallByAnimNotify

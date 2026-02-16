@@ -8,6 +8,8 @@
 #include "Types/StatTypes.h"
 #include "WeaponActor.generated.h"
 
+class USkillDataAsset;
+
 UCLASS()
 class TEAM11_CH3_PROJECT_API AWeaponActor : public AActor
 {
@@ -19,7 +21,7 @@ public:
 	UAnimMontage* GetAttackMontage() const;
 	float GetAttackRange() const;
 	//TODO
-	virtual void StartAttack(AActor* Target/*, SKill skill*/) {};
+	virtual void StartAttack(const FVector& Direction,  USkillDataAsset* Skill) {};
 	virtual void PerformDamage() {};
 	virtual void EndAttack() {};
 	EWeaponType GetWeaponType() const;
