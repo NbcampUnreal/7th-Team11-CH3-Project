@@ -2,6 +2,7 @@
 #include "Components/BoxComponent.h"
 #include "Subsystems/MonsterSubsystem.h"
 #include "Core/SpawnMonsterData.h"
+#include "Characters/Monster/FMonsterData.h"
 #include "WeaponActor.h"
 
 ASpawnVolume::ASpawnVolume()
@@ -24,15 +25,16 @@ void ASpawnVolume::SpawnRandomMonster()
 
 	if (FSpawnMonsterData* SelectedRow = GetRandomMonster())
 	{
-		USkeletalMesh* SelectedMesh = SelectedRow->MonsterSkeletalMesh;
-		FStatData SelectedStatData = SelectedRow->MonsterStat;
-		TSubclassOf<AActor> SelectedWeapon = SelectedRow->MonsterWeapon;
-		float SelectedWeaponDamage = SelectedRow->MonsterWeaponDamage;
+		FMonsterData* MonsterDataRow = SelectedRow->MonsterData.GetRow<FMonsterData>(TEXT("MonsterData"));
+		TSoftObjectPtr<USkeletalMesh> SelectedMesh = MonsterDataRow->SkeletalMesh;
+		FStatData SelectedStatData = MonsterDataRow->StatData;
+		TSoftClassPtr<AWeaponActor> SelectedWeapon = MonsterDataRow->WeaponItemData.WeaponActorClass;
+		TSoftClassPtr<UAnimInstance> SelectedAnim = MonsterDataRow->AnimBlueprint;
+		float SelectedWeaponDamage = 100.0f; // 임시 값 설정
 
 		MonsterData.StatData = SelectedStatData;
 
-		MonsterData.AnimBlueprint = StaticLoadClass(UAnimInstance::StaticClass(), nullptr,
-			TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
+		MonsterData.AnimBlueprint = SelectedAnim;
 
 		MonsterData.SkeletalMesh = SelectedMesh;
 

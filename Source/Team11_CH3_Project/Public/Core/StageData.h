@@ -8,6 +8,9 @@ USTRUCT(BlueprintType)
 struct TEAM11_CH3_PROJECT_API FStageData : public FTableRowBase
 {
 	GENERATED_BODY()
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<AActor> MonsterClass;
+	TSoftObjectPtr<UWorld> StageLevel;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 WaveNum;
 };
