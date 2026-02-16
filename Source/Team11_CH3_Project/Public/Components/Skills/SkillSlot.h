@@ -3,9 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "UObject/NoExportTypes.h"
 #include "SkillSlot.generated.h"
 
+class USkillDataAsset;
 /**
  * 
  */
@@ -17,15 +17,20 @@ class TEAM11_CH3_PROJECT_API USkillSlot : public UObject
 public:
 	// 보석 장착
 	UFUNCTION(BlueprintCallable)
-	void EquipGem(class USkillDataAsset* NewSkillData);
+	void EquipGem(USkillDataAsset* NewSkillData);
 	// 슬롯 비우기
 	UFUNCTION(BlueprintCallable)
 	void ClearSlot();
 	// 장착된 스킬 가져오기
 	UFUNCTION(BlueprintCallable)
-	class UBaseSkill* GetEquippedSkill() const { return EquippedSkill; }
-
+	USkillDataAsset* GetEquippedSkill() const { return EquippedSkill; }
+	void StartCooldown();
+	bool IsSkillOnCooldown()const;
+	float GetCooldownRemaining() const;
 private:
 	UPROPERTY()
-	TObjectPtr<class UBaseSkill> EquippedSkill;
+	TObjectPtr<USkillDataAsset> EquippedSkill;
+	
+	FTimerHandle CooldownTimer;
+	bool bIsOnCooldown;
 };

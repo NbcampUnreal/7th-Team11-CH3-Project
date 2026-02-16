@@ -38,12 +38,17 @@ EBTNodeResult::Type UBTT_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 		AActor* TargetActor  = Cast<AActor>(BB->GetValueAsObject(TargetActorSelector.SelectedKeyName));
 		if (MonsterBase->TryAttack(TargetActor))
 		{
+			MonsterControllerBase->SetFocus(TargetActor);
 			MonsterBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
 			AttackMemory->OnAttackFinishedHandle = MonsterBase->OnAttackFinished.AddLambda(
 			[this, &OwnerComp, AttackMemory, MonsterBase]()
 			{
 				MonsterBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
 				AttackMemory->OnAttackFinishedHandle.Reset();
+				if (AMonsterControllerBase* MonsterControllerBase = Cast<AMonsterControllerBase>(OwnerComp.GetAIOwner()))
+				{
+					// MonsterControllerBase->ClearFocus(EAIFocusPriority::Gameplay);
+				}
 				FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 			}	
 			);

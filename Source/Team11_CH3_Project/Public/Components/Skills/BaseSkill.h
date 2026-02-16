@@ -12,7 +12,7 @@
  * 
  */
 UCLASS()
-class TEAM11_CH3_PROJECT_API UBaseSkill : public UObject
+class TEAM11_CH3_PROJECT_API ABaseSkill : public AActor
 {
 	GENERATED_BODY()
 
@@ -21,19 +21,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void InitFromData(USkillDataAsset* Data) {}
 	// 스킬 발동
-	UFUNCTION(BlueprintCallable)
-	virtual void Activate();
-	// 쿨타임 체크
-	UFUNCTION(BlueprintCallable)
-	virtual bool IsActivate() { return true; }
-	// 쿨타임 반환
-	UFUNCTION(BlueprintCallable)
-	virtual float GetCooldownTime() const { return IsValid(SkillData) ? SkillData->CooldownTime : 0.f; }
 
 protected:
 	// 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|Damage")
 	float Damage;
 	UPROPERTY()
-	TObjectPtr<USkillDataAsset> SkillData = nullptr;  // 원본 데이터
+	TWeakObjectPtr<USkillDataAsset> SkillData = nullptr;  // 원본 데이터
 };

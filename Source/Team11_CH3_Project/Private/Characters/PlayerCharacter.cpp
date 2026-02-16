@@ -5,15 +5,18 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
+#include "WeaponActor.h"
 #include "Components/StatComponent.h"
 #include "Components/BuffManager.h"
 #include "Components/SkillManager.h"
+#include "Components/Skills/SkillSlot.h"
 #include "Kismet/KismetMathLibrary.h"
 
 APlayerCharacter::APlayerCharacter()
 {
-    PrimaryActorTick.bCanEverTick = true;
+    PrimaryActorTick.bCanEverTick = false;
 
+    
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
     CameraBoom->TargetArmLength = CameraBoomLength;
@@ -35,9 +38,9 @@ APlayerCharacter::APlayerCharacter()
     GetCharacterMovement()->AirControl = 0.35f;
     GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-    BasicAttack = CreateDefaultSubobject<UBasicAttack>(TEXT("BasicAttack"));
     StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
     BuffManager = CreateDefaultSubobject<UBuffManager>(TEXT("BuffManager"));
+	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
 
     bIsSprinting = false;
     bIsDodging = false;
@@ -75,30 +78,35 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 // 스킬 정의
 void APlayerCharacter::Attack(const FInputActionValue& Value)
 {
-    if (USkillManager* SkillMgr = FindComponentByClass<USkillManager>())
+    if (SkillComponent->IsSkillOnCooldown(0))
     {
-        SkillMgr->UseBasicAttack();
+        return;
     }
+    // TODO : 스킬컴포넌트 쪽에서 다 처리할지 WeaponActor에서 처리할지 고민중 아래쪽 스킬들 포함
+    SkillComponent->StartSkillCooldown(0);
+    WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(0)->GetEquippedSkill());
 }
 
 void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 {
-    if (USkillManager* SkillMgr = FindComponentByClass<USkillManager>())
+    UE_LOG(LogTemp, Warning, TEXT("Skill Q Used"));
+    if (SkillComponent->IsSkillOnCooldown(1))
     {
-        SkillMgr->UseSkillSlot(0);
-        UE_LOG(LogTemp, Warning, TEXT("Skill Q Used"));
+        return;
     }
-    UE_LOG(LogTemp, Warning, TEXT("Skill Q Empty"));
+    SkillComponent->StartSkillCooldown(1);
+    WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(1)->GetEquippedSkill());
 }
 
 void APlayerCharacter::SkillE(const FInputActionValue& Value)
 {
-    if (USkillManager* SkillMgr = FindComponentByClass<USkillManager>())
+    UE_LOG(LogTemp, Warning, TEXT("Skill E Used"));
+    if (SkillComponent->IsSkillOnCooldown(2))
     {
-        SkillMgr->UseSkillSlot(0);
-        UE_LOG(LogTemp, Warning, TEXT("Skill E Used"));
+        return;
     }
-    UE_LOG(LogTemp, Warning, TEXT("Skill E Empty"));
+    SkillComponent->StartSkillCooldown(2);
+    WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(2)->GetEquippedSkill());
 }
 
 // 무기 소켓
@@ -125,9 +133,21 @@ void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    //BasicAttack = NewObject<UBasicAttack>(this);
 
     UpdateMovementSpeed();
+#pragma region TESTCODE
+    FWeaponItemData WeaponItemData;
+    WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
+    WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
+    WeaponItemData.WeaponType = EWeaponType::Melee;
+    FActorSpawnParameters SpawnInfo;
+    SpawnInfo.Owner = this;
+    WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(WeaponItemData.WeaponActorClass.LoadSynchronous(),SpawnInfo);
+    if (WeaponActor)
+    {
+        WeaponActor->Init(WeaponItemData, GetMesh());
+    }
+#pragma endregion
 }
 
 void APlayerCharacter::Tick(float DeltaTime)

@@ -29,4 +29,8 @@ struct TEAM11_CH3_PROJECT_API FMonsterData : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
 	TSoftClassPtr<UAnimInstance> AnimBlueprint;
+	
+	// UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
+	// TArray<Skill> Skills;
+	
 };

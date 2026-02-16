@@ -5,7 +5,10 @@
 
 #include "WeaponActor.h"
 #include "Characters/Monster/MonsterControllerBase.h"
+#include "Components/SkillManager.h"
 #include "Components/StatComponent.h"
+#include "Components/Skills/SkillSlot.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 
 // Sets default values
@@ -17,6 +20,8 @@ AMonsterBase::AMonsterBase()
 	SetRootComponent(RootComponent);
 	GetMesh()->SetupAttachment(RootComponent);
 	StatComponent = CreateDefaultSubobject<UStatComponent>("StatComponent");
+	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
+	
 	ConstructorHelpers::FClassFinder<AMonsterControllerBase> MonsterControllerFinder(TEXT("/Game/Characters/Monster/BP_MonsterControllerBase.BP_MonsterControllerBase_C"));
 	if (MonsterControllerFinder.Succeeded())
 	{
@@ -52,7 +57,6 @@ void AMonsterBase::Init(const FMonsterData& MonsterData)
 	if (WeaponActor)
 	{
 		WeaponActor->Init(MonsterData.WeaponItemData, GetMesh());
-		
 	}
 	
 	GetMesh()->SetAnimInstanceClass(MonsterData.AnimBlueprint.LoadSynchronous());
@@ -94,34 +98,47 @@ void AMonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 }
 
 
-
 bool AMonsterBase::TryAttack(AActor* Target)
 {
 	if (!Target || bIsAttacking)
 	{
 		return false;
 	}
-
+	
+	TArray<int32> Idxes = SkillComponent->FindReadySlotIdxes();
+	if (Idxes.Num() == 0)
+	{
+		return false;
+	}
+	int32 Index = Idxes[FMath::RandRange(0, Idxes.Num() - 1)];
+	if (SkillComponent->GetCooldownRemaining(Index)>0.0f)
+	{
+		return false;
+	}
+	
+//	SkillComponent
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		CharacterMovementComponent->bUseControllerDesiredRotation = true;
+		CharacterMovementComponent->bOrientRotationToMovement = false;
+	}
 	bIsAttacking = true;
 	PlayAnimMontage(WeaponActor->GetAttackMontage());
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, WeaponActor->GetAttackMontage());
-	WeaponActor->StartAttack();
+	
+	SkillComponent->StartSkillCooldown(Index);
+	WeaponActor->StartAttack(Target->GetActorLocation()-GetActorLocation(), SkillComponent->GetSkillSlot(Index)->GetEquippedSkill());
+	
 	return true;
+	
 }
 
 //CallByAnimNotify
 void AMonsterBase::DealDamage()
 {
-	if (WeaponActor->GetWeaponType() == EWeaponType::Melee)
-	{
-		TArray<AActor*> Targets = WeaponActor->GetTargets();
-		//TODO Finally Deal Damage To Targets
-	}else if (WeaponActor->GetWeaponType() == EWeaponType::Ranged)
-	{
-		//TODO projectile
-	}
+	WeaponActor->PerformDamage();
 }
 
 
@@ -131,4 +148,11 @@ void AMonsterBase::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterru
 	bIsAttacking = false;
 	OnAttackFinished.Broadcast();
 	WeaponActor->EndAttack();
+	
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		CharacterMovementComponent->bUseControllerDesiredRotation = false;
+		CharacterMovementComponent->bOrientRotationToMovement = true;
+	}
+	
 }

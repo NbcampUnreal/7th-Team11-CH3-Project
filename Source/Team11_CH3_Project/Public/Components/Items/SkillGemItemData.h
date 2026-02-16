@@ -15,5 +15,5 @@ struct TEAM11_CH3_PROJECT_API FSkillGemItemData : public FItemDataBase
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|SkillGem")
-	TSubclassOf<class UBaseSkill>SkillClass;
+	TSubclassOf<class ABaseSkill>SkillClass;
 };
