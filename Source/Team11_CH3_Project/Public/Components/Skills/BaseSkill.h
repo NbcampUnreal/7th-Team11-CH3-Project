@@ -29,9 +29,6 @@ public:
 	// 쿨타임 반환
 	UFUNCTION(BlueprintCallable)
 	virtual float GetCooldownTime() const { return CooldownTime; }
-	// 마나 코스트 반환
-	//UFUNCTION(BlueprintCallable)
-	//virtual int32 GetManaCost() const { return ManaCost; }
 
 protected:
 	// 쿨타임
