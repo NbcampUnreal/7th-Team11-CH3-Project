@@ -28,12 +28,9 @@ public:
 	virtual bool IsActivate() { return true; }
 	// 쿨타임 반환
 	UFUNCTION(BlueprintCallable)
-	virtual float GetCooldownTime() const { return CooldownTime; }
+	virtual float GetCooldownTime() const { return IsValid(SkillData) ? SkillData->CooldownTime : 0.f; }
 
 protected:
-	// 쿨타임
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|CooldownTime")
-	float CooldownTime;
 	// 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|Damage")
 	float Damage;

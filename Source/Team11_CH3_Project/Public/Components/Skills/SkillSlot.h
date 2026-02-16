@@ -17,7 +17,7 @@ class TEAM11_CH3_PROJECT_API USkillSlot : public UObject
 public:
 	// 보석 장착
 	UFUNCTION(BlueprintCallable)
-	void EquipGem(TSubclassOf<class UBaseSkill> NewSkillClass);
+	void EquipGem(class USkillDataAsset* NewSkillData);
 	// 슬롯 비우기
 	UFUNCTION(BlueprintCallable)
 	void ClearSlot();

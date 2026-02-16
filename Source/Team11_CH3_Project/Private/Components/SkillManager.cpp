@@ -5,6 +5,7 @@
 #include "Components/Skills/BasicAttack.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Components/Skills/Fireball.h"
+#include "Components/Skills/SkillDataAsset.h"
 #include "Engine/Engine.h"
 #include "Components/StatComponent.h"
 
@@ -23,36 +24,24 @@ USkillManager::USkillManager()
 void USkillManager::BeginPlay()
 {
 	Super::BeginPlay();
-	//if (AActor* Owner = GetOwner())
-	//{
-	//	StatComp = Owner->FindComponentByClass<UStatComponent>();
-	//}
 	// BasicAttack 생성
-	if (IsValid(BasicAttackClass))
+	if (IsValid(BasicAttackData) && IsValid(BasicAttackData->SkillClass))
 	{
-		BasicAttack = NewObject<UBasicAttack>(this, BasicAttackClass);
+		BasicAttack = NewObject<UBasicAttack>(this, BasicAttackData->SkillClass);
+		BasicAttack->InitFromData(BasicAttackData);
 	}
 
 	SkillSlots.Empty();
-	for (const auto& SkillClass : DefaultSkillSlotClasses)
+	for (USkillDataAsset* SkillData : DefaultSkillSlotData)
 	{
-		if (IsValid(SkillClass))
+		if (IsValid(SkillData))
 		{
 			USkillSlot* NewSlot = NewObject<USkillSlot>(this);
-			NewSlot->EquipGem(SkillClass);
+			NewSlot->EquipGem(SkillData);
 			SkillSlots.Add(NewSlot);
 		}
 	}
 }
-
-
-// Called every frame
-//void USkillManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-//{
-//	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-//
-//	// ...
-//}
 
 void USkillManager::UseBasicAttack()
 {
@@ -86,20 +75,7 @@ void USkillManager::UseSkillSlot(int32 Index)
 		UE_LOG(LogTemp, Warning, TEXT("Skill On Cooldown: %.1fs"), GetCooldownRemaining(Index));
 		return;
 	}
-	//// MP 체크 일단 주석처리
-	//if (IsValid(StatComp))
-	//{
-	//	float CurrentMana = StatComp->GetCurrentStat(EStat::MP);
-	//	float ManaCost = SkillSlots[Index]->GetEquippedSkill()->GetManaCost();
 
-	//	if (CurrentMana < ManaCost)
-	//	{
-	//		UE_LOG(LogTemp, Warning, TEXT("Not Enough Mana! Current: % f, Cost %f"), CurrentMana, ManaCost);
-	//		return;
-	//	}
-
-	//	StatComp->SetCurrentStat(EStat::MP, CurrentMana - ManaCost);
-	//}
 	// 스킬 발동
 	SkillSlots[Index]->GetEquippedSkill()->Activate();
 	// 쿨타임 시작
@@ -118,10 +94,10 @@ void USkillManager::UseSkillSlot(int32 Index)
 	}
 }
 
-void USkillManager::EquipSkillGem(int32 SlotIndex, TSubclassOf<class UBaseSkill> NewSkillClass)
+void USkillManager::EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData)
 {
-	// 새로 장착할 Gem의 NewSkillClass nullptr 체크
-	if (NewSkillClass == nullptr)
+	// 새로 장착할 Gem의 NewSkillData 체크
+	if (IsValid(NewSkillData) == false)
 		return;
 	// 스킬 슬롯배열 체크
 	if (SkillSlots.IsValidIndex(SlotIndex) == false)
@@ -130,8 +106,8 @@ void USkillManager::EquipSkillGem(int32 SlotIndex, TSubclassOf<class UBaseSkill>
 		return;
 	}
 	// 장착
-	SkillSlots[SlotIndex]->EquipGem(NewSkillClass);
-	UE_LOG(LogTemp, Warning, TEXT("EquipGem : %s"), *NewSkillClass->GetName());
+	SkillSlots[SlotIndex]->EquipGem(NewSkillData);
+	UE_LOG(LogTemp, Warning, TEXT("EquipGem : %s"), *NewSkillData->SkillName.ToString());
 }
 
 bool USkillManager::IsSkillOnCooldown(int32 SlotIndex) const

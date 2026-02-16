@@ -32,7 +32,7 @@ public:
 	
 	// 스킬 보석 교체
 	UFUNCTION(BlueprintCallable)
-	void EquipSkillGem(int32 SlotIndex, TSubclassOf<class UBaseSkill> NewSkillClass);
+	void EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData);
 
 	// 쿨타임 조회
 	UFUNCTION(BlueprintCallable)
@@ -53,16 +53,15 @@ private:
 	TObjectPtr<class UBasicAttack> BasicAttack;
 	// 기본공격 클래스(블루프린트 설정용)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|BasicAttack", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UBasicAttack> BasicAttackClass;
+	TObjectPtr<class USkillDataAsset> BasicAttackData;
+	//TSubclassOf<class UBasicAttack> BasicAttackClass;
 	// 스킬 배열
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<class USkillSlot>> SkillSlots;
 	// 초기 스킬 클래스(블루프린트 설정용)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
-	TArray<TSubclassOf<class UBaseSkill>> DefaultSkillSlotClasses;
-	// 스킬 데이터 테이블(도전 기능때 구현)
-	//UPROPERTY(EditDefaultsOnly, Category = "Skill|Data", meta = (AllowPrivateAccess = "true"))
-	//TObjectPtr<class UDataTable> SkillDataTable;
+	TArray<TObjectPtr<class USkillDataAsset>> DefaultSkillSlotData;
+	//TArray<TSubclassOf<class UBaseSkill>> DefaultSkillSlotClasses;
 	// 스탯 연동
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UStatComponent> StatComp;

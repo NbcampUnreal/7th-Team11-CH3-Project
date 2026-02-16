@@ -1,4 +1,4 @@
-#include "Characters/PlayerCharacter.h"
+﻿#include "Characters/PlayerCharacter.h"
 #include "Characters/InventoryComponent.h"
 #include "MainPlayerController.h"
 #include "Camera/CameraComponent.h"
@@ -7,6 +7,7 @@
 #include "EnhancedInputComponent.h"
 #include "Components/StatComponent.h"
 #include "Components/BuffManager.h"
+#include "Components/SkillManager.h"
 #include "Kismet/KismetMathLibrary.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -74,20 +75,30 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 // 스킬 정의
 void APlayerCharacter::Attack(const FInputActionValue& Value)
 {
-    if (BasicAttack)
+    if (USkillManager* SkillMgr = FindComponentByClass<USkillManager>())
     {
-        BasicAttack->Activate();
+        SkillMgr->UseBasicAttack();
     }
 }
 
 void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 {
-    UE_LOG(LogTemp, Warning, TEXT("Skill Q Used"));
+    if (USkillManager* SkillMgr = FindComponentByClass<USkillManager>())
+    {
+        SkillMgr->UseSkillSlot(0);
+        UE_LOG(LogTemp, Warning, TEXT("Skill Q Used"));
+    }
+    UE_LOG(LogTemp, Warning, TEXT("Skill Q Empty"));
 }
 
 void APlayerCharacter::SkillE(const FInputActionValue& Value)
 {
-    UE_LOG(LogTemp, Warning, TEXT("Skill E Used"));
+    if (USkillManager* SkillMgr = FindComponentByClass<USkillManager>())
+    {
+        SkillMgr->UseSkillSlot(0);
+        UE_LOG(LogTemp, Warning, TEXT("Skill E Used"));
+    }
+    UE_LOG(LogTemp, Warning, TEXT("Skill E Empty"));
 }
 
 // 무기 소켓
@@ -114,7 +125,7 @@ void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
-    BasicAttack = NewObject<UBasicAttack>(this);
+    //BasicAttack = NewObject<UBasicAttack>(this);
 
     UpdateMovementSpeed();
 }

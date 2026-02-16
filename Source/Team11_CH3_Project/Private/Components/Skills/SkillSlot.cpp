@@ -3,20 +3,22 @@
 
 #include "Components/Skills/SkillSlot.h"
 #include "Components/Skills/BaseSkill.h"
+#include "Components/Skills/SkillDataAsset.h"
 #include "Engine/Engine.h"
 
-void USkillSlot::EquipGem(TSubclassOf<class UBaseSkill> NewSkillClass)
+void USkillSlot::EquipGem(USkillDataAsset* NewSkillData)
 {
-	if (IsValid(NewSkillClass) == false)
+	if (IsValid(NewSkillData) == false || IsValid(NewSkillData->SkillClass) == false)
 		return;
 	if (EquippedSkill)
 	{
 		ClearSlot();
-		UE_LOG(LogTemp, Warning, TEXT("Clear EquipGem: %s"), *NewSkillClass->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Clear EquipGem: %s"), *NewSkillData->SkillName.ToString());
 	}
 
-	EquippedSkill = NewObject<UBaseSkill>(this, NewSkillClass);
-	UE_LOG(LogTemp, Warning, TEXT("EquipGem: %s"), *NewSkillClass->GetName());
+	EquippedSkill = NewObject<UBaseSkill>(this, NewSkillData->SkillClass);
+	EquippedSkill->InitFromData(NewSkillData);
+	UE_LOG(LogTemp, Warning, TEXT("EquipGem: %s"), *NewSkillData->SkillName.ToString());
 
 }
 
