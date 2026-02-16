@@ -46,7 +46,7 @@ void USkillManager::BeginPlay()
 //}
 
 
-TArray<int32> USkillManager::FindReadySlotIdxes() const
+TArray<int32> USkillManager::FindReadySlotIndexes() const
 {
 	TArray<int32> Ret;
 	for (int32 i = 0; i < SkillSlots.Num(); i++)

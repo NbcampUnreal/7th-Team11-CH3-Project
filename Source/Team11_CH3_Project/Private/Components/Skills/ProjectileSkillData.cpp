@@ -21,8 +21,8 @@ void UProjectileSkillData::Activate(APawn* Instigator, const FVector& Origin, co
 	SpawnParams.Owner = Instigator;
 
 	SpawnParams.Instigator = Cast<APawn>(Instigator);
-
-	ABaseProjectile* Projectile = GetWorld()->SpawnActor<ABaseProjectile>(
+	UWorld* W = Instigator->GetWorld();
+	ABaseProjectile* Projectile = W->SpawnActor<ABaseProjectile>(
 		ProjectileClass,
 		Origin,
 		SpawnRotation,

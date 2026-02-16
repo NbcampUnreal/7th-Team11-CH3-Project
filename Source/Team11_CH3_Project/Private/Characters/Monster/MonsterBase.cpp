@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Characters/Monster/MonsterBase.h"
@@ -105,12 +105,12 @@ bool AMonsterBase::TryAttack(AActor* Target)
 		return false;
 	}
 	
-	TArray<int32> Idxes = SkillComponent->FindReadySlotIdxes();
-	if (Idxes.Num() == 0)
+	TArray<int32> Indexes = SkillComponent->FindReadySlotIndexes();
+	if (Indexes.Num() == 0)
 	{
 		return false;
 	}
-	int32 Index = Idxes[FMath::RandRange(0, Idxes.Num() - 1)];
+	int32 Index = Indexes[FMath::RandRange(0, Indexes.Num() - 1)];
 	if (SkillComponent->GetCooldownRemaining(Index)>0.0f)
 	{
 		return false;

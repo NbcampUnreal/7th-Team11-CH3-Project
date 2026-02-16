@@ -2,7 +2,7 @@
 
 
 #include "StaffWeaponActor.h"
-
+#include "Components/Skills/SkillDataAsset.h"
 
 // Sets default values
 AStaffWeaponActor::AStaffWeaponActor()
@@ -29,6 +29,7 @@ void AStaffWeaponActor::Init(const FWeaponItemData& WeaponItem, USkeletalMeshCom
 //TODO
 void AStaffWeaponActor::StartAttack(const FVector& Direction,  USkillDataAsset* Skill) 
 {
+	Skill->Activate(Cast<APawn>(GetOwner()), GetActorLocation(), Direction);
 	UE_LOG(LogTemp, Warning, TEXT("StartAttack Called!"));
 }
 void AStaffWeaponActor::PerformDamage()

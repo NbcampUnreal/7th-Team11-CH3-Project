@@ -78,6 +78,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 // 스킬 정의
 void APlayerCharacter::Attack(const FInputActionValue& Value)
 {
+    if (IsValid(SkillComponent->GetSkillSlot(0)) == false)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Skill Empty!"));
+        return;
+    }
+
     if (SkillComponent->IsSkillOnCooldown(0))
     {
         return;
@@ -90,10 +96,20 @@ void APlayerCharacter::Attack(const FInputActionValue& Value)
 void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 {
     UE_LOG(LogTemp, Warning, TEXT("Skill Q Used"));
+
+    if (IsValid(SkillComponent->GetSkillSlot(1)) == false)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Skill Empty!"));
+        return;
+    }
+
     if (SkillComponent->IsSkillOnCooldown(1))
     {
         return;
     }
+
+
+
     SkillComponent->StartSkillCooldown(1);
     WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(1)->GetEquippedSkill());
 }
@@ -101,10 +117,19 @@ void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 void APlayerCharacter::SkillE(const FInputActionValue& Value)
 {
     UE_LOG(LogTemp, Warning, TEXT("Skill E Used"));
+
+    if (IsValid(SkillComponent->GetSkillSlot(2)) == false)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Skill Empty!"));
+        return;
+    }
+
     if (SkillComponent->IsSkillOnCooldown(2))
     {
         return;
     }
+
+
     SkillComponent->StartSkillCooldown(2);
     WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(2)->GetEquippedSkill());
 }
