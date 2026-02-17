@@ -37,7 +37,7 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	// ItemTpye에 따른 사용 로직
+	// ItemType에 따른 사용 로직
 	void UsePotion(FPotionItemData* Data);
 	void UseSkillGem(FSkillGemItemData* Data, int32 SlotIndex);
 	void EquipWeapon(FWeaponItemData* Data);
