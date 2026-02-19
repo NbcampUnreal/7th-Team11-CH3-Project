@@ -75,9 +75,9 @@ void UItemManager::UseSkillGem(FSkillGemItemData* Data, int32 SlotIndex)
 {
 	auto* SkillManager = GetOwner()->FindComponentByClass<USkillManager>();
 	
-	if (IsValid(SkillManager) && Data->SkillClass)
+	if (IsValid(SkillManager) && Data->SkillData)
 	{
-		SkillManager->EquipSkillGem(SlotIndex, Data->SkillClass);
+		SkillManager->EquipSkillGem(SlotIndex, Data->SkillData);
 	}
 
 }
