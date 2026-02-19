@@ -68,7 +68,10 @@ public:
 	// 받는 데미지 계산
 	UFUNCTION(BlueprintCallable, Category = "Stat")
 	bool TakeDamage(float DamageAmount);
-		
+
+	UFUNCTION(BlueprintCallable, Category = "Stat")
+	bool IsDead() const;
+	
 public:
 	UPROPERTY()
 	FStatData CurrentStat;

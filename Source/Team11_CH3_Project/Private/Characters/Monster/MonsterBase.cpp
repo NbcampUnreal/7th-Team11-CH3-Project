@@ -49,6 +49,8 @@ AMonsterBase::AMonsterBase()
 void AMonsterBase::Init(const FMonsterData& MonsterData)
 {
 	StatComponent->InitStat(MonsterData.StatData);
+	
+	
 	OriginLocation = GetActorLocation();
 	GetMesh()->SetSkeletalMesh(MonsterData.SkeletalMesh.LoadSynchronous());
 	bIsAttacking = false;
@@ -69,12 +71,20 @@ void AMonsterBase::Init(const FMonsterData& MonsterData)
 	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
 	{
 		SkeletalMeshComponent->SetAnimInstanceClass(MonsterData.AnimBlueprint.LoadSynchronous());
+		StopAnimMontage();
+		SkeletalMeshComponent->GetAnimInstance()->InitializeAnimation();
 	}
+	GetCharacterMovement()->MaxWalkSpeed = StatComponent->GetBaseStat(EStat::MoveSpeed);
 	BlackboardUpdate();
 }
 
 void AMonsterBase::Clear()
 {
+	StopAnimMontage();
+	if (AAIController* AIController = Cast<AAIController>(GetController()))
+	{
+		AIController->GetBrainComponent()->PauseLogic(TEXT("Death"));
+	}
 	WeaponActor->Destroy();
 }
 
@@ -82,16 +92,22 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
                                class AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	if (StatComponent->GetCurrentHP() < 0.0f)
+	if (IsDead())
 	{
 		return ActualDamage;
 	}
-	if (StatComponent->TakeDamage(ActualDamage))
+	StatComponent->TakeDamage(ActualDamage);
+	
+	
+	if (IsDead())
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, *GetName().Append(TEXT("DEAD")) );
+		
 		if (AAIController* AIController = Cast<AAIController>(GetController()))
 		{
 			AIController->GetBrainComponent()->PauseLogic(TEXT("Death"));
 		}
+		StopAnimMontage();
 		PlayAnimMontage(MonsterDieAnimMontage);
 
 		FOnMontageEnded EndDelegate;
@@ -104,7 +120,7 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 			}
 		}
 	};
-	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%f"), StatComponent->GetCurrentHP()));
+	// GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%f"), StatComponent->GetCurrentHP()));
 	return ActualDamage;
 }
 
@@ -129,9 +145,11 @@ void AMonsterBase::BlackboardUpdate()
 
 bool AMonsterBase::IsDead() const
 {
+	
+	
 	if (StatComponent)
 	{
-		return StatComponent->GetCurrentHP()<0.0f;
+		return StatComponent->IsDead();
 	}
 	return true;
 }
@@ -150,13 +168,18 @@ float AMonsterBase::GetAttackRange() const
 	return WeaponActor->GetAttackRange();
 }
 
+UStatComponent* AMonsterBase::GetStatComponent() const
+{
+	return StatComponent;
+}
+
 // Called to bind functionality to input
 void AMonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-
+//Toilet
 bool AMonsterBase::TryAttack(AActor* Target)
 {
 	if (!Target || bIsAttacking)
@@ -188,7 +211,7 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, WeaponActor->GetAttackMontage());
 
 	SkillComponent->StartSkillCooldown(Index);
-	WeaponActor->StartAttack(Target->GetActorLocation() - GetActorLocation(),
+	WeaponActor->StartAttack(Target->GetActorLocation(),
 	                         SkillComponent->GetSkillSlot(Index)->GetEquippedSkill());
 
 	return true;
@@ -197,7 +220,9 @@ bool AMonsterBase::TryAttack(AActor* Target)
 //CallByAnimNotify
 void AMonsterBase::DealDamage()
 {
-	WeaponActor->PerformDamage();
+	if (IsValid(this) && WeaponActor){
+		WeaponActor->PerformDamage();
+	}
 }
 
 
@@ -205,8 +230,10 @@ void AMonsterBase::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterru
 {
 	bIsAttacking = false;
 	OnAttackFinished.Broadcast();
-	WeaponActor->EndAttack();
-
+	if (WeaponActor)
+	{
+		WeaponActor->EndAttack();
+	}
 	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
 	{
 		CharacterMovementComponent->bUseControllerDesiredRotation = false;

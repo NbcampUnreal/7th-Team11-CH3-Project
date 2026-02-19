@@ -10,23 +10,29 @@ void UMonsterSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 #pragma region TESTCODE
-	FMonsterData MonsterData;
+	FTimerHandle SpawnedMonsterTimer;
+	GetWorld()->GetTimerManager().SetTimer(SpawnedMonsterTimer,[this]()
+	{
+		FMonsterData MonsterData;
 
-	MonsterData.StatData;
+		MonsterData.StatData;
 
-	
-	MonsterData.AnimBlueprint = StaticLoadClass(UAnimInstance::StaticClass(), nullptr, 
-		TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
+		
+		MonsterData.AnimBlueprint = StaticLoadClass(UAnimInstance::StaticClass(), nullptr, 
+			TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
 
-	// 2. 스켈레탈 메시 로드
-	MonsterData.SkeletalMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, 
-		TEXT("/Game/KayKit_Fix/KayKit_Skeletons_11_FREE/characters/gltf/Skeleton_Warrior/SkeletalMeshes/Skeleton_Warrior.Skeleton_Warrior")));
-	
-	MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
-	MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
-	MonsterData.WeaponItemData.WeaponType = EWeaponType::Melee;
-	MonsterData.StatData.MaxHP = 100.0f;
-	SpawnMonster(MonsterData, FVector::ZeroVector);
+		// 2. 스켈레탈 메시 로드
+		MonsterData.SkeletalMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, 
+			TEXT("/Game/KayKit_Fix/KayKit_Skeletons_11_FREE/characters/gltf/Skeleton_Warrior/SkeletalMeshes/Skeleton_Warrior.Skeleton_Warrior")));
+		
+		MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
+		MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
+		MonsterData.WeaponItemData.WeaponType = EWeaponType::Melee;
+		MonsterData.StatData.MaxHP = 100.0f;
+		MonsterData.StatData.MoveSpeed = 600.0f;
+		SpawnMonster(MonsterData, {100,100,100});
+	},3,true
+	);
 #pragma endregion
 }
 

@@ -83,8 +83,11 @@ void AMonsterControllerBase::BlackboardUpdate()
 		}
 		if (UBlackboardComponent* BB = GetBlackboardComponent())
 		{
-			BB->SetValueAsFloat(TEXT("FightMaxMoveSpeed"), PossessedCharacter->GetCharacterMovement()->GetMaxSpeed());
-			BB->SetValueAsFloat(TEXT("PatrolMaxMoveSpeed"), PossessedCharacter->GetCharacterMovement()->GetMaxSpeed() / 3);
+			if (UStatComponent* StatComponent =  PossessedCharacter->GetStatComponent())
+			{
+				BB->SetValueAsFloat(TEXT("FightMaxMoveSpeed"), StatComponent->GetBaseStat(EStat::MoveSpeed));
+				BB->SetValueAsFloat(TEXT("PatrolMaxMoveSpeed"), StatComponent->GetBaseStat(EStat::MoveSpeed) / 3);
+			}
 			BB->SetValueAsFloat(TEXT("AttackRange"), PossessedCharacter->GetAttackRange());
 		}
 	}

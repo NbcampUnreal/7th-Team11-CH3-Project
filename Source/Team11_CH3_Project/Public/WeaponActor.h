@@ -21,7 +21,7 @@ public:
 	UAnimMontage* GetAttackMontage() const;
 	float GetAttackRange() const;
 	//TODO
-	virtual void StartAttack(const FVector& Direction,  USkillDataAsset* Skill) {};
+	virtual void StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) {};
 	virtual void PerformDamage() {};
 	virtual void EndAttack() {};
 	EWeaponType GetWeaponType() const;
