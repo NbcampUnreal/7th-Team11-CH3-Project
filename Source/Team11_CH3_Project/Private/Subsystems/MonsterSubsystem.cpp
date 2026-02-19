@@ -25,6 +25,7 @@ void UMonsterSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 	MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
 	MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
 	MonsterData.WeaponItemData.WeaponType = EWeaponType::Melee;
+	MonsterData.StatData.MaxHP = 100.0f;
 	SpawnMonster(MonsterData, FVector::ZeroVector);
 #pragma endregion
 }
@@ -42,9 +43,9 @@ UMonsterSubsystem::UMonsterSubsystem()
 void UMonsterSubsystem::SpawnMonster(FMonsterData MonsterData, FVector Location)
 {
 	AMonsterBase* Monster = nullptr;
-	if (CurrentMonsterCount < Monsters.Num())
+	if (SpawnedMonsterCount < Monsters.Num())
 	{
-		Monster = Monsters[CurrentMonsterCount];
+		Monster = Monsters[SpawnedMonsterCount];
 	}
 	else
 	{
@@ -60,17 +61,26 @@ void UMonsterSubsystem::SpawnMonster(FMonsterData MonsterData, FVector Location)
 
 		Monster->Init(MonsterData);
 
-		CurrentMonsterCount++;
+		SpawnedMonsterCount++;
+		AliveMonsterCount++;
 	}
 }
 
 void UMonsterSubsystem::OnMonsterDeath(AMonsterBase* DeadMonster)
 {
+	AliveMonsterCount--;
+	DeadMonster->SetActorEnableCollision(false);
+	FTimerHandle SpawnedMonsterTimer;
+	GetWorld()->GetTimerManager().SetTimer(SpawnedMonsterTimer,[this,DeadMonster](){DespawnMonster(DeadMonster);},5.0f,false);
+}
+
+void UMonsterSubsystem::DespawnMonster(AMonsterBase* DeadMonster)
+{
 	int32 Index = Monsters.Find(DeadMonster);
-	if (Index != INDEX_NONE && Index < CurrentMonsterCount)
+	if (Index != INDEX_NONE && Index < SpawnedMonsterCount)
 	{
-		CurrentMonsterCount--;
-		Monsters.Swap(Index, CurrentMonsterCount);
+		SpawnedMonsterCount--;
+		Monsters.Swap(Index, SpawnedMonsterCount);
 		DeadMonster->Clear();
 		DeadMonster->SetActorHiddenInGame(true);
 		DeadMonster->SetActorEnableCollision(false);

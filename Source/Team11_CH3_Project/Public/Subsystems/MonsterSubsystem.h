@@ -20,12 +20,14 @@ public:
 	UMonsterSubsystem();
 	void SpawnMonster(FMonsterData MonsterData, FVector Location);
 	void OnMonsterDeath(AMonsterBase* DeadMonster);
+	void DespawnMonster(AMonsterBase* DeadMonster);
 protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSoftClassPtr<AMonsterBase> MonsterClass;
 private:
 	UPROPERTY()
 	TArray<TObjectPtr<AMonsterBase>> Monsters;
-	int32 CurrentMonsterCount;
+	int32 SpawnedMonsterCount;
+	int32 AliveMonsterCount;
 	
 };

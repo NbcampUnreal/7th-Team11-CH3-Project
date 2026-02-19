@@ -3,12 +3,14 @@
 
 #include "Characters/Monster/MonsterBase.h"
 
+#include "BrainComponent.h"
 #include "WeaponActor.h"
 #include "Characters/Monster/MonsterControllerBase.h"
 #include "Components/SkillManager.h"
 #include "Components/StatComponent.h"
 #include "Components/Skills/SkillSlot.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Subsystems/MonsterSubsystem.h"
 
 
 // Sets default values
@@ -21,8 +23,9 @@ AMonsterBase::AMonsterBase()
 	GetMesh()->SetupAttachment(RootComponent);
 	StatComponent = CreateDefaultSubobject<UStatComponent>("StatComponent");
 	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
-	
-	ConstructorHelpers::FClassFinder<AMonsterControllerBase> MonsterControllerFinder(TEXT("/Game/Characters/Monster/BP_MonsterControllerBase.BP_MonsterControllerBase_C"));
+
+	ConstructorHelpers::FClassFinder<AMonsterControllerBase> MonsterControllerFinder(
+		TEXT("/Game/Characters/Monster/BP_MonsterControllerBase.BP_MonsterControllerBase_C"));
 	if (MonsterControllerFinder.Succeeded())
 	{
 		AIControllerClass = MonsterControllerFinder.Class;
@@ -50,17 +53,23 @@ void AMonsterBase::Init(const FMonsterData& MonsterData)
 	GetMesh()->SetSkeletalMesh(MonsterData.SkeletalMesh.LoadSynchronous());
 	bIsAttacking = false;
 	//	TODO
-	
+	if (AAIController* AIController = Cast<AAIController>(GetController()))
+	{
+		AIController->GetBrainComponent()->ResumeLogic(TEXT("Init"));
+	}
+
 	FActorSpawnParameters SpawnInfo;
 	SpawnInfo.Owner = this;
-	WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(MonsterData.WeaponItemData.WeaponActorClass.LoadSynchronous(),SpawnInfo);
+	WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(MonsterData.WeaponItemData.WeaponActorClass.LoadSynchronous(),
+	                                                   SpawnInfo);
 	if (WeaponActor)
 	{
 		WeaponActor->Init(MonsterData.WeaponItemData, GetMesh());
 	}
-	
-	GetMesh()->SetAnimInstanceClass(MonsterData.AnimBlueprint.LoadSynchronous());
-	
+	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
+	{
+		SkeletalMeshComponent->SetAnimInstanceClass(MonsterData.AnimBlueprint.LoadSynchronous());
+	}
 	BlackboardUpdate();
 }
 
@@ -69,12 +78,62 @@ void AMonsterBase::Clear()
 	WeaponActor->Destroy();
 }
 
+float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+                               class AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if (StatComponent->GetCurrentHP() < 0.0f)
+	{
+		return ActualDamage;
+	}
+	if (StatComponent->TakeDamage(ActualDamage))
+	{
+		if (AAIController* AIController = Cast<AAIController>(GetController()))
+		{
+			AIController->GetBrainComponent()->PauseLogic(TEXT("Death"));
+		}
+		PlayAnimMontage(MonsterDieAnimMontage);
+
+		FOnMontageEnded EndDelegate;
+		EndDelegate.BindUObject(this, &AMonsterBase::OnDieMontageEnded);
+		if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
+		{
+			if (UAnimInstance* AnimInstance = SkeletalMeshComponent->GetAnimInstance())
+			{
+				AnimInstance->Montage_SetEndDelegate(EndDelegate, MonsterDieAnimMontage);
+			}
+		}
+	};
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%f"), StatComponent->GetCurrentHP()));
+	return ActualDamage;
+}
+
+
+void AMonsterBase::OnDieMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
+{
+	if (UWorld* World = GetWorld())
+	{
+		World->GetSubsystem<UMonsterSubsystem>()->OnMonsterDeath(this);
+	}
+
+}
+
+
 void AMonsterBase::BlackboardUpdate()
-{	
-	if (AMonsterControllerBase* MonsterControllerBase = Cast<AMonsterControllerBase> (GetController()))
+{
+	if (AMonsterControllerBase* MonsterControllerBase = Cast<AMonsterControllerBase>(GetController()))
 	{
 		MonsterControllerBase->BlackboardUpdate();
 	}
+}
+
+bool AMonsterBase::IsDead() const
+{
+	if (StatComponent)
+	{
+		return StatComponent->GetCurrentHP()<0.0f;
+	}
+	return true;
 }
 
 FVector AMonsterBase::GetOriginLocation() const
@@ -104,19 +163,19 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	{
 		return false;
 	}
-	
+
 	TArray<int32> Indexes = SkillComponent->FindReadySlotIndexes();
 	if (Indexes.Num() == 0)
 	{
 		return false;
 	}
 	int32 Index = Indexes[FMath::RandRange(0, Indexes.Num() - 1)];
-	if (SkillComponent->GetCooldownRemaining(Index)>0.0f)
+	if (SkillComponent->GetCooldownRemaining(Index) > 0.0f)
 	{
 		return false;
 	}
-	
-//	SkillComponent
+
+	//	SkillComponent
 	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
 	{
 		CharacterMovementComponent->bUseControllerDesiredRotation = true;
@@ -127,12 +186,12 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, WeaponActor->GetAttackMontage());
-	
+
 	SkillComponent->StartSkillCooldown(Index);
-	WeaponActor->StartAttack(Target->GetActorLocation()-GetActorLocation(), SkillComponent->GetSkillSlot(Index)->GetEquippedSkill());
-	
+	WeaponActor->StartAttack(Target->GetActorLocation() - GetActorLocation(),
+	                         SkillComponent->GetSkillSlot(Index)->GetEquippedSkill());
+
 	return true;
-	
 }
 
 //CallByAnimNotify
@@ -142,17 +201,15 @@ void AMonsterBase::DealDamage()
 }
 
 
-
 void AMonsterBase::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
 {
 	bIsAttacking = false;
 	OnAttackFinished.Broadcast();
 	WeaponActor->EndAttack();
-	
+
 	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
 	{
 		CharacterMovementComponent->bUseControllerDesiredRotation = false;
 		CharacterMovementComponent->bOrientRotationToMovement = true;
 	}
-	
 }
