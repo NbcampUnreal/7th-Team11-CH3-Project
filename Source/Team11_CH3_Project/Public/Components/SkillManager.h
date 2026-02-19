@@ -7,6 +7,10 @@
 #include "SkillManager.generated.h"
 
 
+class UStatComponent;
+class USkillSlot;
+class USkillDataAsset;
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TEAM11_CH3_PROJECT_API USkillManager : public UActorComponent
 {
@@ -19,20 +23,19 @@ public:
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	// Getter
-	UFUNCTION(BlueprintCallable)
-	UBasicAttack* GetBasicAttack() const { return BasicAttack; }
+
 	UFUNCTION(BlueprintCallable)
 	USkillSlot* GetSkillSlot(int32 Index) const { return SkillSlots.IsValidIndex(Index) ? SkillSlots[Index] : nullptr; }
-
+	UFUNCTION(BlueprintCallable)
+	TArray<int32> FindReadySlotIndexes()const;	
+	
 	// 스킬 실행
 	UFUNCTION(BlueprintCallable)
-	void UseBasicAttack();
-	UFUNCTION(BlueprintCallable)
-	void UseSkillSlot(int32 Index);
+	void StartSkillCooldown(int32 Index);
 	
 	// 스킬 보석 교체
 	UFUNCTION(BlueprintCallable)
-	void EquipSkillGem(int32 SlotIndex, TSubclassOf<class UBaseSkill> NewSkillClass);
+	void EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData);
 
 	// 쿨타임 조회
 	UFUNCTION(BlueprintCallable)
@@ -40,33 +43,22 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetCooldownRemaining(int32 SlotIndex) const;
 
-	// 쿨타임 종료 콜백
-	void OnCooldownFinished(int32 SlotIndex);
-
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 private:
-	// 기본공격 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|BasicAttack", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UBasicAttack> BasicAttack;
-	// 기본공격 클래스(블루프린트 설정용)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|BasicAttack", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<class UBasicAttack> BasicAttackClass;
 	// 스킬 배열
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
-	TArray<TObjectPtr<class USkillSlot>> SkillSlots;
+	TArray<TObjectPtr<USkillSlot>> SkillSlots;
 	// 초기 스킬 클래스(블루프린트 설정용)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
-	TArray<TSubclassOf<class UBaseSkill>> DefaultSkillSlotClasses;
+	TArray<TObjectPtr<USkillDataAsset>> DefaultSkillSlotData;
 	// 스킬 데이터 테이블(도전 기능때 구현)
 	//UPROPERTY(EditDefaultsOnly, Category = "Skill|Data", meta = (AllowPrivateAccess = "true"))
 	//TObjectPtr<class UDataTable> SkillDataTable;
 	// 스탯 연동
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<class UStatComponent> StatComp;
+	TWeakObjectPtr<UStatComponent> StatComp;
 	// 쿨다운 관리
-	UPROPERTY()
-	TMap<int32, FTimerHandle> CooldownTimers;
 };

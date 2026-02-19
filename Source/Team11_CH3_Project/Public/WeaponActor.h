@@ -8,30 +8,31 @@
 #include "Types/StatTypes.h"
 #include "WeaponActor.generated.h"
 
+class USkillDataAsset;
+
 UCLASS()
 class TEAM11_CH3_PROJECT_API AWeaponActor : public AActor
 {
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this actor's properties
 	AWeaponActor();
-	virtual void BeginPlay() override;
-	void Init(const FWeaponItemData& WeaponItem, USkeletalMeshComponent* SkeletalMesh);
+	virtual void Init(const FWeaponItemData& WeaponItem, USkeletalMeshComponent* SkeletalMesh);
 	UAnimMontage* GetAttackMontage() const;
-	float GetAttackRange()const;
-	void StartAttack();
-	void EndAttack();
-	TArray<AActor*> GetTargets();
-	EWeaponType GetWeaponType();
+	float GetAttackRange() const;
+	//TODO
+	virtual void StartAttack(const FVector& Direction,  USkillDataAsset* Skill) {};
+	virtual void PerformDamage() {};
+	virtual void EndAttack() {};
+	EWeaponType GetWeaponType() const;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	float AttackRange;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TSoftObjectPtr<UAnimMontage> AttackMontage;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
-	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
+	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
+	// Ptr SKill skill;
 private:
 	FWeaponItemData WeaponItemData;
 
