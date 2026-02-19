@@ -21,6 +21,8 @@ class UBuffManager;
 class UStatComponent;
 // class AWeapon; // 일단 전방 선언
 
+struct FInputActionValue;
+
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintStarted);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintEnded);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeStarted);
@@ -52,6 +54,14 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
     float CameraSensitivity = 1.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Camera")
+    FVector DefaultSocketOffset = FVector(0.f, 0.f, 0.f);
+
+    UPROPERTY(EditDefaultsOnly, Category = "Camera")
+    FVector AimSocketOffset = FVector(0.f, 50.f, 15.f);
+
+    float CameraInterpSpeed = 10.f;
 #pragma endregion
 
 #pragma region Movement
@@ -59,10 +69,10 @@ public:
     float WalkSpeed = 400.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-    float SprintSpeed = 600.0f;
+    float SprintSpeed = 800.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-    float DodgeDistance = 500.0f;
+    float DodgeDistance = 1800.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float DodgeDuration = 0.5f;
@@ -153,6 +163,12 @@ public:
     */
 #pragma endregion
 
+    UPROPERTY(BlueprintReadWrite, Category = "Combat")
+    bool bIsAiming;
+
+    // 조준 상태 변경
+    void SetAiming(bool bNewAiming);
+
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
     virtual void ReceiveDamage(float Damage, AActor* DamageCauser) override;
@@ -163,8 +179,6 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TObjectPtr<AWeaponActor> WeaponActor;
 	
-    
-protected:
 
     void UpdateMovementSpeed();
     void ExecuteDodge();
@@ -172,12 +186,17 @@ protected:
     void ResetDodgeCooldown();
 
     void Hit();
-    
+
     void Attack(const FInputActionValue& Value);
     void SkillQ(const FInputActionValue& Value);
     void SkillE(const FInputActionValue& Value);
 
 private:
     bool bIsDead = false;
-    
+
+    float DefaultWalkSpeed = 600.f;
+    float AimWalkSpeed = 300.f;
+
+    float DefaultArmLength = 300.f;
+    float AimArmLength = 200.f;
 };

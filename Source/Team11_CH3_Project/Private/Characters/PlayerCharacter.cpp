@@ -1,4 +1,4 @@
-﻿#include "Characters/PlayerCharacter.h"
+#include "Characters/PlayerCharacter.h"
 #include "Characters/InventoryComponent.h"
 #include "MainPlayerController.h"
 #include "Camera/CameraComponent.h"
@@ -14,14 +14,14 @@
 
 APlayerCharacter::APlayerCharacter()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
 
     
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
     CameraBoom->TargetArmLength = CameraBoomLength;
     CameraBoom->bUsePawnControlRotation = true;
-    CameraBoom->bEnableCameraLag = true;
+    CameraBoom->bEnableCameraLag = !bIsAiming;
     CameraBoom->CameraLagSpeed = 3.0f;
 
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -134,6 +134,17 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
     WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(2)->GetEquippedSkill());
 }
 
+void APlayerCharacter::SetAiming(bool bNewAiming)
+{
+    UE_LOG(LogTemp, Warning, TEXT("SetAiming: %d"), bNewAiming);
+    bIsAiming = bNewAiming;
+
+    bUseControllerRotationYaw = bIsAiming;
+    GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
+    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : DefaultWalkSpeed;
+}
+
+
 // 무기 소켓
 /*
 void APlayerCharacter::AttachWeapon(TSubclassOf<AActor> WeaponClass)
@@ -178,23 +189,32 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    float TargetArm = bIsAiming ? AimArmLength : DefaultArmLength;
+    FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
+
+    CameraBoom->TargetArmLength =
+        FMath::FInterpTo(CameraBoom->TargetArmLength, TargetArm, DeltaTime, CameraInterpSpeed);
+
+    CameraBoom->SocketOffset =
+        FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
 }
+
 
 void APlayerCharacter::Move(const FVector2D& MovementVector)
 {
     if (bIsDodging) return;
 
-    if (Controller != nullptr && MovementVector.SizeSquared() > 0.0f)
-    {
-        const FRotator Rotation = Controller->GetControlRotation();
-        const FRotator YawRotation(0, Rotation.Yaw, 0);
+    if (!Controller) return;
 
-        const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-        const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+    FRotator ControlRotation = Controller->GetControlRotation();
+    FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
 
-        AddMovementInput(ForwardDirection, MovementVector.Y);
-        AddMovementInput(RightDirection, MovementVector.X);
-    }
+    FVector Forward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+    FVector Right = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+    AddMovementInput(Forward, MovementVector.Y);
+    AddMovementInput(Right, MovementVector.X);
 }
 
 void APlayerCharacter::Look(const FVector2D& LookAxisVector)
@@ -352,4 +372,3 @@ void APlayerCharacter::PlayDeathAnimation()
     }
 }
 */
-
