@@ -58,6 +58,12 @@ protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lean")
     float LeanInterpSpeed = 6.0f;
 
+    UPROPERTY(BlueprintReadOnly, Category = "Aiming")
+    bool bIsAiming;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Aiming")
+    float AimOffset;
+
 private:
     float PreviousYaw;
     void UpdateLean(float DeltaSeconds);
