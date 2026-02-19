@@ -105,6 +105,7 @@ void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 
     if (SkillComponent->IsSkillOnCooldown(1))
     {
+        UE_LOG(LogTemp, Warning, TEXT("CoolTime Remaining : %0.1f"), SkillComponent->GetCooldownRemaining(1));
         return;
     }
 
@@ -126,6 +127,7 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
 
     if (SkillComponent->IsSkillOnCooldown(2))
     {
+        UE_LOG(LogTemp, Warning, TEXT("CoolTime Remaining : %0.1f"), SkillComponent->GetCooldownRemaining(2));
         return;
     }
 

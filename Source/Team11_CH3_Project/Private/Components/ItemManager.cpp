@@ -68,6 +68,7 @@ void UItemManager::UsePotion(FPotionItemData* Data)
 	if (IsValid(StatComp) && Data->HealAmount)
 	{
 		StatComp->AddCurrentHP(Data->HealAmount);
+		UE_LOG(LogTemp, Warning, TEXT("Heal : %0.f"), Data->HealAmount);
 	}
 }
 
