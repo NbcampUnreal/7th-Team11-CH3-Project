@@ -90,7 +90,7 @@ void APlayerCharacter::Attack(const FInputActionValue& Value)
     }
     // TODO : 스킬컴포넌트 쪽에서 다 처리할지 WeaponActor에서 처리할지 고민중 아래쪽 스킬들 포함
     SkillComponent->StartSkillCooldown(0);
-    WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(0)->GetEquippedSkill());
+    WeaponActor->StartAttack(GetActorForwardVector() * 1000.0f + GetActorLocation(), SkillComponent->GetSkillSlot(0)->GetEquippedSkill());
 }
 
 void APlayerCharacter::SkillQ(const FInputActionValue& Value)
@@ -111,7 +111,7 @@ void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 
 
     SkillComponent->StartSkillCooldown(1);
-    WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(1)->GetEquippedSkill());
+    WeaponActor->StartAttack(GetActorForwardVector() * 1000.0f + GetActorLocation(), SkillComponent->GetSkillSlot(1)->GetEquippedSkill());
 }
 
 void APlayerCharacter::SkillE(const FInputActionValue& Value)
@@ -131,7 +131,7 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
 
 
     SkillComponent->StartSkillCooldown(2);
-    WeaponActor->StartAttack(GetActorForwardVector(), SkillComponent->GetSkillSlot(2)->GetEquippedSkill());
+    WeaponActor->StartAttack(GetActorForwardVector() * 1000.0f + GetActorLocation(), SkillComponent->GetSkillSlot(2)->GetEquippedSkill());
 }
 
 // 무기 소켓

@@ -21,9 +21,11 @@ public:
 	UAnimMontage* GetAttackMontage() const;
 	float GetAttackRange() const;
 	//TODO
-	virtual void StartAttack(const FVector& Direction,  USkillDataAsset* Skill) {CurrentSkillData = Skill;}
+
+	virtual void StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) {CurrentSkillData = Skill;}
 	virtual void PerformDamage() {}
 	virtual void EndAttack() {CurrentSkillData.Reset(); CurrentSkillData = nullptr;}
+
 	EWeaponType GetWeaponType() const;
 
 protected:

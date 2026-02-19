@@ -10,22 +10,29 @@ void UMonsterSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 #pragma region TESTCODE
-	FMonsterData MonsterData;
+	FTimerHandle SpawnedMonsterTimer;
+	GetWorld()->GetTimerManager().SetTimer(SpawnedMonsterTimer,[this]()
+	{
+		FMonsterData MonsterData;
 
-	MonsterData.StatData;
+		MonsterData.StatData;
 
-	
-	MonsterData.AnimBlueprint = StaticLoadClass(UAnimInstance::StaticClass(), nullptr, 
-		TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
+		
+		MonsterData.AnimBlueprint = StaticLoadClass(UAnimInstance::StaticClass(), nullptr, 
+			TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
 
-	// 2. 스켈레탈 메시 로드
-	MonsterData.SkeletalMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, 
-		TEXT("/Game/KayKit_Fix/KayKit_Skeletons_11_FREE/characters/gltf/Skeleton_Warrior/SkeletalMeshes/Skeleton_Warrior.Skeleton_Warrior")));
-	
-	MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
-	MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
-	MonsterData.WeaponItemData.WeaponType = EWeaponType::Melee;
-	SpawnMonster(MonsterData, FVector::ZeroVector);
+		// 2. 스켈레탈 메시 로드
+		MonsterData.SkeletalMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, 
+			TEXT("/Game/KayKit_Fix/KayKit_Skeletons_11_FREE/characters/gltf/Skeleton_Warrior/SkeletalMeshes/Skeleton_Warrior.Skeleton_Warrior")));
+		
+		MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
+		MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
+		MonsterData.WeaponItemData.WeaponType = EWeaponType::Melee;
+		MonsterData.StatData.MaxHP = 100.0f;
+		MonsterData.StatData.MoveSpeed = 600.0f;
+		SpawnMonster(MonsterData, {100,100,100});
+	},3,true
+	);
 #pragma endregion
 }
 
@@ -42,9 +49,9 @@ UMonsterSubsystem::UMonsterSubsystem()
 void UMonsterSubsystem::SpawnMonster(FMonsterData MonsterData, FVector Location)
 {
 	AMonsterBase* Monster = nullptr;
-	if (CurrentMonsterCount < Monsters.Num())
+	if (SpawnedMonsterCount < Monsters.Num())
 	{
-		Monster = Monsters[CurrentMonsterCount];
+		Monster = Monsters[SpawnedMonsterCount];
 	}
 	else
 	{
@@ -60,17 +67,26 @@ void UMonsterSubsystem::SpawnMonster(FMonsterData MonsterData, FVector Location)
 
 		Monster->Init(MonsterData);
 
-		CurrentMonsterCount++;
+		SpawnedMonsterCount++;
+		AliveMonsterCount++;
 	}
 }
 
 void UMonsterSubsystem::OnMonsterDeath(AMonsterBase* DeadMonster)
 {
+	AliveMonsterCount--;
+	DeadMonster->SetActorEnableCollision(false);
+	FTimerHandle SpawnedMonsterTimer;
+	GetWorld()->GetTimerManager().SetTimer(SpawnedMonsterTimer,[this,DeadMonster](){DespawnMonster(DeadMonster);},5.0f,false);
+}
+
+void UMonsterSubsystem::DespawnMonster(AMonsterBase* DeadMonster)
+{
 	int32 Index = Monsters.Find(DeadMonster);
-	if (Index != INDEX_NONE && Index < CurrentMonsterCount)
+	if (Index != INDEX_NONE && Index < SpawnedMonsterCount)
 	{
-		CurrentMonsterCount--;
-		Monsters.Swap(Index, CurrentMonsterCount);
+		SpawnedMonsterCount--;
+		Monsters.Swap(Index, SpawnedMonsterCount);
 		DeadMonster->Clear();
 		DeadMonster->SetActorHiddenInGame(true);
 		DeadMonster->SetActorEnableCollision(false);

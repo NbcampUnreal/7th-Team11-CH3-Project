@@ -156,10 +156,11 @@ bool UStatComponent::TakeDamage(float DamageAmount)
 	UE_LOG(LogTemp, Warning, TEXT("Damage: %f"), CalculatedDamage);
 	AddCurrentHP(-CalculatedDamage);
 
-	if (GetCurrentHP() <= 0)
-	{
-		// 사망
-		return true;
-	}
-	return false;
+	return IsDead();
+}
+
+bool UStatComponent::IsDead() const
+{
+
+	return /*GetCurrentStat(EStat::MaxHP)>0.0f && */GetCurrentHP() <= 0.0f;
 }

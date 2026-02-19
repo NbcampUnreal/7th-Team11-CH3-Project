@@ -27,8 +27,9 @@ void AStaffWeaponActor::Init(const FWeaponItemData& WeaponItem, USkeletalMeshCom
 	StaticMeshComponent->AttachToComponent(SkeletalMesh, AttachRules,TEXT("handslot_r"));
 }
 //TODO
-void AStaffWeaponActor::StartAttack(const FVector& Direction,  USkillDataAsset* Skill) 
+void AStaffWeaponActor::StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) 
 {
+	FVector Direction = TargetLocation - GetActorLocation();
 	Skill->Activate(Cast<APawn>(GetOwner()), GetActorLocation(), Direction);
 	UE_LOG(LogTemp, Warning, TEXT("StartAttack Called!"));
 }

@@ -21,15 +21,20 @@ class TEAM11_CH3_PROJECT_API AMonsterBase : public ACharacter
 
 public:
 	AMonsterBase();
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
+	void OnDieMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
 	bool TryAttack(AActor* Target);
 	
 	void DealDamage();
 	void BlackboardUpdate();
 	void Init(const FMonsterData& MonsterData);
 	void Clear();
+	
+	
 	FOnAttackFinished OnAttackFinished;
+	
 protected:
 	
 	FVector OriginLocation;
@@ -41,12 +46,15 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<AWeaponActor> WeaponActor;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UAnimMontage> MonsterDieAnimMontage;
 	
 public:
+	UFUNCTION(BlueprintPure)
+	bool IsDead() const;
 	FVector GetOriginLocation() const;
 	float GetAttackRange() const;
-
+	UStatComponent* GetStatComponent() const;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

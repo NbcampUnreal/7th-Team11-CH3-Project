@@ -15,7 +15,7 @@ public:
 	// Sets default values for this actor's properties
 	AStaffWeaponActor();
 	virtual void Init(const FWeaponItemData& WeaponItem, USkeletalMeshComponent* SkeletalMesh) override;
-	virtual void StartAttack(const FVector& Direction,  USkillDataAsset* Skill) override;
+	virtual void StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) override;
 	virtual void PerformDamage() override;
 	virtual void EndAttack() override;
 
