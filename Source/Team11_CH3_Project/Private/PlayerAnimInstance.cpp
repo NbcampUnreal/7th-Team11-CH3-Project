@@ -15,6 +15,8 @@ UPlayerAnimInstance::UPlayerAnimInstance()
     bIsDodging = false;
     bIsDead = false;
     bHasWeapon = false;
+    bIsAiming = false;
+    AimOffset = 0.0f;
     LeanAmount = 0.0f;
     PreviousYaw = 0.0f;
 }
@@ -33,6 +35,15 @@ void UPlayerAnimInstance::NativeInitializeAnimation()
 void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
     Super::NativeUpdateAnimation(DeltaSeconds);
+
+    if (!OwnerCharacter)
+    {
+        OwnerCharacter = Cast<ABaseCharacter>(TryGetPawnOwner());
+        if (OwnerCharacter)
+        {
+            MovementComponent = OwnerCharacter->GetCharacterMovement();
+        }
+    }
 
     if (!OwnerCharacter || !MovementComponent)
     {
@@ -62,6 +73,19 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
     {
         bIsSprinting = PlayerChar->bIsSprinting;
         bIsDodging = PlayerChar->bIsDodging;
+        bIsAiming = PlayerChar->bIsAiming;
+
+        if (bIsAiming)
+        {
+            FRotator BaseAimRot = PlayerChar->GetBaseAimRotation();
+            FRotator ActorRot = PlayerChar->GetActorRotation();
+            float DeltaPitch = UKismetMathLibrary::NormalizedDeltaRotator(BaseAimRot, ActorRot).Pitch;
+            AimOffset = FMath::Clamp(DeltaPitch, -55.0f, 55.0f);
+        }
+        else
+        {
+            AimOffset = 0.0f;
+        }
     }
 
     if (OwnerCharacter->GetInventoryComponent())
