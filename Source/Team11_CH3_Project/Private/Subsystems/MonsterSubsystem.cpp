@@ -1,9 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Subsystems/MonsterSubsystem.h"
 #include "Types/StatTypes.h"
 #include "WeaponActor.h"
+#include "Core/T11_GameState.h"
 #include "Characters/Monster/MonsterBase.h"
 
 void UMonsterSubsystem::OnWorldBeginPlay(UWorld& InWorld)
@@ -75,5 +76,11 @@ void UMonsterSubsystem::OnMonsterDeath(AMonsterBase* DeadMonster)
 		DeadMonster->SetActorHiddenInGame(true);
 		DeadMonster->SetActorEnableCollision(false);
 		DeadMonster->SetActorTickEnabled(false);
+
+		AT11_GameState* GameState = GetWorld()->GetGameState<AT11_GameState>();
+		if (GameState)
+		{
+			GameState->OnMonsterKilled();
+		}
 	}
 }
