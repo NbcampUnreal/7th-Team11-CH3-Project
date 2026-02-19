@@ -20,9 +20,10 @@ void AT11_GameState::StartLevel()
     if (CurrentWorld && MapDataConfigs.Contains(CurrentWorld->GetName()))
     {
         WaveData = MapDataConfigs[CurrentWorld->GetName()];
+        
+        
         if (!WaveData)
         {
-            UE_LOG(LogTemp, Warning, TEXT("No WaveData Found"));
             return;
         }
         MaxWave = WaveData->GetRowMap().Num();

@@ -13,3 +13,14 @@ enum class EItemType : uint8
     Equipment,
     Material
 };
+
+UENUM(BlueprintType)
+enum class EEquipmentType : uint8
+{
+    Weapon,
+    Helmet,
+    Chest,
+    Gloves,
+    Legs,
+    Boots
+};

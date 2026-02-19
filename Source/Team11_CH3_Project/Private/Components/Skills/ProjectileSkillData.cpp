@@ -12,6 +12,10 @@ void UProjectileSkillData::Activate(APawn* Instigator, const FVector& Origin, co
 	//AActor* Owner = Cast<AActor>(GetOuter()->GetOuter());
 
 	// StatComp 불러오기
+	if (!IsValid(Instigator))
+	{
+		return;
+	}
 	UStatComponent* StatComp = Instigator->FindComponentByClass<UStatComponent>();
 	
 	// 손 -> 타겟 방향 계산

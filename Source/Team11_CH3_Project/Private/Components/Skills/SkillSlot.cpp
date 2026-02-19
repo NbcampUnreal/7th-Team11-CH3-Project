@@ -37,6 +37,7 @@ void USkillSlot::StartCooldown()
 	{
 		return;	
 	}
+	bIsOnCooldown = true;
 	GetWorld()->GetTimerManager().SetTimer(CooldownTimer,[this](){bIsOnCooldown = false;}, EquippedSkill->GetCooldownTime(),false);
 	
 }

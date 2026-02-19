@@ -6,9 +6,8 @@
 #include "Components/Items/Equipments/WeaponItemData.h"
 #include "GameFramework/Actor.h"
 #include "Types/StatTypes.h"
+#include "Components/Skills/SkillDataAsset.h"
 #include "WeaponActor.generated.h"
-
-class USkillDataAsset;
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API AWeaponActor : public AActor
@@ -21,9 +20,11 @@ public:
 	UAnimMontage* GetAttackMontage() const;
 	float GetAttackRange() const;
 	//TODO
-	virtual void StartAttack(const FVector& Direction,  USkillDataAsset* Skill) {};
-	virtual void PerformDamage() {};
-	virtual void EndAttack() {};
+
+	virtual void StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) {CurrentSkillData = Skill;}
+	virtual void PerformDamage() {}
+	virtual void EndAttack() {CurrentSkillData.Reset(); CurrentSkillData = nullptr;}
+
 	EWeaponType GetWeaponType() const;
 
 protected:
@@ -31,8 +32,8 @@ protected:
 	float AttackRange;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TSoftObjectPtr<UAnimMontage> AttackMontage;
-	// UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
-	// Ptr SKill skill;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
+	TWeakObjectPtr<USkillDataAsset> CurrentSkillData;
 private:
 	FWeaponItemData WeaponItemData;
 

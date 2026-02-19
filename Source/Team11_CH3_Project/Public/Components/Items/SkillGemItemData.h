@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/Items/ItemDataBase.h"
+#include "Components/Skills/SkillDataAsset.h"
 #include "SkillGemItemData.generated.h"
 
 /**
@@ -15,5 +16,5 @@ struct TEAM11_CH3_PROJECT_API FSkillGemItemData : public FItemDataBase
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|SkillGem")
-	TSubclassOf<class ABaseSkill>SkillClass;
+	TObjectPtr<USkillDataAsset> SkillData;
 };
