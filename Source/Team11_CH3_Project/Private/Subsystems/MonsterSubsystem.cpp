@@ -1,39 +1,40 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Subsystems/MonsterSubsystem.h"
 #include "Types/StatTypes.h"
 #include "WeaponActor.h"
+#include "Core/T11_GameState.h"
 #include "Characters/Monster/MonsterBase.h"
 
 void UMonsterSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
-#pragma region TESTCODE
-	FTimerHandle SpawnedMonsterTimer;
-	GetWorld()->GetTimerManager().SetTimer(SpawnedMonsterTimer,[this]()
-	{
-		FMonsterData MonsterData;
-
-		MonsterData.StatData;
-
-		
-		MonsterData.AnimBlueprint = StaticLoadClass(UAnimInstance::StaticClass(), nullptr, 
-			TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
-
-		// 2. 스켈레탈 메시 로드
-		MonsterData.SkeletalMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, 
-			TEXT("/Game/KayKit_Fix/KayKit_Skeletons_11_FREE/characters/gltf/Skeleton_Warrior/SkeletalMeshes/Skeleton_Warrior.Skeleton_Warrior")));
-		
-		MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
-		MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
-		MonsterData.WeaponItemData.WeaponType = EWeaponType::Melee;
-		MonsterData.StatData.MaxHP = 100.0f;
-		MonsterData.StatData.MoveSpeed = 600.0f;
-		SpawnMonster(MonsterData, {100,100,100});
-	},3,true
-	);
-#pragma endregion
+// #pragma region TESTCODE
+// 	FTimerHandle SpawnedMonsterTimer;
+// 	GetWorld()->GetTimerManager().SetTimer(SpawnedMonsterTimer,[this]()
+// 	{
+// 		FMonsterData MonsterData;
+//
+// 		MonsterData.StatData;
+//
+// 		
+// 		MonsterData.AnimBlueprint = StaticLoadClass(UAnimInstance::StaticClass(), nullptr, 
+// 			TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
+//
+// 		// 2. 스켈레탈 메시 로드
+// 		MonsterData.SkeletalMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, 
+// 			TEXT("/Game/KayKit_Fix/KayKit_Skeletons_11_FREE/characters/gltf/Skeleton_Warrior/SkeletalMeshes/Skeleton_Warrior.Skeleton_Warrior")));
+// 		
+// 		MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
+// 		MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
+// 		MonsterData.WeaponItemData.WeaponType = EWeaponType::Melee;
+// 		MonsterData.StatData.MaxHP = 100.0f;
+// 		MonsterData.StatData.MoveSpeed = 600.0f;
+// 		SpawnMonster(MonsterData, {100,100,100});
+// 	},3,true
+// 	);
+// #pragma endregion
 }
 
 UMonsterSubsystem::UMonsterSubsystem()
@@ -91,5 +92,11 @@ void UMonsterSubsystem::DespawnMonster(AMonsterBase* DeadMonster)
 		DeadMonster->SetActorHiddenInGame(true);
 		DeadMonster->SetActorEnableCollision(false);
 		DeadMonster->SetActorTickEnabled(false);
+
+		AT11_GameState* GameState = GetWorld()->GetGameState<AT11_GameState>();
+		if (GameState)
+		{
+			GameState->OnMonsterKilled();
+		}
 	}
 }

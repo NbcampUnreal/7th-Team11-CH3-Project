@@ -6,9 +6,8 @@
 #include "Components/Items/Equipments/WeaponItemData.h"
 #include "GameFramework/Actor.h"
 #include "Types/StatTypes.h"
+#include "Components/Skills/SkillDataAsset.h"
 #include "WeaponActor.generated.h"
-
-class USkillDataAsset;
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API AWeaponActor : public AActor
