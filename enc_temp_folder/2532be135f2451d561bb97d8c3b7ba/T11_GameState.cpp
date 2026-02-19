@@ -20,12 +20,7 @@ void AT11_GameState::StartLevel()
     if (CurrentWorld && MapDataConfigs.Contains(CurrentWorld->GetName()))
     {
         WaveData = MapDataConfigs[CurrentWorld->GetName()];
-        
-        
-        if (!WaveData)
-        {
-            return;
-        }
+        if (!WaveData) return;
         MaxWave = WaveData->GetRowMap().Num();
         UE_LOG(LogTemp, Warning, TEXT("Level Start"));
         StartNextWave();
@@ -51,12 +46,12 @@ void AT11_GameState::StartNextWave()
             {
                 if (Volume->ActorHasTag(VolumePair.Key))
                 {
-                    ASpawnVolume* CurrentSpawnVolume;
-                    CurrentSpawnVolume = Cast<ASpawnVolume>(Volume);
+
+                    SpawnVolume = Cast<ASpawnVolume>(Volume);
                     MonsterToSpawn = VolumePair.Value;
                     SpawnedMonsterCount += MonsterToSpawn;
-                    UE_LOG(LogTemp, Warning, TEXT("Spawn Start"));
-                    CreateSpawnTimer(VolumePair.Key.ToString(), 1.0f, MonsterToSpawn, CurrentSpawnVolume);
+                    
+                    CreateSpawnTimer(VolumePair.Key.ToString(), 1.0f, MonsterToSpawn);
                 }
             }
         }
@@ -95,16 +90,15 @@ void AT11_GameState::EndWave()
     }
 }
 
-void AT11_GameState::CreateSpawnTimer(FString TimerName, float Interval, int32 TotalCount, ASpawnVolume* SpawnVolume)
+void AT11_GameState::CreateSpawnTimer(FString TimerName, float Interval, int32 TotalCount)
 {
     FSpawnState& NewState = SpawnStates.FindOrAdd(TimerName);
     NewState.WaveName = TimerName;
     NewState.RemainingCount = TotalCount;
-    NewState.TargetVolume = SpawnVolume;
 
     FTimerHandle& Handle = SpawnTimerHandles.FindOrAdd(TimerName);
 
-    GetWorldTimerManager().SetTimer(Handle, [this, TimerName, SpawnVolume]()
+    GetWorldTimerManager().SetTimer(Handle, [this, TimerName]()
         {
             FSpawnState* State = SpawnStates.Find(TimerName);
             if (State && State->RemainingCount > 0)

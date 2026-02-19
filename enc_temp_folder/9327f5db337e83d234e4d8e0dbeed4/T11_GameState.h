@@ -14,7 +14,6 @@ class TEAM11_CH3_PROJECT_API AT11_GameState : public AGameState
 	struct FSpawnState
 	{
 		FString WaveName;      // 타이머 식별 이름
-		ASpawnVolume* TargetVolume;
 		int32 RemainingCount;  // 남은 소환 마리수
 	};
 
@@ -30,7 +29,7 @@ public:
 	void EndLevel();
 	void EndWave();
 
-	void CreateSpawnTimer(FString TimerName, float Interval, int32 TotalCount, ASpawnVolume* SpawnVolume);
+	void CreateSpawnTimer(FString TimerName, float Interval, int32 TotalCount);
 
 	void OnMonsterKilled();
 
@@ -47,5 +46,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	TMap<FString, TSoftObjectPtr<UDataTable>> MapDataConfigs;
 
+	ASpawnVolume* SpawnVolume;
 	TSoftObjectPtr<UDataTable> WaveData;
 };
