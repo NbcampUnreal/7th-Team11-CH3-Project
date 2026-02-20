@@ -58,6 +58,14 @@ public:
 	// TODO - 추후 gamemode에서 캐릭터 사망 처리 후 직접 호출 방식으로 수정
 	void HandlePlayerDeath();
 
+	// 조준점 월드 타겟
+	UFUNCTION(BlueprintCallable)
+	bool GetAimPoint(FVector& OutAimPoint) const;
+
+	// 조준시 조준점 토글
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_SetCrosshairVisible(bool bVisible);
+
 protected:
 
 	// move

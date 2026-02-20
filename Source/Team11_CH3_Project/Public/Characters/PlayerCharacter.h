@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Components/StatComponent.h"
+#include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
 class AWeaponActor;
@@ -61,6 +62,16 @@ public:
     UPROPERTY(EditDefaultsOnly, Category = "Camera")
     FVector AimSocketOffset = FVector(0.f, 50.f, 15.f);
 
+    UPROPERTY(EditAnywhere, Category = "Camera|Dodge")
+    float DodgeCameraLagSpeed = 15.f;   // 닷지 중 랙 스피드
+
+    UPROPERTY(EditAnywhere, Category = "Camera|Dodge")
+    bool bDisableCameraLagWhileDodging = false;
+
+
+    bool bSavedEnableCameraLag = false;
+
+    float SavedCameraLagSpeed = 0.f;
     float CameraInterpSpeed = 10.f;
 #pragma endregion
 
@@ -79,6 +90,10 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float DodgeCooldown = 1.0f;
+
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    float DodgeDistanceScale = 0.4f;
+
 #pragma endregion
 
 #pragma region State
@@ -175,21 +190,31 @@ public:
     virtual void Die() override;
 
     // void AttachWeapon(TSubclassOf<AActor> WeaponClass);
-protected:
-    UPROPERTY(EditAnywhere, BlueprintReadOnly)
-    TObjectPtr<AWeaponActor> WeaponActor;
-	
+
+    // 쏘아져나가는 것 방지용 닷지 시작위치 저장, alpha 보간, deltasecond 사용
+    FTimerHandle DodgeTickHandle;
+    FVector DodgeStartLoc;
+    FVector DodgeDir = FVector::ZeroVector;
+    float DodgeElapsed = 0.f;
+    double DodgeLastTimeSec = 0.0;
+    float DodgeRemainingDist = 0.f;
 
     void UpdateMovementSpeed();
     void ExecuteDodge();
     void EndDodge();
     void ResetDodgeCooldown();
 
+protected:
+    UPROPERTY(EditAnywhere, BlueprintReadOnly)
+    TObjectPtr<AWeaponActor> WeaponActor;
+
     void Hit();
 
     void Attack(const FInputActionValue& Value);
     void SkillQ(const FInputActionValue& Value);
     void SkillE(const FInputActionValue& Value);
+
+    void DodgeStep();
 
 private:
     bool bIsDead = false;
@@ -199,4 +224,8 @@ private:
 
     float DefaultArmLength = 300.f;
     float AimArmLength = 200.f;
+
+    float SavedGroundFriction = 0.f;
+    float SavedBrakingFrictionFactor = 0.f;
+    float SavedBrakingDecel = 0.f;
 };

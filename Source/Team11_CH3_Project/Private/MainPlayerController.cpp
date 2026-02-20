@@ -1,4 +1,5 @@
 #include "MainPlayerController.h"
+#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/PlayerController.h"
@@ -224,4 +225,26 @@ void AMainPlayerController::AimReleased()
 	{
 		ControlledPawn->SetAiming(false);
 	}
+}
+
+bool AMainPlayerController::GetAimPoint(FVector& OutAimPoint) const
+{
+	int32 SX, SY;
+	GetViewportSize(SX, SY);
+
+	FVector Origin, Dir;
+	if (!DeprojectScreenPositionToWorld(SX * 0.5f, SY * 0.5f, Origin, Dir))
+		return false;
+
+	const float Dist = 100000.f;
+	const FVector Start = Origin;
+	const FVector End = Origin + Dir * Dist;
+
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(AimTrace), true);
+	if (APawn* P = GetPawn()) Params.AddIgnoredActor(P);
+
+	const bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params);
+	OutAimPoint = bHit ? Hit.ImpactPoint : End;
+	return true;
 }
