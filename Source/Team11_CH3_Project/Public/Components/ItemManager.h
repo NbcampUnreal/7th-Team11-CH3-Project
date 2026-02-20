@@ -23,7 +23,7 @@ public:
 
 	// 아이템 사용(타입별 분기)
 	UFUNCTION(BlueprintCallable, Category = "Item")
-	void UseItem(FName RowName, EItemType ItemType, int32 SlotIndex);
+	void UseItem(FName RowName, EItemType ItemType, int32 SlotIndex = -1);
 
 	// 장비 해제
 	UFUNCTION(BlueprintCallable, Category = "Item")
@@ -31,6 +31,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void UnequipArmor(EEquipmentType SlotType);
+
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	AWeaponActor* GetCurrentWeapon() const { return CurrentWeapon; }
 
 protected:
 	// Called when the game starts

@@ -6,6 +6,7 @@
 #include "Components/Skills/BaseSkill.h"
 #include "Components/StatComponent.h"
 #include "Components/Items/Equipments/WeaponItemData.h"
+#include "Characters/PlayerCharacter.h"
 #include "WeaponActor.h"
 
 // Sets default values for this component's properties
@@ -18,7 +19,7 @@ UItemManager::UItemManager()
 	// ...
 }
 
-void UItemManager::UseItem(FName RowName, EItemType ItemType, int32 SlotIndex = -1)
+void UItemManager::UseItem(FName RowName, EItemType ItemType, int32 SlotIndex)
 {
 	switch (ItemType)
 	{
@@ -100,6 +101,12 @@ void UItemManager::EquipWeapon(FWeaponItemData* Data)
 		CurrentWeapon = Weapon;
 		CachedWeaponData = *Data;
 		ApplyStatBonuses(Data->StatBonuses, false);
+
+		// PlayerCharacter의 WeaponActor 갱신
+		if (auto* Player = Cast<APlayerCharacter>(GetOwner()))
+		{
+			Player->SetWeaponActor(Weapon);
+		}
 	}
 
 }

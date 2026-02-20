@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
@@ -19,6 +19,7 @@ class UInputAction;
 class UInventoryComponent;
 class UBuffManager;
 class UStatComponent;
+class UItemManager;
 // class AWeapon; // 일단 전방 선언
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintStarted);
@@ -94,6 +95,8 @@ public:
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
     TObjectPtr<UBuffManager> BuffManager;
+    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
+    TObjectPtr<UItemManager> ItemManager;
     
     UPROPERTY(EditAnywhere, BlueprintReadOnly)
     TObjectPtr<USkillManager> SkillComponent;
@@ -155,8 +158,11 @@ public:
 
     virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-    virtual void ReceiveDamage(float Damage, AActor* DamageCauser) override;
+    virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+        class AController* EventInstigator, AActor* DamageCauser) override;
     virtual void Die() override;
+
+    void SetWeaponActor(AWeaponActor* NewWeapon) { WeaponActor = NewWeapon; }
 
     // void AttachWeapon(TSubclassOf<AActor> WeaponClass);
 protected:
