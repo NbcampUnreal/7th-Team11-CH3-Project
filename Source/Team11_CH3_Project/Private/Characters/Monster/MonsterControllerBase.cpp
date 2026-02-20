@@ -53,7 +53,7 @@ AMonsterControllerBase::AMonsterControllerBase()
 	HearingConfig->DetectionByAffiliation.bDetectNeutrals = false;
 
 	DamageConfig->SetMaxAge(1000.0f);
-	
+
 	TouchConfig->DetectionByAffiliation.bDetectEnemies = true;
 	TouchConfig->DetectionByAffiliation.bDetectFriendlies = false;
 	TouchConfig->DetectionByAffiliation.bDetectNeutrals = false;
@@ -168,18 +168,24 @@ void AMonsterControllerBase::TargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 				{
 					GetWorldTimerManager().SetTimer(TeamReportTimerHandle, [this,Actor]()
 					{
-						
+						if (!IsValid(this))
+						{
+							return;
+						}
 						UAIPerceptionSystem* PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
 						if (PerceptionSystem && IsValid(Actor))
 						{
 							FAITeamStimulusEvent Event = FAITeamStimulusEvent(
 								this, Actor, Actor->GetActorLocation(), 1000.0f);
 							PerceptionSystem->OnEvent(Event);
-						}else
-						{
-							GetWorldTimerManager().ClearTimer(TeamReportTimerHandle);
 						}
-						
+						else
+						{
+							if (IsValid(this))
+							{
+								GetWorldTimerManager().ClearTimer(TeamReportTimerHandle);
+							}
+						}
 					}, 2.0f, true, 0.5f);
 
 					BB->SetValueAsObject(TEXT("TargetActor"), Actor);

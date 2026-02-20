@@ -90,22 +90,50 @@ void ABaseProjectile::ProcessImpact(AActor* OtherActor)
         return;
     }
 
-
-    AController* InstigatorController = nullptr;
-    if (IsValid(GetInstigator()))
+    if (IsValid(GetInstigator()) == false)
     {
-        InstigatorController = GetInstigator()->GetController();
+        return;
     }
 
+    // 같은편 끼리 충돌 나지 않게
+    if (OtherActor->GetClass()->IsChildOf(GetInstigator()->GetClass()))
+    {
+        return;
+    }
+
+
+    AController* InstigatorController = nullptr;
+    InstigatorController = GetInstigator()->GetController();
+
+
     // 데미지 처리
+    float FinalDamage = Damage;
+
+    // 크리티컬 판정
+
+    UStatComponent* StatComp = GetInstigator()->FindComponentByClass<UStatComponent>();
+    if (IsValid(StatComp) == false)
+    {
+        return;
+    }
+
+    float CriticalChance = StatComp->GetCurrentStat(EStat::CriticalChance);
+    float CriticalMultiplier = StatComp->GetCurrentStat(EStat::CriticalDamage);
+
+    if (FMath::FRandRange(0.0f, 100.0f) < CriticalChance)
+    {
+        FinalDamage *= CriticalMultiplier;
+        UE_LOG(LogTemp, Warning, TEXT("Critical Hit"));
+    }
+
     UGameplayStatics::ApplyDamage(
         OtherActor,
-        Damage,
+        FinalDamage,
         InstigatorController,
         this,
         UDamageType::StaticClass()
     );
-    UE_LOG(LogTemp, Warning, TEXT("Hit : %s, Damage : %d"), *OtherActor->GetName(), Damage);
+    UE_LOG(LogTemp, Warning, TEXT("Hit : %s, Damage : %0.1f"), *OtherActor->GetName(), FinalDamage);
 
     Destroy();
 }

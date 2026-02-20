@@ -1,4 +1,4 @@
-#include "Components/StatComponent.h"
+﻿#include "Components/StatComponent.h"
 
 UStatComponent::UStatComponent()
 {
@@ -152,7 +152,7 @@ float UStatComponent::GetCurrentHP() const
 
 bool UStatComponent::TakeDamage(float DamageAmount)
 {
-	float CalculatedDamage = DamageAmount*100/FMath::Max(100 + GetCurrentStat(EStat::DEF), 0.01f); // 데미지 * 100/(100+방어력)
+	float CalculatedDamage = DamageAmount * 100 / FMath::Max(100 + GetCurrentStat(EStat::DEF), 0.01f); // 데미지 * 100/(100+방어력)
 	UE_LOG(LogTemp, Warning, TEXT("Damage: %f"), CalculatedDamage);
 	AddCurrentHP(-CalculatedDamage);
 

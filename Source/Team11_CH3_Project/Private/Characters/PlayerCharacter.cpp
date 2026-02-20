@@ -9,6 +9,7 @@
 #include "Components/StatComponent.h"
 #include "Components/BuffManager.h"
 #include "Components/SkillManager.h"
+#include "Components/ItemManager.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -41,6 +42,7 @@ APlayerCharacter::APlayerCharacter()
     StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
     BuffManager = CreateDefaultSubobject<UBuffManager>(TEXT("BuffManager"));
 	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
+    ItemManager = CreateDefaultSubobject<UItemManager>(TEXT("ItemManager"));
 
     bIsSprinting = false;
     bIsDodging = false;
@@ -136,25 +138,7 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
     WeaponActor->StartAttack(GetActorForwardVector() * 1000.0f + GetActorLocation(), SkillComponent->GetSkillSlot(2)->GetEquippedSkill());
 }
 
-// 무기 소켓
-/*
-void APlayerCharacter::AttachWeapon(TSubclassOf<AActor> WeaponClass)
-{
-    if (!WeaponClass) return;
 
-    AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(WeaponClass);
-
-    if (!SpawnedActor) return;
-
-    const USkeletalMeshSocket* WeaponSocket =
-        GetMesh()->GetSocketByName(TEXT("WeaponSocket"));
-
-    if (WeaponSocket)
-    {
-        WeaponSocket->AttachActor(SpawnedActor, GetMesh());
-    }
-}
-*/
 
 void APlayerCharacter::BeginPlay()
 {
@@ -162,8 +146,11 @@ void APlayerCharacter::BeginPlay()
 
 
     UpdateMovementSpeed();
+
+    ItemManager->UseItem(TEXT("StaffWeapon"), EItemType::Equipment, 0);
+    //TODO: InitStat -> 스테이지 종료될때 게임인스턴스에 넘기고 다시 받아오기
 #pragma region TESTCODE
-    FWeaponItemData WeaponItemData;
+
     WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
     WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
     WeaponItemData.WeaponType = EWeaponType::Melee;
@@ -235,7 +222,8 @@ void APlayerCharacter::UpdateMovementSpeed()
 
     if (bIsSprinting)
     {
-        GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+        GetCharacterMovement()->MaxWalkSpeed = WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
+        //GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
     }
     else
     {
@@ -292,22 +280,26 @@ void APlayerCharacter::ResetDodgeCooldown()
 {
     bCanDodge = true;
 }
-
-void APlayerCharacter::ReceiveDamage(float Damage, AActor* DamageCauser)
+// TakeDamage로 변경
+float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
+    class AController* EventInstigator, AActor* DamageCauser)
 {
-    if (!StatComponent || bIsDead)
-        return;
+    float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-    const bool bDied = StatComponent->TakeDamage(Damage);
+    if (!StatComponent || bIsDead)
+        return 0.0f;
+
+    const bool bDied = StatComponent->TakeDamage(ActualDamage);
 
     if (bDied)
     {
-        Die();
+    //    Die();
     }
     else
     {
         Hit();
     }
+    return ActualDamage;
 }
 
 void APlayerCharacter::Hit()
