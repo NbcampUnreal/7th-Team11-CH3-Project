@@ -21,27 +21,12 @@ ASpawnVolume::ASpawnVolume()
 void ASpawnVolume::SpawnRandomMonster()
 {
 	UMonsterSubsystem* MonsterSubsystem = GetWorld()->GetSubsystem<UMonsterSubsystem>();
-	FMonsterData MonsterData;
 
 	if (FSpawnMonsterData* SelectedRow = GetRandomMonster())
 	{
 		FMonsterData* MonsterDataRow = SelectedRow->MonsterData.GetRow<FMonsterData>(TEXT("MonsterData"));
-		TSoftObjectPtr<USkeletalMesh> SelectedMesh = MonsterDataRow->SkeletalMesh;
-		FStatData SelectedStatData = MonsterDataRow->StatData;
-		TSoftClassPtr<AWeaponActor> SelectedWeapon = MonsterDataRow->WeaponItemData.WeaponActorClass;
-		TSoftClassPtr<UAnimInstance> SelectedAnim = MonsterDataRow->AnimBlueprint;
-		float SelectedWeaponDamage = 100.0f; // 임시 값 설정
 
-		MonsterData.StatData = SelectedStatData;
-
-		MonsterData.AnimBlueprint = SelectedAnim;
-
-		MonsterData.SkeletalMesh = SelectedMesh;
-
-		MonsterData.WeaponItemData.WeaponActorClass = SelectedWeapon;
-		MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,SelectedWeaponDamage);
-
-		MonsterSubsystem->SpawnMonster(MonsterData, GetRandomPointInVolume());
+		MonsterSubsystem->SpawnMonster(MonsterDataRow, GetRandomPointInVolume());
 	}
 }
 

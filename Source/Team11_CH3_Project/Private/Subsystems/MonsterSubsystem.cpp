@@ -47,7 +47,7 @@ UMonsterSubsystem::UMonsterSubsystem()
 	}
 }
 
-void UMonsterSubsystem::SpawnMonster(FMonsterData MonsterData, FVector Location)
+void UMonsterSubsystem::SpawnMonster(FMonsterData* MonsterData, FVector Location)
 {
 	AMonsterBase* Monster = nullptr;
 	if (SpawnedMonsterCount < Monsters.Num())

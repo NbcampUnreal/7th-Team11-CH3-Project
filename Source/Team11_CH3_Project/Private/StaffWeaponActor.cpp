@@ -15,7 +15,7 @@ AStaffWeaponActor::AStaffWeaponActor()
 	StaticMeshComponent->SetCollisionProfileName(FName("OverlapAll"));
 }
 
-void AStaffWeaponActor::Init(const FWeaponItemData& WeaponItem, USkeletalMeshComponent* SkeletalMesh)
+void AStaffWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh)
 {
 	Super::Init(WeaponItem, SkeletalMesh);
 	FAttachmentTransformRules AttachRules(

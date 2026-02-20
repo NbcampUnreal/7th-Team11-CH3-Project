@@ -18,7 +18,7 @@ class TEAM11_CH3_PROJECT_API UMonsterSubsystem : public UWorldSubsystem
 public:
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
 	UMonsterSubsystem();
-	void SpawnMonster(FMonsterData MonsterData, FVector Location);
+	void SpawnMonster(FMonsterData* MonsterData, FVector Location);
 	void OnMonsterDeath(AMonsterBase* DeadMonster);
 	void DespawnMonster(AMonsterBase* DeadMonster);
 protected:

@@ -6,12 +6,14 @@
 #include "AIController.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
+#include "Perception/AISenseConfig_Team.h"
 #include "MonsterControllerBase.generated.h"
 
 class UAISenseConfig_Touch;
 class UAISenseConfig_Sight;
 class UAISenseConfig_Hearing;
 class UAISenseConfig_Damage;
+class UAISenseConfig_Team;
 /**
  * 
  */
@@ -33,6 +35,7 @@ public:
 	
 protected:
 	virtual void OnPossess(class APawn* InPawn) override;
+	virtual void OnUnPossess() override;
 	virtual void BeginPlay() override;
 	
 	
@@ -55,11 +58,12 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="AI")
 	TObjectPtr<UAISenseConfig_Touch> TouchConfig;
-	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="AI")
+	TObjectPtr<UAISenseConfig_Team> TeamConfig;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="AI")
 	TObjectPtr<UAIPerceptionComponent> AIPerceptionComp;
 private:
-		FGenericTeamId TeamID;
-
+	FGenericTeamId TeamID;
+	FTimerHandle TeamReportTimerHandle;
 };

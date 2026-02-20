@@ -16,11 +16,11 @@ class TEAM11_CH3_PROJECT_API USkillDataAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 
 public:
-	virtual void Activate(APawn* Instigator, const FVector& Origin, const FVector& Direction)
+	virtual void Activate(APawn* Instigator, const FVector& Origin, const FVector& Direction) const
 	{
-	};
+	}
 	float GetCooldownTime() const { return CooldownTime; };
-
+	UAnimMontage* GetSkillMontage()const{return SkillMontage;};
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
 	FName SkillID;

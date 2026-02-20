@@ -17,7 +17,7 @@ class TEAM11_CH3_PROJECT_API UProjectileSkillData : public USkillDataAsset
 	
 protected:
 
-	virtual void Activate(APawn* Instigator, const FVector& Origin, const FVector& Direction) override;
+	virtual void Activate(APawn* Instigator, const FVector& Origin, const FVector& Direction) const override;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|Projectile")
 	float ProjectileSpeed;

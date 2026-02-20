@@ -11,25 +11,24 @@ AWeaponActor::AWeaponActor()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-
 }
 
 
-void AWeaponActor::Init(const FWeaponItemData& WeaponItem, USkeletalMeshComponent* SkeletalMesh)
+void AWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh)
 {
-	AttackMontage.LoadSynchronous();
-	WeaponItemData = WeaponItem;
+	if (!WeaponItem)
+	{
+		return;
+	}
+	WeaponItemData = *WeaponItem;
 	CurrentSkillData = nullptr;
+	DefaultSkill = WeaponItem->DefaultSkill.LoadSynchronous();
 }
 
-UAnimMontage* AWeaponActor::GetAttackMontage() const
-{
-	return AttackMontage.Get();
-}
 
 float AWeaponActor::GetAttackRange() const
 {
-	return AttackRange;
+	return WeaponItemData.AttackRange;
 }
 
 
