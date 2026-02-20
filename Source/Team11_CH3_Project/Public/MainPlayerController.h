@@ -24,36 +24,47 @@ public:
 	virtual FGenericTeamId GetGenericTeamId() const override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
-	UInputMappingContext* DefaultMappingContext;
+	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* MoveAction;
+	TObjectPtr<UInputAction> MoveAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* JumpAction;
+	TObjectPtr<UInputAction> JumpAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* LookAction;
+	TObjectPtr<UInputAction> LookAction;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* SprintAction;
+	TObjectPtr<UInputAction> SprintAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* DodgeAction;
+	TObjectPtr<UInputAction> DodgeAction;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> AimAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* InventoryAction;
+	TObjectPtr<UInputAction> InventoryAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* Skill1Action;
+	TObjectPtr<UInputAction> Skill1Action;
 	// 스킬 슬롯. 필요시 2, 3 식으로 추가
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	UInputAction* Consumable1Action;
+	TObjectPtr<UInputAction> Consumable1Action;
 	// 소모품 슬롯. 필요시 2, 3식으로 추가
 	
 	// TODO - 추후 gamemode에서 캐릭터 사망 처리 후 직접 호출 방식으로 수정
 	void HandlePlayerDeath();
+
+	// 조준점 월드 타겟
+	UFUNCTION(BlueprintCallable)
+	bool GetAimPoint(FVector& OutAimPoint) const;
+
+	// 조준시 조준점 토글
+	UFUNCTION(BlueprintImplementableEvent)
+	void BP_SetCrosshairVisible(bool bVisible);
 
 protected:
 
@@ -78,7 +89,13 @@ protected:
 
 	void UseSkillSlot(int32 SlotIndex);
 	void UseConsumableSlot(int32 SlotIndex);
+
+	// aim move
+	void AimPressed();
+	void AimReleased();
+
 private:
+
 	FGenericTeamId TeamID;
 
 };

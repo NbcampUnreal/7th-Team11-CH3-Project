@@ -1,7 +1,10 @@
 #include "MainPlayerController.h"
+#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/PlayerController.h"
 #include "Characters/PlayerCharacter.h"
+#include "InputActionValue.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Characters/InventoryComponent.h"
@@ -49,6 +52,10 @@ void AMainPlayerController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleStartSprint);
 	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AMainPlayerController::HandleStopSprint);
 	EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleDodge);
+
+	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AMainPlayerController::AimPressed);
+	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Completed, this, &AMainPlayerController::AimReleased);
+
 
 	if (InventoryAction)
 		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleOpenInventory);
@@ -209,3 +216,43 @@ void AMainPlayerController::UseSkillSlot(int32 SlotIndex)
 		}
 	}
 }*/
+
+void AMainPlayerController::AimPressed()
+{
+	if (APlayerCharacter* ControlledPawn =
+		Cast<APlayerCharacter>(GetPawn()))
+	{
+		ControlledPawn->SetAiming(true);
+	}
+}
+
+void AMainPlayerController::AimReleased()
+{
+	if (APlayerCharacter* ControlledPawn =
+		Cast<APlayerCharacter>(GetPawn()))
+	{
+		ControlledPawn->SetAiming(false);
+	}
+}
+
+bool AMainPlayerController::GetAimPoint(FVector& OutAimPoint) const
+{
+	int32 SX, SY;
+	GetViewportSize(SX, SY);
+
+	FVector Origin, Dir;
+	if (!DeprojectScreenPositionToWorld(SX * 0.5f, SY * 0.5f, Origin, Dir))
+		return false;
+
+	const float Dist = 100000.f;
+	const FVector Start = Origin;
+	const FVector End = Origin + Dir * Dist;
+
+	FHitResult Hit;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(AimTrace), true);
+	if (APawn* P = GetPawn()) Params.AddIgnoredActor(P);
+
+	const bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params);
+	OutAimPoint = bHit ? Hit.ImpactPoint : End;
+	return true;
+}

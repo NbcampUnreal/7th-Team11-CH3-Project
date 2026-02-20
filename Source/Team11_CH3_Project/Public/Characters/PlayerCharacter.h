@@ -9,6 +9,7 @@
 #include "Animation/AnimMontage.h"
 #include "Components/StatComponent.h"
 #include "Components/Items/Equipments/WeaponItemData.h"
+#include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
 class AWeaponActor;
@@ -22,6 +23,8 @@ class UBuffManager;
 class UStatComponent;
 class UItemManager;
 // class AWeapon; // 일단 전방 선언
+
+struct FInputActionValue;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintStarted);
 
@@ -58,25 +61,49 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
 	float CameraBoomLength = 300.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-	float CameraSensitivity = 1.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+    float CameraSensitivity = 1.0f;
+
+    UPROPERTY(EditDefaultsOnly, Category = "Camera")
+    FVector DefaultSocketOffset = FVector(0.f, 0.f, 0.f);
+
+    UPROPERTY(EditDefaultsOnly, Category = "Camera")
+    FVector AimSocketOffset = FVector(0.f, 50.f, 15.f);
+
+    UPROPERTY(EditAnywhere, Category = "Camera|Dodge")
+    float DodgeCameraLagSpeed = 15.f;   // 닷지 중 랙 스피드
+
+    UPROPERTY(EditAnywhere, Category = "Camera|Dodge")
+    bool bDisableCameraLagWhileDodging = false;
+
+
+    bool bSavedEnableCameraLag = false;
+
+    float SavedCameraLagSpeed = 0.f;
+    float CameraInterpSpeed = 10.f;
 #pragma endregion
 
 #pragma region Movement
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float WalkSpeed = 400.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float SprintSpeed = 600.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float DodgeDistance = 500.0f;
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+    float SprintSpeed = 800.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+    float DodgeDistance = 1800.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float DodgeDuration = 0.5f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float DodgeCooldown = 1.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+    float DodgeCooldown = 1.0f;
+
+    UPROPERTY(EditAnywhere, Category = "Movement")
+    float DodgeDistanceScale = 0.4f;
+
 #pragma endregion
 
 #pragma region State
@@ -163,7 +190,13 @@ public:
 	*/
 #pragma endregion
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+    UPROPERTY(BlueprintReadWrite, Category = "Combat")
+    bool bIsAiming;
+
+    // 조준 상태 변경
+    void SetAiming(bool bNewAiming);
+
+    virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
 	                         class AController* EventInstigator, AActor* DamageCauser) override;
@@ -181,13 +214,37 @@ protected:
 	void ExecuteDodge();
 	void EndDodge();
 	void ResetDodgeCooldown();
+    // void AttachWeapon(TSubclassOf<AActor> WeaponClass);
+
+    // 쏘아져나가는 것 방지용 닷지 시작위치 저장, alpha 보간, deltasecond 사용
+    FTimerHandle DodgeTickHandle;
+    FVector DodgeStartLoc;
+    FVector DodgeDir = FVector::ZeroVector;
+    float DodgeElapsed = 0.f;
+    double DodgeLastTimeSec = 0.0;
+    float DodgeRemainingDist = 0.f;
 
 	void Hit();
 
-	void Attack(const FInputActionValue& Value);
-	void SkillQ(const FInputActionValue& Value);
-	void SkillE(const FInputActionValue& Value);
+
+protected:
+
+    void Attack(const FInputActionValue& Value);
+    void SkillQ(const FInputActionValue& Value);
+    void SkillE(const FInputActionValue& Value);
+
+    void DodgeStep();
 
 private:
-	bool bIsDead = false;
+    bool bIsDead = false;
+
+    float DefaultWalkSpeed = 600.f;
+    float AimWalkSpeed = 300.f;
+
+    float DefaultArmLength = 300.f;
+    float AimArmLength = 200.f;
+
+    float SavedGroundFriction = 0.f;
+    float SavedBrakingFrictionFactor = 0.f;
+    float SavedBrakingDecel = 0.f;
 };

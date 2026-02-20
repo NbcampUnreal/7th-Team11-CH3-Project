@@ -1,11 +1,13 @@
-﻿#include "Characters/PlayerCharacter.h"
+#include "Characters/PlayerCharacter.h"
 #include "Characters/InventoryComponent.h"
 #include "MainPlayerController.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "EnhancedInputComponent.h"
+#include "Engine/World.h"
 #include "WeaponActor.h"
+#include "TimerManager.h"
 #include "Components/StatComponent.h"
 #include "Components/BuffManager.h"
 #include "Components/SkillManager.h"
@@ -15,14 +17,14 @@
 
 APlayerCharacter::APlayerCharacter()
 {
-    PrimaryActorTick.bCanEverTick = false;
+    PrimaryActorTick.bCanEverTick = true;
 
     
     CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
     CameraBoom->SetupAttachment(RootComponent);
     CameraBoom->TargetArmLength = CameraBoomLength;
     CameraBoom->bUsePawnControlRotation = true;
-    CameraBoom->bEnableCameraLag = true;
+    CameraBoom->bEnableCameraLag = !bIsAiming;
     CameraBoom->CameraLagSpeed = 3.0f;
 
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -138,6 +140,23 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
     WeaponActor->StartAttack(GetActorForwardVector() * 1000.0f + GetActorLocation(), SkillComponent->GetSkillSlot(2)->GetEquippedSkill());
 }
 
+void APlayerCharacter::SetAiming(bool bNewAiming)
+{
+    UE_LOG(LogTemp, Warning, TEXT("SetAiming: %d"), bNewAiming);
+    bIsAiming = bNewAiming;
+
+    bUseControllerRotationYaw = bIsAiming;
+    GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
+    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : DefaultWalkSpeed;
+
+    if (AMainPlayerController* PC = Cast<AMainPlayerController>(GetController()))
+    {
+        PC->BP_SetCrosshairVisible(bIsAiming);
+    }
+}
+
+
+
 
 
 void APlayerCharacter::BeginPlay()
@@ -167,23 +186,32 @@ void APlayerCharacter::BeginPlay()
 void APlayerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    float TargetArm = bIsAiming ? AimArmLength : DefaultArmLength;
+    FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
+
+    CameraBoom->TargetArmLength =
+        FMath::FInterpTo(CameraBoom->TargetArmLength, TargetArm, DeltaTime, CameraInterpSpeed);
+
+    CameraBoom->SocketOffset =
+        FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
 }
+
 
 void APlayerCharacter::Move(const FVector2D& MovementVector)
 {
     if (bIsDodging) return;
 
-    if (Controller != nullptr && MovementVector.SizeSquared() > 0.0f)
-    {
-        const FRotator Rotation = Controller->GetControlRotation();
-        const FRotator YawRotation(0, Rotation.Yaw, 0);
+    if (!Controller) return;
 
-        const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-        const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+    FRotator ControlRotation = Controller->GetControlRotation();
+    FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
 
-        AddMovementInput(ForwardDirection, MovementVector.Y);
-        AddMovementInput(RightDirection, MovementVector.X);
-    }
+    FVector Forward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+    FVector Right = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+    AddMovementInput(Forward, MovementVector.Y);
+    AddMovementInput(Right, MovementVector.X);
 }
 
 void APlayerCharacter::Look(const FVector2D& LookAxisVector)
@@ -233,48 +261,133 @@ void APlayerCharacter::UpdateMovementSpeed()
 
 void APlayerCharacter::ExecuteDodge()
 {
+    if (!bCanDodge) return;
+
     bIsDodging = true;
     bCanDodge = false;
 
     if (bIsSprinting)
-    {
         StopSprint();
-    }
 
-    // PlayDodgeAnimation();
+    DodgeDir = GetLastMovementInputVector();
+    if (DodgeDir.IsNearlyZero()) DodgeDir = GetVelocity();
+    if (DodgeDir.IsNearlyZero()) DodgeDir = GetActorForwardVector();
 
-    FVector DodgeDirection = GetVelocity().GetSafeNormal();
+    DodgeDir.Z = 0.f;
+    DodgeDir = DodgeDir.GetSafeNormal();
 
-    if (DodgeDirection.IsNearlyZero())
+    DodgeRemainingDist = DodgeDistance * DodgeDistanceScale;
+
+    auto* Move = GetCharacterMovement();
+
+    if (CameraBoom)
     {
-        DodgeDirection = GetActorForwardVector();
+        bSavedEnableCameraLag = CameraBoom->bEnableCameraLag;
+        SavedCameraLagSpeed = CameraBoom->CameraLagSpeed;
+
+        CameraBoom->bEnableCameraLag = true;
+        CameraBoom->CameraLagSpeed = DodgeCameraLagSpeed;
     }
 
-    FVector LaunchVelocity = DodgeDirection * (DodgeDistance / DodgeDuration);
-    LaunchCharacter(LaunchVelocity, true, true);
+    // 마찰 저장
+    SavedGroundFriction = Move->GroundFriction;
+    SavedBrakingFrictionFactor = Move->BrakingFrictionFactor;
+    SavedBrakingDecel = Move->BrakingDecelerationWalking;
 
+    // 드르륵 방지
+    Move->GroundFriction = 0.f;
+    Move->BrakingFrictionFactor = 0.f;
+    Move->BrakingDecelerationWalking = 0.f;
 
+    Move->StopMovementImmediately();
+
+    DodgeLastTimeSec = GetWorld()->GetTimeSeconds();
+
+    GetWorldTimerManager().SetTimer(
+        DodgeTickHandle,
+        this,
+        &APlayerCharacter::DodgeStep,
+        0.005f,
+        true);
+
+    // 닷지 종료
     GetWorldTimerManager().SetTimer(
         DodgeTimerHandle,
         this,
         &APlayerCharacter::EndDodge,
         DodgeDuration,
-        false
-    );
+        false);
 
+    // 쿨타임
     GetWorldTimerManager().SetTimer(
         DodgeCooldownTimerHandle,
         this,
         &APlayerCharacter::ResetDodgeCooldown,
         DodgeCooldown,
-        false
+        false);
+}
+
+void APlayerCharacter::DodgeStep()
+{
+    if (!bIsDodging)
+        return;
+
+    const double Now = GetWorld()->GetTimeSeconds();
+    const float DeltaSeconds = float(Now - DodgeLastTimeSec);
+    DodgeLastTimeSec = Now;
+
+    if (DeltaSeconds <= 0.f)
+        return;
+
+    const float TotalDist = DodgeDistance * DodgeDistanceScale;
+    const float Speed = TotalDist / DodgeDuration;
+
+    float StepDist = Speed * DeltaSeconds;
+    StepDist = FMath::Min(StepDist, DodgeRemainingDist);
+
+    FVector Delta = DodgeDir * StepDist;
+
+    FHitResult Hit;
+    GetCharacterMovement()->SafeMoveUpdatedComponent(
+        Delta,
+        GetActorRotation(),
+        true,
+        Hit
     );
+
+    DodgeRemainingDist -= StepDist;
+
+    // 벽에 막히거나 거리 끝
+    if (DodgeRemainingDist <= KINDA_SMALL_NUMBER || Hit.bBlockingHit)
+    {
+        EndDodge();
+    }
 }
 
 void APlayerCharacter::EndDodge()
 {
+    if (!bIsDodging)
+        return;
+
     bIsDodging = false;
+
+    GetWorldTimerManager().ClearTimer(DodgeTickHandle);
+
+    auto* Move = GetCharacterMovement();
+
+    // 카메라 복구
+    if (CameraBoom)
+    {
+        CameraBoom->bEnableCameraLag = bSavedEnableCameraLag;
+        CameraBoom->CameraLagSpeed = SavedCameraLagSpeed;
+    }
+
+    // 마찰 복구
+    Move->GroundFriction = SavedGroundFriction;
+    Move->BrakingFrictionFactor = SavedBrakingFrictionFactor;
+    Move->BrakingDecelerationWalking = SavedBrakingDecel;
 }
+
 
 void APlayerCharacter::ResetDodgeCooldown()
 {
@@ -346,4 +459,3 @@ void APlayerCharacter::PlayDeathAnimation()
     }
 }
 */
-
