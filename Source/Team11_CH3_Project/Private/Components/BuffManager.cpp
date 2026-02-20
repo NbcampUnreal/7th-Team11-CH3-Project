@@ -13,6 +13,7 @@ void UBuffManager::BeginPlay()
 
 	StatComp = GetOwner()->FindComponentByClass<UStatComponent>();
 	checkf(StatComp, TEXT("No StatComponent Found"));
+	CurrentBuffID = 0;
 }
 
 void UBuffManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -35,13 +36,17 @@ void UBuffManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	}
 }
 
-void UBuffManager::AddBuff(const FBuffData& Buff)
+int32 UBuffManager::AddBuff(const EStat TargetStat, EBuffType BuffType, float Amount, float Duration)
 {
+	int32 NewID = ++CurrentBuffID;
+	FBuffData Buff = { NewID, TargetStat, BuffType, Amount, Duration };
 	ActiveBuffs.Add(Buff);
 	SetBuffs(Buff.TargetStat);
+
+	return NewID;
 }
 
-void UBuffManager::RemoveBuff(FName BuffID)
+void UBuffManager::RemoveBuff(int32 BuffID)
 {
 	for (int32 i = ActiveBuffs.Num() - 1; i >= 0; i--)
 	{
