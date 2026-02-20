@@ -172,7 +172,7 @@ void APlayerCharacter::BeginPlay()
     WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(WeaponItemData.WeaponActorClass.LoadSynchronous(),SpawnInfo);
     if (WeaponActor)
     {
-        WeaponActor->Init(WeaponItemData, GetMesh());
+        WeaponActor->Init(&WeaponItemData, GetMesh());
     }
 #pragma endregion
 }

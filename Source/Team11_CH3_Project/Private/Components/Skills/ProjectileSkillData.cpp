@@ -5,7 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/Skills/BaseProjectile.h"
 
-void UProjectileSkillData::Activate(APawn* Instigator, const FVector& Origin, const FVector& Direction)
+void UProjectileSkillData::Activate(APawn* Instigator, const FVector& Origin, const FVector& Direction) const
 {
 	// 캐릭터 불러오기 수정 전 주석의 코드는 BasicAttack(깊이 2)과 다른 Skill들(깊이 3)과의 계층 깊이가 달라
 	// 동일하게 적용했더니 Fireball의 경우엔 nullptr을 가르켰음

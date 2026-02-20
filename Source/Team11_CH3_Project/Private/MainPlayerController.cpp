@@ -5,6 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Characters/InventoryComponent.h"
+#include "Perception/AIPerceptionSystem.h"
 
 AMainPlayerController::AMainPlayerController()
 {
@@ -29,8 +30,7 @@ void AMainPlayerController::BeginPlay()
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
 	
-	//TODO HardCoded
-	TeamID = FGenericTeamId(0);
+
 }
 
 void AMainPlayerController::SetupInputComponent()
@@ -58,6 +58,14 @@ void AMainPlayerController::SetupInputComponent()
 
 	if (Consumable1Action)
 		EnhancedInputComponent->BindAction(Consumable1Action, ETriggerEvent::Started, this, &AMainPlayerController::HandleUseConsumable1);
+}
+
+void AMainPlayerController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+	//TODO HardCoded
+	TeamID = FGenericTeamId(0);
+	SetGenericTeamId(TeamID);
 }
 
 FGenericTeamId AMainPlayerController::GetGenericTeamId() const

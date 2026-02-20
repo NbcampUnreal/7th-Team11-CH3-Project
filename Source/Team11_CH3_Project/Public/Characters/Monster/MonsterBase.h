@@ -29,7 +29,7 @@ public:
 	
 	void DealDamage();
 	void BlackboardUpdate();
-	void Init(const FMonsterData& MonsterData);
+	void Init(const FMonsterData* MonsterData);
 	void Clear();
 	
 	

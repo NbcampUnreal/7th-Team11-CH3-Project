@@ -47,7 +47,7 @@ UMonsterSubsystem::UMonsterSubsystem()
 	}
 }
 
-void UMonsterSubsystem::SpawnMonster(FMonsterData MonsterData, FVector Location)
+void UMonsterSubsystem::SpawnMonster(FMonsterData* MonsterData, FVector Location)
 {
 	AMonsterBase* Monster = nullptr;
 	if (SpawnedMonsterCount < Monsters.Num())
@@ -56,7 +56,9 @@ void UMonsterSubsystem::SpawnMonster(FMonsterData MonsterData, FVector Location)
 	}
 	else
 	{
-		Monster = GetWorld()->SpawnActor<AMonsterBase>(MonsterClass.LoadSynchronous());
+		FActorSpawnParameters SpawnParameters;
+		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		Monster = GetWorld()->SpawnActor<AMonsterBase>(MonsterClass.LoadSynchronous(),SpawnParameters);
 		Monsters.Add(Monster);
 	}
 	if (Monster)

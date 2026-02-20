@@ -47,7 +47,7 @@ EBTNodeResult::Type UBTT_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 				AttackMemory->OnAttackFinishedHandle.Reset();
 				if (AMonsterControllerBase* MonsterControllerBase = Cast<AMonsterControllerBase>(OwnerComp.GetAIOwner()))
 				{
-					// MonsterControllerBase->ClearFocus(EAIFocusPriority::Gameplay);
+					MonsterControllerBase->ClearFocus(EAIFocusPriority::Gameplay);
 				}
 				FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 			}	

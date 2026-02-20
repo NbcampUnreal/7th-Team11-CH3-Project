@@ -95,7 +95,7 @@ void UItemManager::EquipWeapon(FWeaponItemData* Data)
 	if (IsValid(Weapon))
 	{
 		auto* Mesh = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
-		Weapon->Init(*Data, Mesh);
+		Weapon->Init(Data, Mesh);
 
 		CurrentWeapon = Weapon;
 		CachedWeaponData = *Data;

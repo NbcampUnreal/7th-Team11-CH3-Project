@@ -8,6 +8,7 @@
 #include "WeaponItemData.generated.h"
 
 class AWeaponActor;
+class USkillDataAsset;
 /**
  * 
  */
@@ -19,4 +20,8 @@ struct TEAM11_CH3_PROJECT_API FWeaponItemData : public FEquipmentItemData
 	TSoftClassPtr<AWeaponActor> WeaponActorClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item|Weapon")
 	EWeaponType WeaponType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item|Weapon")
+	TSoftObjectPtr<USkillDataAsset> DefaultSkill;	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Item|Weapon")
+	float AttackRange = 200.0f;
 };

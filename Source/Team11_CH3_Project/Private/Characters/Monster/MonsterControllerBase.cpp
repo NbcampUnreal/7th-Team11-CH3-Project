@@ -16,6 +16,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AISenseConfig_Touch.h"
+#include "Perception/AISense_Team.h"
 #include "Perception/AISense_Touch.h"
 
 
@@ -29,12 +30,13 @@ AMonsterControllerBase::AMonsterControllerBase()
 		BehaviorTree = BehaviorTreeFinder.Object;
 	}
 	bAttachToPawn = true;
-	
+
 	AIPerceptionComp = CreateDefaultSubobject<UAIPerceptionComponent>("AIPerceptionComp");
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
 	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>("HearingConfig");
 	DamageConfig = CreateDefaultSubobject<UAISenseConfig_Damage>("DamageConfig");
 	TouchConfig = CreateDefaultSubobject<UAISenseConfig_Touch>("TouchConfig");
+	TeamConfig = CreateDefaultSubobject<UAISenseConfig_Team>("TeamConfig");
 
 	SightConfig->LoseSightRadius = 1500.0f;
 	SightConfig->SightRadius = 1000.0f;
@@ -51,22 +53,22 @@ AMonsterControllerBase::AMonsterControllerBase()
 	HearingConfig->DetectionByAffiliation.bDetectNeutrals = false;
 
 	DamageConfig->SetMaxAge(1000.0f);
-
+	
 	TouchConfig->DetectionByAffiliation.bDetectEnemies = true;
 	TouchConfig->DetectionByAffiliation.bDetectFriendlies = false;
 	TouchConfig->DetectionByAffiliation.bDetectNeutrals = false;
 	TouchConfig->SetMaxAge(1000.0f);
 
+	TeamConfig->SetMaxAge(1000.0f);
+
 	AIPerceptionComp->ConfigureSense(*SightConfig);
 	AIPerceptionComp->ConfigureSense(*HearingConfig);
 	AIPerceptionComp->ConfigureSense(*DamageConfig);
 	AIPerceptionComp->ConfigureSense(*TouchConfig);
+	AIPerceptionComp->ConfigureSense(*TeamConfig);
 	AIPerceptionComp->SetDominantSense(SightConfig->GetSenseImplementation());
 	AIPerceptionComp->OnTargetPerceptionUpdated.AddDynamic(this, &AMonsterControllerBase::TargetPerceptionUpdated);
 	AIPerceptionComp->OnTargetPerceptionForgotten.AddDynamic(this, &AMonsterControllerBase::TargetPerceptionForgotten);
-	
-	//TODO HardCoded
-	TeamID = FGenericTeamId(1);
 }
 
 void AMonsterControllerBase::BlackboardUpdate()
@@ -75,7 +77,7 @@ void AMonsterControllerBase::BlackboardUpdate()
 	{
 		// PossessedCharacter->bUseControllerRotationYaw = true;
 		// PossessedCharacter->AllowedYawError = 30.0f;
-		
+
 		if (UCharacterMovementComponent* CharacterMovementComponent = PossessedCharacter->GetCharacterMovement())
 		{
 			CharacterMovementComponent->bUseControllerDesiredRotation = false;
@@ -83,7 +85,7 @@ void AMonsterControllerBase::BlackboardUpdate()
 		}
 		if (UBlackboardComponent* BB = GetBlackboardComponent())
 		{
-			if (UStatComponent* StatComponent =  PossessedCharacter->GetStatComponent())
+			if (UStatComponent* StatComponent = PossessedCharacter->GetStatComponent())
 			{
 				BB->SetValueAsFloat(TEXT("FightMaxMoveSpeed"), StatComponent->GetBaseStat(EStat::MoveSpeed));
 				BB->SetValueAsFloat(TEXT("PatrolMaxMoveSpeed"), StatComponent->GetBaseStat(EStat::MoveSpeed) / 3);
@@ -99,6 +101,19 @@ void AMonsterControllerBase::OnPossess(class APawn* InPawn)
 	Super::OnPossess(InPawn);
 	RunBehaviorTree(BehaviorTree);
 	BlackboardUpdate();
+	//TODO HardCoded
+	TeamID = FGenericTeamId(1);
+	SetGenericTeamId(TeamID);
+	UAIPerceptionSystem::GetCurrent(GetWorld())->UpdateListener(*PerceptionComponent);
+}
+
+void AMonsterControllerBase::OnUnPossess()
+{
+	Super::OnUnPossess();
+	if (UBlackboardComponent* BB = GetBlackboardComponent())
+	{
+		UseBlackboard(BehaviorTree->GetBlackboardAsset(), BB);
+	}
 }
 
 void AMonsterControllerBase::BeginPlay()
@@ -128,20 +143,48 @@ void AMonsterControllerBase::TargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 	}
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Red, Actor->GetName());
-
 		TSubclassOf<UAISense> SenseClass = UAIPerceptionSystem::GetSenseClassForStimulus(GetWorld(), Stimulus);
 		if (SenseClass == nullptr)
 		{
 			return;
 		}
-		if (SenseClass == UAISense_Sight::StaticClass() || SenseClass == UAISense_Damage::StaticClass() || SenseClass ==
-			UAISense_Touch::StaticClass())
+
+		if (SenseClass == UAISense_Sight::StaticClass() ||
+			SenseClass == UAISense_Damage::StaticClass() ||
+			SenseClass == UAISense_Touch::StaticClass() ||
+			SenseClass == UAISense_Team::StaticClass())
 		{
+			if (SenseClass == UAISense_Team::StaticClass())
+			{
+				GetPawn();
+			}
+
 			if (UBlackboardComponent* BB = GetBlackboardComponent())
 			{
-				BB->SetValueAsObject(TEXT("TargetActor"), Actor);
-				BB->SetValueAsBool(TEXT("bIsFighting"), true);
+				if (BB->GetValueAsObject(TEXT("TargetActor")))
+				{
+				}
+				else
+				{
+					GetWorldTimerManager().SetTimer(TeamReportTimerHandle, [this,Actor]()
+					{
+						
+						UAIPerceptionSystem* PerceptionSystem = UAIPerceptionSystem::GetCurrent(GetWorld());
+						if (PerceptionSystem && IsValid(Actor))
+						{
+							FAITeamStimulusEvent Event = FAITeamStimulusEvent(
+								this, Actor, Actor->GetActorLocation(), 1000.0f);
+							PerceptionSystem->OnEvent(Event);
+						}else
+						{
+							GetWorldTimerManager().ClearTimer(TeamReportTimerHandle);
+						}
+						
+					}, 2.0f, true, 0.5f);
+
+					BB->SetValueAsObject(TEXT("TargetActor"), Actor);
+					BB->SetValueAsBool(TEXT("bIsFighting"), true);
+				}
 			}
 		}
 		if (SenseClass == UAISense_Hearing::StaticClass())
@@ -186,14 +229,16 @@ ETeamAttitude::Type AMonsterControllerBase::GetTeamAttitudeTowards(const AActor&
 {
 	if (const APawn* OtherPawn = Cast<APawn>(&Other))
 	{
-		if (const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(OtherPawn->GetController()))
+		if (const IGenericTeamAgentInterface* OtherTeamID = Cast<
+			IGenericTeamAgentInterface>(OtherPawn->GetController()))
 		{
 			if (TeamID == OtherTeamID->GetGenericTeamId())
 			{
 				return ETeamAttitude::Friendly;
-			}else
+			}
+			else
 			{
-				return ETeamAttitude::Hostile;	
+				return ETeamAttitude::Hostile;
 			}
 		}
 	}

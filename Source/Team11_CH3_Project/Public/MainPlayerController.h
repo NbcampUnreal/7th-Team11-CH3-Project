@@ -19,7 +19,7 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
-	
+	virtual void OnPossess(APawn* InPawn) override;
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
 	virtual FGenericTeamId GetGenericTeamId() const override;
 

@@ -9,15 +9,14 @@
 #include "Components/Skills/SkillDataAsset.h"
 #include "WeaponActor.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable,BlueprintType)
 class TEAM11_CH3_PROJECT_API AWeaponActor : public AActor
 {
 	GENERATED_BODY()
 
 public:
 	AWeaponActor();
-	virtual void Init(const FWeaponItemData& WeaponItem, USkeletalMeshComponent* SkeletalMesh);
-	UAnimMontage* GetAttackMontage() const;
+	virtual void Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh);
 	float GetAttackRange() const;
 	//TODO
 
@@ -29,12 +28,11 @@ public:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
-	float AttackRange;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
-	TSoftObjectPtr<UAnimMontage> AttackMontage;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Weapon")
-	TWeakObjectPtr<USkillDataAsset> CurrentSkillData;
+	TObjectPtr<USkillDataAsset> DefaultSkill;
+
 private:
+	UPROPERTY(VisibleInstanceOnly, Category="Weapon")
+	TWeakObjectPtr<USkillDataAsset> CurrentSkillData;
 	FWeaponItemData WeaponItemData;
 
 };
