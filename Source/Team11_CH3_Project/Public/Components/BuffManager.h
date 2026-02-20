@@ -20,7 +20,7 @@ struct TEAM11_CH3_PROJECT_API FBuffData
 	GENERATED_BODY()
 
 	UPROPERTY()
-	FName BuffID;
+	int32 BuffID;
 	UPROPERTY()
 	EStat TargetStat;
 	UPROPERTY()
@@ -43,9 +43,9 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	// 버프 추가
-	void AddBuff(const FBuffData& Buff);
+	int32 AddBuff(const EStat TargetStat, EBuffType BuffType, float Amount, float Duration);
 	// 버프 제거
-	void RemoveBuff(FName BuffID);
+	void RemoveBuff(int32 BuffID);
 
 	// 버프 계산
 	float CalculateBuffs(EStat Stat) const;
@@ -59,4 +59,6 @@ private:
 
 	UPROPERTY()
 	TArray<FBuffData> ActiveBuffs;
+
+	int32 CurrentBuffID;
 };
