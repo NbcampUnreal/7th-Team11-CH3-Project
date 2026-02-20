@@ -62,7 +62,7 @@ void UBuffManager::RemoveBuff(int32 BuffID)
 float UBuffManager::CalculateBuffs(EStat Stat) const
 {
 	float Adds = 0.0f;
-	float Muls = 0.0f;
+	float Muls = 1.0f;
 
 	for (const FBuffData& Buff : ActiveBuffs)
 	{
