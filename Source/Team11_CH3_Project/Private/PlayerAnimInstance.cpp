@@ -1,4 +1,4 @@
-#include "PlayerAnimInstance.h"
+﻿#include "PlayerAnimInstance.h"
 #include "Characters/BaseCharacter.h"
 #include "Characters/PlayerCharacter.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -71,7 +71,6 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
     if (APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(OwnerCharacter))
     {
-        bIsSprinting = PlayerChar->bIsSprinting;
         bIsDodging = PlayerChar->bIsDodging;
         bIsAiming = PlayerChar->bIsAiming;
 

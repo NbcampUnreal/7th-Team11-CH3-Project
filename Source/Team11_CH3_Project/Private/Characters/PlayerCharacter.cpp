@@ -1,4 +1,4 @@
-#include "Characters/PlayerCharacter.h"
+﻿#include "Characters/PlayerCharacter.h"
 #include "Characters/InventoryComponent.h"
 #include "MainPlayerController.h"
 #include "Camera/CameraComponent.h"
@@ -46,7 +46,6 @@ APlayerCharacter::APlayerCharacter()
 	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
     ItemManager = CreateDefaultSubobject<UItemManager>(TEXT("ItemManager"));
 
-    bIsSprinting = false;
     bIsDodging = false;
     bCanDodge = true;
 
@@ -147,7 +146,7 @@ void APlayerCharacter::SetAiming(bool bNewAiming)
 
     bUseControllerRotationYaw = bIsAiming;
     GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
-    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : DefaultWalkSpeed;
+    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
 
     if (AMainPlayerController* PC = Cast<AMainPlayerController>(GetController()))
     {
@@ -223,20 +222,6 @@ void APlayerCharacter::Look(const FVector2D& LookAxisVector)
     }
 }
 
-void APlayerCharacter::StartSprint()
-{
-    if (bIsDodging) return;
-
-    bIsSprinting = true;
-    UpdateMovementSpeed();
-}
-
-void APlayerCharacter::StopSprint()
-{
-    bIsSprinting = false;
-    UpdateMovementSpeed();
-}
-
 void APlayerCharacter::PerformDodge()
 {
     if (!bCanDodge || bIsDodging) return;
@@ -246,17 +231,9 @@ void APlayerCharacter::PerformDodge()
 
 void APlayerCharacter::UpdateMovementSpeed()
 {
-    if (!GetCharacterMovement()) return;
+    if (!GetCharacterMovement() || !StatComponent) return;
 
-    if (bIsSprinting)
-    {
-        GetCharacterMovement()->MaxWalkSpeed = WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
-        //GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
-    }
-    else
-    {
-        GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-    }
+    GetCharacterMovement()->MaxWalkSpeed = WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
 }
 
 void APlayerCharacter::ExecuteDodge()
@@ -265,9 +242,6 @@ void APlayerCharacter::ExecuteDodge()
 
     bIsDodging = true;
     bCanDodge = false;
-
-    if (bIsSprinting)
-        StopSprint();
 
     DodgeDir = GetLastMovementInputVector();
     if (DodgeDir.IsNearlyZero()) DodgeDir = GetVelocity();

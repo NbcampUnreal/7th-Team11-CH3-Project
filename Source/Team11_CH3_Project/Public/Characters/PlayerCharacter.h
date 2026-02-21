@@ -26,10 +26,6 @@ class UItemManager;
 
 struct FInputActionValue;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintStarted);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintEnded);
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeStarted);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeEnded);
@@ -87,10 +83,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float WalkSpeed = 400.0f;
 
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-    float SprintSpeed = 800.0f;
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float DodgeDistance = 1800.0f;
 
@@ -107,8 +99,6 @@ public:
 #pragma endregion
 
 #pragma region State
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
-	bool bIsSprinting;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	bool bIsDodging;
@@ -116,11 +106,6 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State")
 	bool bCanDodge;
 
-	UPROPERTY(BlueprintAssignable, Category = "State")
-	FOnSprintStarted OnSprintStartedEvent;
-
-	UPROPERTY(BlueprintAssignable, Category = "State")
-	FOnSprintEnded OnSprintEndedEvent;
 #pragma endregion
 
 #pragma region Component
@@ -162,12 +147,6 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void Look(const FVector2D& LookAxisVector);
-
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void StartSprint();
-
-	UFUNCTION(BlueprintCallable, Category = "Movement")
-	void StopSprint();
 
 	UFUNCTION(BlueprintCallable, Category = "Movement")
 	void PerformDodge();
@@ -238,7 +217,7 @@ protected:
 private:
     bool bIsDead = false;
 
-    float DefaultWalkSpeed = 600.f;
+    //float DefaultWalkSpeed = 600.f;
     float AimWalkSpeed = 300.f;
 
     float DefaultArmLength = 300.f;
