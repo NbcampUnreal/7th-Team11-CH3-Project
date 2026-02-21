@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
@@ -27,6 +27,8 @@ struct TEAM11_CH3_PROJECT_API FStatData
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float CriticalDamage;
 };
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStatChanged);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TEAM11_CH3_PROJECT_API UStatComponent : public UActorComponent
@@ -72,6 +74,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Stat")
 	bool IsDead() const;
 	
+	// 스탯 변경 시 브로드캐스트
+	UPROPERTY(BlueprintAssignable)
+	FOnStatChanged OnStatChanged;
+
 public:
 	UPROPERTY()
 	FStatData CurrentStat;

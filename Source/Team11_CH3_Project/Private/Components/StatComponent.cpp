@@ -83,6 +83,8 @@ void UStatComponent::SetCurrentStat(EStat TargetStat, float Amount)
 	default:
 		break;
 	}
+	// 스텟 변동시 Broadcast
+	OnStatChanged.Broadcast();
 }
 
 float UStatComponent::GetBaseStat(EStat TargetStat) const

@@ -189,6 +189,8 @@ protected:
 	TObjectPtr<AWeaponActor> WeaponActor;
 
 protected:
+	// 델리게이트 사용목적 UFUNCTION() 
+	UFUNCTION()
 	void UpdateMovementSpeed();
 	void ExecuteDodge();
 	void EndDodge();

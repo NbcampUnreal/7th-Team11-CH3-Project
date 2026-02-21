@@ -146,8 +146,7 @@ void APlayerCharacter::SetAiming(bool bNewAiming)
 
     bUseControllerRotationYaw = bIsAiming;
     GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
-    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
-
+    UpdateMovementSpeed();
     if (AMainPlayerController* PC = Cast<AMainPlayerController>(GetController()))
     {
         PC->BP_SetCrosshairVisible(bIsAiming);
@@ -167,19 +166,9 @@ void APlayerCharacter::BeginPlay()
 
     ItemManager->UseItem(TEXT("StaffWeapon"), EItemType::Equipment, 0);
     //TODO: InitStat -> 스테이지 종료될때 게임인스턴스에 넘기고 다시 받아오기
-#pragma region TESTCODE
-
-    WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
-    WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
-    WeaponItemData.WeaponType = EWeaponType::Melee;
-    FActorSpawnParameters SpawnInfo;
-    SpawnInfo.Owner = this;
-    WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(WeaponItemData.WeaponActorClass.LoadSynchronous(),SpawnInfo);
-    if (WeaponActor)
-    {
-        WeaponActor->Init(&WeaponItemData, GetMesh());
-    }
-#pragma endregion
+    
+    // 스탯 변경 시 이동속도 업데이트
+    StatComponent->OnStatChanged.AddDynamic(this, &APlayerCharacter::UpdateMovementSpeed);
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -232,8 +221,8 @@ void APlayerCharacter::PerformDodge()
 void APlayerCharacter::UpdateMovementSpeed()
 {
     if (!GetCharacterMovement() || !StatComponent) return;
-
-    GetCharacterMovement()->MaxWalkSpeed = WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
+    // 조준상태일때도 고려해서 최고속도 업데이트
+    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
 }
 
 void APlayerCharacter::ExecuteDodge()

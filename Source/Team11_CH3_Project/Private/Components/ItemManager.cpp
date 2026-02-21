@@ -3,10 +3,12 @@
 
 #include "Components/ItemManager.h"
 #include "Components/Skillmanager.h"
+#include "Components/BuffManager.h"
 #include "Components/Skills/BaseSkill.h"
 #include "Components/StatComponent.h"
 #include "Components/Items/Equipments/WeaponItemData.h"
 #include "Characters/PlayerCharacter.h"
+#include "Subsystems/ItemWorldSubsystem.h"
 #include "WeaponActor.h"
 
 // Sets default values for this component's properties
@@ -21,26 +23,30 @@ UItemManager::UItemManager()
 
 void UItemManager::UseItem(FName RowName, EItemType ItemType, int32 SlotIndex)
 {
+	UItemWorldSubsystem* Subsystem = GetWorld()->GetSubsystem<UItemWorldSubsystem>();
+	if (IsValid(Subsystem) == false)
+		return;
+
 	switch (ItemType)
 	{
 	case EItemType::Potion:
-		if (auto* Data = PotionTable->FindRow<FPotionItemData>(RowName, TEXT("UItemManager::UseItem : Potion")))
+		if (auto* Data = Subsystem->FindPotion(RowName))
 		{
 			UsePotion(Data);
 		}
 		break;
 	case EItemType::SkillGem:
-		if (auto* Data = SkillGemTable->FindRow<FSkillGemItemData>(RowName, TEXT("UItemManager::UseItem : SkillGem")))
+		if (auto* Data = Subsystem->FindSkillGem(RowName))
 		{
 			UseSkillGem(Data, SlotIndex);
 		}
 		break;
 	case EItemType::Equipment:
-		if (auto* Data = WeaponTable->FindRow<FWeaponItemData>(RowName, TEXT("UItemManager::UseItem : Weapon")))
+		if (auto* Data = Subsystem->FindWeapon(RowName))
 		{
 			EquipWeapon(Data);
 		}
-		else if (auto* ArmorData = ArmorTable->FindRow<FArmorItemData>(RowName, TEXT("UItemManager::UseItem : Armor")))
+		else if (auto* ArmorData = Subsystem->FindArmor(RowName))
 		{
 			EquipArmor(ArmorData);
 		}
@@ -102,7 +108,7 @@ void UItemManager::EquipWeapon(FWeaponItemData* Data)
 
 		CurrentWeapon = Weapon;
 		CachedWeaponData = *Data;
-		ApplyStatBonuses(Data->StatBonuses, false);
+		ApplyStatBonuses(Data->ItemID, Data->StatBonuses);
 
 		// PlayerCharacter의 WeaponActor 갱신
 		if (auto* Player = Cast<APlayerCharacter>(GetOwner()))
@@ -110,7 +116,6 @@ void UItemManager::EquipWeapon(FWeaponItemData* Data)
 			Player->SetWeaponActor(Weapon);
 		}
 	}
-
 }
 
 void UItemManager::EquipArmor(FArmorItemData* Data)
@@ -119,43 +124,45 @@ void UItemManager::EquipArmor(FArmorItemData* Data)
 	// 장착 중인 방어구 타입 및 데이터 추가
 	EquippedArmors.Add(Data->EquipmentType, *Data);
 	// StatBonuses 추가
-	ApplyStatBonuses(Data->StatBonuses, false);
+	ApplyStatBonuses(Data->ItemID, Data->StatBonuses);
 }
 
-void UItemManager::ApplyStatBonuses(TMap<EStat, float> StatBonuses, bool bRemove)
+void UItemManager::ApplyStatBonuses(FName ItemRowName, TMap<EStat, float>& StatBonuses)
 {
-	// Owner의 스탯 컴포넌트
-	auto* StatComp = GetOwner()->FindComponentByClass<UStatComponent>();
-	if (!IsValid(StatComp))
+	auto* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
+	if (IsValid(BuffManager) == false)
 		return;
-	// StatBonuses Tmap 배열 순회 하면서 CurrntStat에 StatBonuses 적용
+	TArray<int32>& BuffIDS = EquipmentBuffIDs.FindOrAdd(ItemRowName);
 	for (auto& Pair : StatBonuses)
 	{
-		float Current = StatComp->GetCurrentStat(Pair.Key);
-		float NewValue;
-		// 장착 해제
-		if (bRemove)
-		{
-			NewValue = Current - Pair.Value;
-		}
-		// 장착
-		else
-		{
-			NewValue = Current + Pair.Value;
-		}
-		
-		StatComp->SetCurrentStat(Pair.Key, NewValue);
+		int32 ID = BuffManager->AddBuff(Pair.Key, EBuffType::Add, Pair.Value, -1.f);
+		BuffIDS.Add(ID);
 	}
+}
+
+void UItemManager::RemoveStatBonuses(FName ItemID)
+{
+	UBuffManager* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
+	if (IsValid(BuffManager) == false)
+		return;
+	TArray<int32>* BuffIDs = EquipmentBuffIDs.Find(ItemID);
+	if (BuffIDs == nullptr)
+		return;
+
+	for (int32 ID : *BuffIDs)
+	{
+		BuffManager->RemoveBuff(ID);
+	}
+	EquipmentBuffIDs.Remove(ItemID);
+	
 }
 
 void UItemManager::UnequipWeapon()
 {
 	if (IsValid(CurrentWeapon) == false)
-	{
 		return;
-	}
 
-	ApplyStatBonuses(CachedWeaponData.StatBonuses, true);
+	RemoveStatBonuses(CachedWeaponData.ItemID);
 	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	CurrentWeapon->Destroy();
 	CurrentWeapon = nullptr;
@@ -163,9 +170,10 @@ void UItemManager::UnequipWeapon()
 
 void UItemManager::UnequipArmor(EEquipmentType SlotType)
 {
-	if (EquippedArmors.Contains(SlotType))
-	{
-		ApplyStatBonuses(EquippedArmors[SlotType].StatBonuses, true);
-		EquippedArmors.Remove(SlotType);
-	}
+	if (EquippedArmors.Contains(SlotType) == false)
+		return;
+
+	RemoveStatBonuses(EquippedArmors[SlotType].ItemID);
+	EquippedArmors.Remove(SlotType);
+
 }
