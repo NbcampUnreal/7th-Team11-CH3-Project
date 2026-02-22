@@ -45,7 +45,7 @@ public:
 	int RemainingMonsterCount;
 
 	UPROPERTY(EditAnywhere)
-	TMap<FString, TSoftObjectPtr<UDataTable>> MapDataConfigs;
+	TMap<FString, UDataTable*> MapDataConfigs;
 
 	TSoftObjectPtr<UDataTable> WaveData;
 };
