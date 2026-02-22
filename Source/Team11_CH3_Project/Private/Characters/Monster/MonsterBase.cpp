@@ -104,7 +104,7 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 	UAISense_Damage::ReportDamageEvent(
 		GetWorld(),
 		this,
-		EventInstigator,
+		EventInstigator->GetPawn(),
 		ActualDamage,
 		GetActorLocation(),
 		GetActorLocation()

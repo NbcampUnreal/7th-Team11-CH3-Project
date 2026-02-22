@@ -4,6 +4,7 @@
 #include "BTS_CheckRange.h"
 
 #include "AIController.h"
+#include "SNegativeActionButton.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTS_CheckRange::UBTS_CheckRange()
@@ -25,7 +26,25 @@ void UBTS_CheckRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 	{
 		float Range = BB->GetValueAsFloat("AttackRange");
 		bool bIsInRange = FVector::DistSquared(Target->GetActorLocation(), Pawn->GetActorLocation()) < Range*Range;
-		BB->SetValueAsBool(IsInRangeKey.SelectedKeyName,bIsInRange);
+		if (!bIsInRange)
+		{
+			BB->SetValueAsBool(IsInRangeKey.SelectedKeyName,false);
+			return;
+		}
+		FHitResult Hit;
+		FCollisionQueryParams CollisionParams;
+		CollisionParams.AddIgnoredActor(Pawn);
+		GetWorld()->LineTraceSingleByChannel(Hit,Pawn->GetActorLocation(),Target->GetActorLocation(),ECollisionChannel::ECC_WorldStatic,CollisionParams);
+
+		if (Hit.bBlockingHit)
+		{
+			if (Hit.GetActor() == Target)
+			{
+				BB->SetValueAsBool(IsInRangeKey.SelectedKeyName,true);
+				return;
+			}
+		}
+		BB->SetValueAsBool(IsInRangeKey.SelectedKeyName,false);
 		
 	}
 }

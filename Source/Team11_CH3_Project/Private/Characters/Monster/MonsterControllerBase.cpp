@@ -161,7 +161,7 @@ void AMonsterControllerBase::TargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 
 			if (UBlackboardComponent* BB = GetBlackboardComponent())
 			{
-				if (BB->GetValueAsObject(TEXT("TargetActor")))
+				if (BB->GetValueAsObject(TEXT("TargetActor")) && BB->GetValueAsBool(TEXT("bIsFighting")))
 				{
 				}
 				else
@@ -187,7 +187,6 @@ void AMonsterControllerBase::TargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 							}
 						}
 					}, 2.0f, true, 0.5f);
-
 					BB->SetValueAsObject(TEXT("TargetActor"), Actor);
 					BB->SetValueAsBool(TEXT("bIsFighting"), true);
 				}
