@@ -177,3 +177,18 @@ void UItemManager::UnequipArmor(EEquipmentType SlotType)
 	EquippedArmors.Remove(SlotType);
 
 }
+
+void UItemManager::RestoreEquipment(const FWeaponItemData& WeaponData, const TMap<EEquipmentType, FArmorItemData>& ArmorData)
+{
+	// 무기 복원
+	if (WeaponData.ItemID.IsNone())
+		return;
+
+	EquipWeapon(const_cast<FWeaponItemData*>(&WeaponData));
+	
+	// 방어구 복원
+	for (const auto& Pair : ArmorData)
+	{
+		EquipArmor(const_cast<FArmorItemData*>(&Pair.Value));
+	}
+}

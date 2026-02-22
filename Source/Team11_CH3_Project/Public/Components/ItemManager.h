@@ -28,13 +28,18 @@ public:
 	// 장비 해제
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void UnequipWeapon();
-
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void UnequipArmor(EEquipmentType SlotType);
 
+	// GameInstance에서 장비 데이터 받아오는 함수
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	void RestoreEquipment(const FWeaponItemData& WeaponData, const TMap<EEquipmentType, FArmorItemData>& ArmorData);
+
+	// Getter
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	AWeaponActor* GetCurrentWeapon() const { return CurrentWeapon; }
-
+	const FWeaponItemData& GetCachedWeaponData() const { return CachedWeaponData; }
+	const TMap<EEquipmentType, FArmorItemData>& GetEquippedArmors() const { return EquippedArmors; }
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -48,15 +53,6 @@ private:
 	// 아이템 장착 해제 시 스탯 수정
 	void ApplyStatBonuses(FName ItemRowName, TMap<EStat, float>& StatBonuses);
 	void RemoveStatBonuses(FName ItemID);
-	//데이터 테이블 참조
-	//UPROPERTY(EditDefaultsOnly, Category = "Item|Data", meta = (AllowPrivateAccess = "true"))
-	//TObjectPtr<UDataTable> PotionTable;
-	//UPROPERTY(EditDefaultsOnly, Category = "Item|Data", meta = (AllowPrivateAccess = "true"))
-	//TObjectPtr<UDataTable> SkillGemTable;
-	//UPROPERTY(EditDefaultsOnly, Category = "Item|Data", meta = (AllowPrivateAccess = "true"))
-	//TObjectPtr<UDataTable> WeaponTable;
-	//UPROPERTY(EditDefaultsOnly, Category = "Item|Data", meta = (AllowPrivateAccess = "true"))
-	//TObjectPtr<UDataTable> ArmorTable;
 
 	// 장착중인 무기
 	UPROPERTY(EditDefaultsOnly, Category = "Item|Weapon", meta = (AllowPrivateAccess = "true"))
