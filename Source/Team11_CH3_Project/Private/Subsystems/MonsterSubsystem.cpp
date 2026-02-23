@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Subsystems/MonsterSubsystem.h"
@@ -99,7 +99,8 @@ void UMonsterSubsystem::DespawnMonster(AMonsterBase* DeadMonster)
 		AT11_GameState* GameState = GetWorld()->GetGameState<AT11_GameState>();
 		if (GameState)
 		{
-			GameState->OnMonsterKilled();
+			// 아이템 드랍을 위해서 몬스터 위치 매개변수(완료) 및 점수 데이터 추가(예정)
+			GameState->OnMonsterKilled(DeadMonster->GetActorLocation());
 		}
 	}
 }
