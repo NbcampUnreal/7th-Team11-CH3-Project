@@ -26,7 +26,12 @@ APlayerCharacter::APlayerCharacter()
     CameraBoom->TargetArmLength = CameraBoomLength;
     CameraBoom->bUsePawnControlRotation = true;
     CameraBoom->bEnableCameraLag = !bIsAiming;
-    CameraBoom->CameraLagSpeed = 3.0f;
+    CameraBoom->CameraLagSpeed = 20.0f;
+    CameraBoom->CameraLagMaxDistance = 0.f;
+    CameraBoom->bEnableCameraRotationLag = false;
+    CameraBoom->CameraRotationLagSpeed = 20.f;
+    CameraBoom->bUseCameraLagSubstepping = true;
+    CameraBoom->CameraLagMaxTimeStep = 1.f / 60.f;
 
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -39,14 +44,15 @@ APlayerCharacter::APlayerCharacter()
     GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
     bUseControllerRotationPitch = false;
-    bUseControllerRotationYaw = false;
+    bUseControllerRotationYaw = true;
     bUseControllerRotationRoll = false;
 
-    GetCharacterMovement()->bOrientRotationToMovement = true;
+    GetCharacterMovement()->bOrientRotationToMovement = false;
     GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
     GetCharacterMovement()->JumpZVelocity = 600.0f;
     GetCharacterMovement()->AirControl = 0.35f;
     GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+    GetCharacterMovement()->bUseControllerDesiredRotation = true;
 
     StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
     BuffManager = CreateDefaultSubobject<UBuffManager>(TEXT("BuffManager"));
@@ -152,8 +158,9 @@ void APlayerCharacter::SetAiming(bool bNewAiming)
     UE_LOG(LogTemp, Warning, TEXT("SetAiming: %d"), bNewAiming);
     bIsAiming = bNewAiming;
 
-    bUseControllerRotationYaw = bIsAiming;
-    GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
+    bUseControllerRotationYaw = false;
+    GetCharacterMovement()->bOrientRotationToMovement = false;
+    GetCharacterMovement()->bUseControllerDesiredRotation = true;
     GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : DefaultWalkSpeed;
 
     if (AMainPlayerController* PC = Cast<AMainPlayerController>(GetController()))
@@ -190,6 +197,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    const FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
+    CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
+    /*
     float TargetArm = bIsAiming ? AimArmLength : DefaultArmLength;
     FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
 
@@ -198,8 +208,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 
     CameraBoom->SocketOffset =
         FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
+        */
 }
-
 
 void APlayerCharacter::Move(const FVector2D& MovementVector)
 {
@@ -207,6 +217,26 @@ void APlayerCharacter::Move(const FVector2D& MovementVector)
 
     if (!Controller) return;
 
+    SmoothedMoveInput = FMath::Vector2DInterpTo(
+        SmoothedMoveInput,
+        MovementVector,
+        GetWorld()->GetDeltaSeconds(),
+        MoveInputSmoothSpeed
+    );
+
+    const float X = SmoothedMoveInput.X;
+    const float Y = SmoothedMoveInput.Y;
+
+    const FRotator ControlRot = Controller->GetControlRotation();
+    const FRotator YawRot(0.f, ControlRot.Yaw, 0.f);
+
+    const FVector ForwardDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+    const FVector RightDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
+
+    AddMovementInput(ForwardDir, Y);
+    AddMovementInput(RightDir, X);
+
+    /*
     FRotator ControlRotation = Controller->GetControlRotation();
     FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
 
@@ -215,6 +245,7 @@ void APlayerCharacter::Move(const FVector2D& MovementVector)
 
     AddMovementInput(Forward, MovementVector.Y);
     AddMovementInput(Right, MovementVector.X);
+    */
 }
 
 void APlayerCharacter::Look(const FVector2D& LookAxisVector)
@@ -317,22 +348,6 @@ void APlayerCharacter::ExecuteDodge()
 
     const EDodgeDir Dir = GetDodgeDirectionFromInput();
     PlayDodgeMontage(Dir);
-   
-    /*
-    UAnimMontage* M = DodgeMontage_F; // 테스트
-    UE_LOG(LogTemp, Warning, TEXT("[Dodge] Montage=%s"), *GetNameSafe(M));
-
-    if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
-    {
-        const float Len = Anim->Montage_Play(M, 1.0f);
-        UE_LOG(LogTemp, Warning, TEXT("[Dodge] Len=%.3f AnimClass=%s"),
-            Len, *GetNameSafe(GetMesh()->GetAnimClass()));
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("[Dodge] AnimInstance NULL"));
-    }
-    */
 
     if (bIsSprinting)
         StopSprint();
@@ -509,21 +524,3 @@ void APlayerCharacter::Die()
     }
 }
 
-// dodge, death anim
-/*
-void APlayerCharacter::PlayDodgeAnimation()
-{
-    if (DodgeMontage && GetMesh() && GetMesh()->GetAnimInstance())
-    {
-        GetMesh()->GetAnimInstance()->Montage_Play(DodgeMontage);
-    }
-}
-
-void APlayerCharacter::PlayDeathAnimation()
-{
-    if (DeathMontage && GetMesh() && GetMesh()->GetAnimInstance())
-    {
-        GetMesh()->GetAnimInstance()->Montage_Play(DeathMontage);
-    }
-}
-*/
