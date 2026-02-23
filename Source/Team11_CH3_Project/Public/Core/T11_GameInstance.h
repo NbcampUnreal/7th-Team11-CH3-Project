@@ -44,4 +44,9 @@ public:
 	TMap<EEquipmentType, FArmorItemData> SavedEquippedArmor;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Skill")
 	TArray<TSoftObjectPtr<USkillDataAsset>> SavedSkillSlots;
+	// 점수 데이터 총 점수 스테이지 점수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Score")
+	int32 TotalScore = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Score")
+	TMap<int32, int32> StageScore;
 };

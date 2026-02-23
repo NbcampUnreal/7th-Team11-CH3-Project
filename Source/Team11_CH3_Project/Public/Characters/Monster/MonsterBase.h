@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -31,8 +31,8 @@ public:
 	void BlackboardUpdate();
 	void Init(const FMonsterData* MonsterData);
 	void Clear();
-	
-	
+	// Getter
+	int32 GetScoreValue() const { return ScoreValue; }
 	FOnAttackFinished OnAttackFinished;
 	
 protected:
@@ -61,4 +61,5 @@ public:
 
 private:
 	bool bIsAttacking;
+	int32 ScoreValue = 0;
 };

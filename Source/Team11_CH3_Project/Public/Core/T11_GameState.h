@@ -32,7 +32,7 @@ public:
 
 	void CreateSpawnTimer(FString TimerName, float Interval, int32 TotalCount, ASpawnVolume* SpawnVolume);
 	// 아이템 드랍 위치 매개변수 추가
-	void OnMonsterKilled(FVector DropLocation);
+	void OnMonsterKilled(FVector DropLocation, int32 ScoreValue);
 
 	FTimerHandle WaveTimerHandle;
 	TMap<FString, FTimerHandle> SpawnTimerHandles;

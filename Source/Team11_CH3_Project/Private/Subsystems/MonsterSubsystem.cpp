@@ -100,7 +100,7 @@ void UMonsterSubsystem::DespawnMonster(AMonsterBase* DeadMonster)
 		if (GameState)
 		{
 			// 아이템 드랍을 위해서 몬스터 위치 매개변수(완료) 및 점수 데이터 추가(예정)
-			GameState->OnMonsterKilled(DeadMonster->GetActorLocation());
+			GameState->OnMonsterKilled(DeadMonster->GetActorLocation(),DeadMonster->GetScoreValue());
 		}
 	}
 }

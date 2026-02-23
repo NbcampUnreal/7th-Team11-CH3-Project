@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -30,7 +30,6 @@ struct TEAM11_CH3_PROJECT_API FMonsterData : public FTableRowBase
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
 	TSoftClassPtr<UAnimInstance> AnimBlueprint;
 	
-	// UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
-	// TArray<Skill> Skills;
-	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
+	int32 ScoreValue = 0;
 };
