@@ -189,11 +189,7 @@ void APlayerCharacter::BeginPlay()
 
         // 기본 장비 장착(시작은 기본 무기만)
         ItemManager->UseItem(TEXT("StaffWeapon"), EItemType::Equipment, 0);
-        ItemManager->UseItem(TEXT("Foot"), EItemType::Equipment, 0);
     }
-
-    
-
 
     UpdateMovementSpeed();
 }
