@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
@@ -31,6 +31,7 @@ struct TEAM11_CH3_PROJECT_API FBuffData
 	float Duration; // -1 = 무한
 };
 
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TEAM11_CH3_PROJECT_API UBuffManager : public UActorComponent
 {
@@ -41,7 +42,7 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	
+
 	// 버프 추가
 	int32 AddBuff(const EStat TargetStat, EBuffType BuffType, float Amount, float Duration);
 	// 버프 제거

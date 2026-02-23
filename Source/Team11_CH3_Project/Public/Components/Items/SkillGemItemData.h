@@ -16,5 +16,5 @@ struct TEAM11_CH3_PROJECT_API FSkillGemItemData : public FItemDataBase
 	GENERATED_BODY()
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|SkillGem")
-	TObjectPtr<USkillDataAsset> SkillData;
+	TSoftObjectPtr<USkillDataAsset> SkillData;
 };

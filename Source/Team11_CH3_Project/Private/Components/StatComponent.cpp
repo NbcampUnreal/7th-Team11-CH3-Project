@@ -64,6 +64,8 @@ void UStatComponent::SetCurrentStat(EStat TargetStat, float Amount)
 		break;
 	case EStat::MoveSpeed:
 		CurrentStat.MoveSpeed = FMath::Max(Amount, 0.0f);
+		// 스텟 변동시 Broadcast 지금은 이동속도만 업데이트 해주기 때문에 MoveSpeed변동시에만 호출
+		OnStatChanged.Broadcast();
 		break;
 	case EStat::AttackDamage:
 		CurrentStat.AttackDamage = FMath::Max(Amount, 0.0f);
@@ -83,6 +85,7 @@ void UStatComponent::SetCurrentStat(EStat TargetStat, float Amount)
 	default:
 		break;
 	}
+
 }
 
 float UStatComponent::GetBaseStat(EStat TargetStat) const

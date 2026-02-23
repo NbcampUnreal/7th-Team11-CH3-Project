@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
@@ -34,9 +34,6 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputAction> LookAction;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
-	TObjectPtr<UInputAction> SprintAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
 	TObjectPtr<UInputAction> DodgeAction;
@@ -73,8 +70,6 @@ protected:
 	void HandleLook(const FInputActionValue& Value);
 	void HandleJump();
 	void HandleStopJumping();
-	void HandleStartSprint();
-	void HandleStopSprint();
 	void HandleDodge();
 
 	// camera

@@ -1,4 +1,4 @@
-#include "Characters/PlayerCharacter.h"
+﻿#include "Characters/PlayerCharacter.h"
 #include "Characters/InventoryComponent.h"
 #include "MainPlayerController.h"
 #include "Camera/CameraComponent.h"
@@ -13,6 +13,7 @@
 #include "Components/SkillManager.h"
 #include "Components/ItemManager.h"
 #include "Components/Skills/SkillSlot.h"
+#include "Core/T11_GameInstance.h"
 #include "Kismet/KismetMathLibrary.h"
 
 APlayerCharacter::APlayerCharacter()
@@ -46,7 +47,6 @@ APlayerCharacter::APlayerCharacter()
 	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
     ItemManager = CreateDefaultSubobject<UItemManager>(TEXT("ItemManager"));
 
-    bIsSprinting = false;
     bIsDodging = false;
     bCanDodge = true;
 
@@ -147,8 +147,7 @@ void APlayerCharacter::SetAiming(bool bNewAiming)
 
     bUseControllerRotationYaw = bIsAiming;
     GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
-    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : DefaultWalkSpeed;
-
+    UpdateMovementSpeed();
     if (AMainPlayerController* PC = Cast<AMainPlayerController>(GetController()))
     {
         PC->BP_SetCrosshairVisible(bIsAiming);
@@ -163,24 +162,40 @@ void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
 
+    // 스탯 변경 시 이동속도 업데이트
+    StatComponent->OnStatChanged.AddDynamic(this, &APlayerCharacter::UpdateMovementSpeed);
+
+    UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
+    if (IsValid(GI) == false)
+        return;
+
+    if (GI->HasSavedData())
+    {
+        GI->RestorePlayerData(StatComponent, ItemManager, SkillComponent);
+    }
+    else
+    {
+        // 초기 스탯 설정
+        FStatData InitialStat;
+        InitialStat.MaxHP = 1000.f;
+        InitialStat.DEF = 10.f;
+        InitialStat.MoveSpeed = 0.f;
+        InitialStat.AttackDamage = 20.f;
+        InitialStat.CastSpeed = 1.f;
+        InitialStat.ProjectileSpeed = 500.f;
+        InitialStat.CriticalChance = 10.f;
+        InitialStat.CriticalDamage = 1.5f;
+        StatComponent->InitStat(InitialStat);
+
+        // 기본 장비 장착(시작은 기본 무기만)
+        ItemManager->UseItem(TEXT("StaffWeapon"), EItemType::Equipment, 0);
+        ItemManager->UseItem(TEXT("Foot"), EItemType::Equipment, 0);
+    }
+
+    
+
 
     UpdateMovementSpeed();
-
-    ItemManager->UseItem(TEXT("StaffWeapon"), EItemType::Equipment, 0);
-    //TODO: InitStat -> 스테이지 종료될때 게임인스턴스에 넘기고 다시 받아오기
-#pragma region TESTCODE
-
-    WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
-    WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
-    WeaponItemData.WeaponType = EWeaponType::Melee;
-    FActorSpawnParameters SpawnInfo;
-    SpawnInfo.Owner = this;
-    WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(WeaponItemData.WeaponActorClass.LoadSynchronous(),SpawnInfo);
-    if (WeaponActor)
-    {
-        WeaponActor->Init(&WeaponItemData, GetMesh());
-    }
-#pragma endregion
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -223,20 +238,6 @@ void APlayerCharacter::Look(const FVector2D& LookAxisVector)
     }
 }
 
-void APlayerCharacter::StartSprint()
-{
-    if (bIsDodging) return;
-
-    bIsSprinting = true;
-    UpdateMovementSpeed();
-}
-
-void APlayerCharacter::StopSprint()
-{
-    bIsSprinting = false;
-    UpdateMovementSpeed();
-}
-
 void APlayerCharacter::PerformDodge()
 {
     if (!bCanDodge || bIsDodging) return;
@@ -246,17 +247,9 @@ void APlayerCharacter::PerformDodge()
 
 void APlayerCharacter::UpdateMovementSpeed()
 {
-    if (!GetCharacterMovement()) return;
-
-    if (bIsSprinting)
-    {
-        GetCharacterMovement()->MaxWalkSpeed = WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
-        //GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
-    }
-    else
-    {
-        GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-    }
+    if (!GetCharacterMovement() || !StatComponent) return;
+    // 조준상태일때도 고려해서 최고속도 업데이트
+    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
 }
 
 void APlayerCharacter::ExecuteDodge()
@@ -265,9 +258,6 @@ void APlayerCharacter::ExecuteDodge()
 
     bIsDodging = true;
     bCanDodge = false;
-
-    if (bIsSprinting)
-        StopSprint();
 
     DodgeDir = GetLastMovementInputVector();
     if (DodgeDir.IsNearlyZero()) DodgeDir = GetVelocity();

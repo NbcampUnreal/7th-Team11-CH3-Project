@@ -1,4 +1,4 @@
-#include "MainPlayerController.h"
+﻿#include "MainPlayerController.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
@@ -49,8 +49,6 @@ void AMainPlayerController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainPlayerController::HandleLook);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleJump);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AMainPlayerController::HandleStopJumping);
-	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleStartSprint);
-	EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AMainPlayerController::HandleStopSprint);
 	EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleDodge);
 
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AMainPlayerController::AimPressed);
@@ -122,22 +120,6 @@ void AMainPlayerController::HandleStopJumping()
 	if (ACharacter* PlayerChar = Cast<ACharacter>(GetPawn()))
 	{
 		PlayerChar->StopJumping();
-	}
-}
-
-void AMainPlayerController::HandleStartSprint()
-{
-	if (APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetPawn()))
-	{
-		PlayerChar->StartSprint();
-	}
-}
-
-void AMainPlayerController::HandleStopSprint()
-{
-	if (APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetPawn()))
-	{
-		PlayerChar->StopSprint();
 	}
 }
 

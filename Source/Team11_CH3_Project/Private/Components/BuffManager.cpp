@@ -14,6 +14,7 @@ void UBuffManager::BeginPlay()
 	StatComp = GetOwner()->FindComponentByClass<UStatComponent>();
 	checkf(StatComp, TEXT("No StatComponent Found"));
 	CurrentBuffID = 0;
+
 }
 
 void UBuffManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
