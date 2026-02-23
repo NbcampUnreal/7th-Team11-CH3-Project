@@ -96,7 +96,7 @@ void AT11_GameState::EndLevel()
     );
 
     // 임의로 다음 스테이지로 이동
-    UGameplayStatics::OpenLevel(GetWorld(), FName("L_TestStage_2"));
+    UGameplayStatics::OpenLevel(GetWorld(), FName("L_Stage2_Test"));
 }
 
 void AT11_GameState::EndWave()
