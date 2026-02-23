@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "WeaponActor.h"
 #include "TimerManager.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/StatComponent.h"
 #include "Components/BuffManager.h"
 #include "Components/SkillManager.h"
@@ -30,6 +31,12 @@ APlayerCharacter::APlayerCharacter()
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     FollowCamera->bUsePawnControlRotation = false;
+
+    // 캡슐과 카메라 사이 충돌 비활성화
+    GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera,
+        ECollisionResponse::ECR_Ignore);
+    // 매쉬와 카메라 사이 충돌 비활성화
+    GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
     bUseControllerRotationPitch = false;
     bUseControllerRotationYaw = false;
@@ -314,7 +321,8 @@ void APlayerCharacter::ExecuteDodge()
 
     const EDodgeDir Dir = GetDodgeDirectionFromInput();
     PlayDodgeMontage(Dir);
-
+   
+    /*
     UAnimMontage* M = DodgeMontage_F; // 테스트
     UE_LOG(LogTemp, Warning, TEXT("[Dodge] Montage=%s"), *GetNameSafe(M));
 
@@ -328,6 +336,7 @@ void APlayerCharacter::ExecuteDodge()
     {
         UE_LOG(LogTemp, Warning, TEXT("[Dodge] AnimInstance NULL"));
     }
+    */
 
     if (bIsSprinting)
         StopSprint();
