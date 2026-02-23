@@ -162,10 +162,6 @@ void APlayerCharacter::SetAiming(bool bNewAiming)
     }
 }
 
-
-
-
-
 void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
