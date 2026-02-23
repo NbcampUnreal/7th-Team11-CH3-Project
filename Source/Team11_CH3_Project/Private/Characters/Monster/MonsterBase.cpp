@@ -89,7 +89,9 @@ void AMonsterBase::Clear()
 	{
 		AIController->GetBrainComponent()->PauseLogic(TEXT("Death"));
 	}
-	WeaponActor->Destroy();
+	if (WeaponActor){
+		WeaponActor->Destroy();
+	}
 }
 
 float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,

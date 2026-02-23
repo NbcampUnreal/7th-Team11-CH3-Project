@@ -92,6 +92,11 @@ void APlayerCharacter::Attack(const FInputActionValue& Value)
     {
         return;
     }
+    if (!IsValid(WeaponActor))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Weapon Empty!"));
+        return;        
+    }
     // TODO : 스킬컴포넌트 쪽에서 다 처리할지 WeaponActor에서 처리할지 고민중 아래쪽 스킬들 포함
     SkillComponent->StartSkillCooldown(0);
     WeaponActor->StartAttack(GetActorForwardVector() * 1000.0f + GetActorLocation(), SkillComponent->GetSkillSlot(0)->GetEquippedSkill());
@@ -112,7 +117,11 @@ void APlayerCharacter::SkillQ(const FInputActionValue& Value)
         UE_LOG(LogTemp, Warning, TEXT("CoolTime Remaining : %0.1f"), SkillComponent->GetCooldownRemaining(1));
         return;
     }
-
+    if (!IsValid(WeaponActor))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Weapon Empty!"));
+        return;        
+    }
 
 
     SkillComponent->StartSkillCooldown(1);
@@ -134,7 +143,11 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
         UE_LOG(LogTemp, Warning, TEXT("CoolTime Remaining : %0.1f"), SkillComponent->GetCooldownRemaining(2));
         return;
     }
-
+    if (!IsValid(WeaponActor))
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Weapon Empty!"));
+        return;        
+    }
 
     SkillComponent->StartSkillCooldown(2);
     WeaponActor->StartAttack(GetActorForwardVector() * 1000.0f + GetActorLocation(), SkillComponent->GetSkillSlot(2)->GetEquippedSkill());

@@ -113,6 +113,7 @@ void AMonsterControllerBase::OnUnPossess()
 	if (UBlackboardComponent* BB = GetBlackboardComponent())
 	{
 		UseBlackboard(BehaviorTree->GetBlackboardAsset(), BB);
+		GetWorldTimerManager().ClearTimer(TeamReportTimerHandle);
 	}
 }
 
@@ -168,7 +169,7 @@ void AMonsterControllerBase::TargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 				{
 					GetWorldTimerManager().SetTimer(TeamReportTimerHandle, [this,Actor]()
 					{
-						if (!IsValid(this))
+						if (!IsValid(this) || !IsValid(GetWorld()))
 						{
 							return;
 						}

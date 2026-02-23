@@ -16,6 +16,7 @@ void UItemWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 
 FWeaponItemData* UItemWorldSubsystem::FindWeapon(FName RowName)
 {
+	
 	return WeaponTable ? WeaponTable->FindRow<FWeaponItemData>(RowName, TEXT("FindWeapon")) : nullptr;
 }
 
