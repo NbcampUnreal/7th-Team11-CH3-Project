@@ -8,6 +8,7 @@
 #include "Engine/World.h"
 #include "WeaponActor.h"
 #include "TimerManager.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/StatComponent.h"
 #include "Components/BuffManager.h"
 #include "Components/SkillManager.h"
@@ -31,6 +32,12 @@ APlayerCharacter::APlayerCharacter()
     FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
     FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
     FollowCamera->bUsePawnControlRotation = false;
+
+    // 캡슐과 카메라 사이 충돌 비활성화
+    GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera,
+        ECollisionResponse::ECR_Ignore);
+    // 매쉬와 카메라 사이 충돌 비활성화
+    GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
     bUseControllerRotationPitch = false;
     bUseControllerRotationYaw = false;
@@ -167,10 +174,6 @@ void APlayerCharacter::SetAiming(bool bNewAiming)
     }
 }
 
-
-
-
-
 void APlayerCharacter::BeginPlay()
 {
     Super::BeginPlay();
@@ -265,12 +268,78 @@ void APlayerCharacter::UpdateMovementSpeed()
     GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
 }
 
+EDodgeDir APlayerCharacter::GetDodgeDirectionFromInput() const
+{
+    FVector InputDir = GetLastMovementInputVector();
+
+    if (InputDir.IsNearlyZero())
+    {
+        return EDodgeDir::Forward;
+    }
+
+    InputDir.Z = 0.f;
+    InputDir = InputDir.GetSafeNormal();
+
+    const float ForwardDot = FVector::DotProduct(InputDir, GetActorForwardVector());
+    const float RightDot = FVector::DotProduct(InputDir, GetActorRightVector());
+
+    if (FMath::Abs(ForwardDot) >= FMath::Abs(RightDot))
+    {
+        return (ForwardDot >= 0.f) ? EDodgeDir::Forward : EDodgeDir::Backward;
+    }
+    else
+    {
+        return (RightDot >= 0.f) ? EDodgeDir::Right : EDodgeDir::Left;
+    }
+}
+
+void APlayerCharacter::PlayDodgeMontage(EDodgeDir Dir)
+{
+    UAnimMontage* MontageToPlay = nullptr;
+
+    switch (Dir)
+    {
+    case EDodgeDir::Forward:  MontageToPlay = DodgeMontage_F; break;
+    case EDodgeDir::Backward: MontageToPlay = DodgeMontage_B; break;
+    case EDodgeDir::Left:     MontageToPlay = DodgeMontage_L; break;
+    case EDodgeDir::Right:    MontageToPlay = DodgeMontage_R; break;
+    default: break;
+    }
+
+    if (!MontageToPlay) return;
+
+    if (UAnimInstance* Anim = GetMesh() ? GetMesh()->GetAnimInstance() : nullptr)
+    {
+        Anim->Montage_Play(MontageToPlay, 1.0f);
+    }
+}
+
 void APlayerCharacter::ExecuteDodge()
 {
     if (!bCanDodge) return;
 
     bIsDodging = true;
     bCanDodge = false;
+
+    const EDodgeDir Dir = GetDodgeDirectionFromInput();
+    PlayDodgeMontage(Dir);
+   
+    /*
+    UAnimMontage* M = DodgeMontage_F; // 테스트
+    UE_LOG(LogTemp, Warning, TEXT("[Dodge] Montage=%s"), *GetNameSafe(M));
+
+    if (UAnimInstance* Anim = GetMesh()->GetAnimInstance())
+    {
+        const float Len = Anim->Montage_Play(M, 1.0f);
+        UE_LOG(LogTemp, Warning, TEXT("[Dodge] Len=%.3f AnimClass=%s"),
+            Len, *GetNameSafe(GetMesh()->GetAnimClass()));
+    }
+    else
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Dodge] AnimInstance NULL"));
+    }
+    */
+
 
     DodgeDir = GetLastMovementInputVector();
     if (DodgeDir.IsNearlyZero()) DodgeDir = GetVelocity();

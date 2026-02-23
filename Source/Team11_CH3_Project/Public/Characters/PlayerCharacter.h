@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
@@ -25,6 +25,20 @@ class UItemManager;
 // class AWeapon; // 일단 전방 선언
 
 struct FInputActionValue;
+
+// Dodge montage
+UENUM(BlueprintType)
+enum class EDodgeDir : uint8
+{
+	Forward,
+	Backward,
+	Left,
+	Right
+};
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintStarted);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintEnded);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeStarted);
 
@@ -172,6 +186,21 @@ public:
     UPROPERTY(BlueprintReadWrite, Category = "Combat")
     bool bIsAiming;
 
+#pragma region Dodge|Montage
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dodge|Montage")
+	TObjectPtr<UAnimMontage> DodgeMontage_F;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dodge|Montage")
+	TObjectPtr<UAnimMontage> DodgeMontage_B;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dodge|Montage")
+	TObjectPtr<UAnimMontage> DodgeMontage_L;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Dodge|Montage")
+	TObjectPtr<UAnimMontage> DodgeMontage_R;
+#pragma endregion
+
+
     // 조준 상태 변경
     void SetAiming(bool bNewAiming);
 
@@ -183,7 +212,10 @@ public:
 
 	void SetWeaponActor(AWeaponActor* NewWeapon) { WeaponActor = NewWeapon; }
 
+	void ExecuteDodge();
+
 	// void AttachWeapon(TSubclassOf<AActor> WeaponClass);
+
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<AWeaponActor> WeaponActor;
@@ -192,7 +224,6 @@ protected:
 	// 델리게이트 사용목적 UFUNCTION() 
 	UFUNCTION()
 	void UpdateMovementSpeed();
-	void ExecuteDodge();
 	void EndDodge();
 	void ResetDodgeCooldown();
     // void AttachWeapon(TSubclassOf<AActor> WeaponClass);
@@ -215,6 +246,11 @@ protected:
     void SkillE(const FInputActionValue& Value);
 
     void DodgeStep();
+
+	// 방향 계산 함수
+	EDodgeDir GetDodgeDirectionFromInput() const;
+
+	void PlayDodgeMontage(EDodgeDir Dir);
 
 private:
     bool bIsDead = false;
