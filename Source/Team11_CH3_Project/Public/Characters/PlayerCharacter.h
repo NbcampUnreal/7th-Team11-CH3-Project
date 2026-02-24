@@ -71,7 +71,7 @@ public:
 	UCameraComponent* FollowCamera;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-	float CameraBoomLength = 300.0f;
+	float CameraBoomLength = 400.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
     float CameraSensitivity = 1.0f;
@@ -88,7 +88,6 @@ public:
     UPROPERTY(EditAnywhere, Category = "Camera|Dodge")
     bool bDisableCameraLagWhileDodging = false;
 
-
     bool bSavedEnableCameraLag = false;
 
     float SavedCameraLagSpeed = 0.f;
@@ -100,17 +99,24 @@ public:
 	float WalkSpeed = 400.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+    float SprintSpeed = 800.0f;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float DodgeDistance = 1800.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	float DodgeDuration = 0.5f;
-
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
     float DodgeCooldown = 1.0f;
 
     UPROPERTY(EditAnywhere, Category = "Movement")
     float DodgeDistanceScale = 0.4f;
+
+	FVector2D SmoothedMoveInput = FVector2D::ZeroVector;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float MoveInputSmoothSpeed = 12.f;
 
 #pragma endregion
 
@@ -153,7 +159,6 @@ public:
 	TSubclassOf<AActor> WeaponClass;
 	*/
 
-
 	FTimerHandle DodgeTimerHandle;
 	FTimerHandle DodgeCooldownTimerHandle;
 
@@ -177,9 +182,6 @@ public:
 
 	// montage로 할지 animation으로 할지 고려
 	/*
-	UFUNCTION(EditAnywhere, BlueprintReadWrite, Category = "Animation")
-	void PlayDodgeAnimation();
-
 	UFUNCTION(EditAnywhere, BlueprintReadWrite, Category = "Animation")
 	void PlayDeathAnimation();
 	*/
@@ -262,7 +264,7 @@ public:
 private:
     bool bIsDead = false;
 
-    //float DefaultWalkSpeed = 600.f;
+    float DefaultWalkSpeed = 600.f;
     float AimWalkSpeed = 300.f;
 
     float DefaultArmLength = 300.f;

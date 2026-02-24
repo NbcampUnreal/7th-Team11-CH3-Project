@@ -22,13 +22,18 @@ APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-
-	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-	CameraBoom->SetupAttachment(RootComponent);
-	CameraBoom->TargetArmLength = CameraBoomLength;
-	CameraBoom->bUsePawnControlRotation = true;
-	CameraBoom->bEnableCameraLag = !bIsAiming;
-	CameraBoom->CameraLagSpeed = 3.0f;
+    
+    CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+    CameraBoom->SetupAttachment(RootComponent);
+    CameraBoom->TargetArmLength = CameraBoomLength;
+    CameraBoom->bUsePawnControlRotation = true;
+    CameraBoom->bEnableCameraLag = !bIsAiming;
+    CameraBoom->CameraLagSpeed = 20.0f;
+    CameraBoom->CameraLagMaxDistance = 0.f;
+    CameraBoom->bEnableCameraRotationLag = false;
+    CameraBoom->CameraRotationLagSpeed = 20.f;
+    CameraBoom->bUseCameraLagSubstepping = true;
+    CameraBoom->CameraLagMaxTimeStep = 1.f / 60.f;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -40,15 +45,16 @@ APlayerCharacter::APlayerCharacter()
 	// 매쉬와 카메라 사이 충돌 비활성화
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
+    bUseControllerRotationPitch = false;
+    bUseControllerRotationYaw = true;
+    bUseControllerRotationRoll = false;
 
-	GetCharacterMovement()->bOrientRotationToMovement = true;
-	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
-	GetCharacterMovement()->JumpZVelocity = 600.0f;
-	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+    GetCharacterMovement()->bOrientRotationToMovement = false;
+    GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
+    GetCharacterMovement()->JumpZVelocity = 600.0f;
+    GetCharacterMovement()->AirControl = 0.35f;
+    GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+    GetCharacterMovement()->bUseControllerDesiredRotation = true;
 
     StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
     BuffManager = CreateDefaultSubobject<UBuffManager>(TEXT("BuffManager"));
@@ -205,13 +211,17 @@ void APlayerCharacter::SetAiming(bool bNewAiming)
 	UE_LOG(LogTemp, Warning, TEXT("SetAiming: %d"), bNewAiming);
 	bIsAiming = bNewAiming;
 
-	bUseControllerRotationYaw = bIsAiming;
-	GetCharacterMovement()->bOrientRotationToMovement = !bIsAiming;
+    bUseControllerRotationYaw = false;
+    GetCharacterMovement()->bOrientRotationToMovement = false;
+    GetCharacterMovement()->bUseControllerDesiredRotation = true;
+    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : DefaultWalkSpeed;
 	UpdateMovementSpeed();
-	if (AMainPlayerController* PC = Cast<AMainPlayerController>(GetController()))
-	{
-		PC->BP_SetCrosshairVisible(bIsAiming);
-	}
+
+    if (AMainPlayerController* PC = Cast<AMainPlayerController>(GetController()))
+    {
+        PC->BP_SetCrosshairVisible(bIsAiming);
+    }
+
 }
 
 void APlayerCharacter::BeginPlay()
@@ -254,14 +264,18 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	float TargetArm = bIsAiming ? AimArmLength : DefaultArmLength;
-	FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
+    const FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
+    CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
+    /*
+    float TargetArm = bIsAiming ? AimArmLength : DefaultArmLength;
+    FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
 
-	CameraBoom->TargetArmLength =
-		FMath::FInterpTo(CameraBoom->TargetArmLength, TargetArm, DeltaTime, CameraInterpSpeed);
+    CameraBoom->TargetArmLength =
+        FMath::FInterpTo(CameraBoom->TargetArmLength, TargetArm, DeltaTime, CameraInterpSpeed);
 
-	CameraBoom->SocketOffset =
-		FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
+    CameraBoom->SocketOffset =
+        FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
+        */
 }
 
 
@@ -271,14 +285,35 @@ void APlayerCharacter::Move(const FVector2D& MovementVector)
 
 	if (!Controller) return;
 
-	FRotator ControlRotation = Controller->GetControlRotation();
-	FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
+    SmoothedMoveInput = FMath::Vector2DInterpTo(
+        SmoothedMoveInput,
+        MovementVector,
+        GetWorld()->GetDeltaSeconds(),
+        MoveInputSmoothSpeed
+    );
 
-	FVector Forward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	FVector Right = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+    const float X = SmoothedMoveInput.X;
+    const float Y = SmoothedMoveInput.Y;
 
-	AddMovementInput(Forward, MovementVector.Y);
-	AddMovementInput(Right, MovementVector.X);
+    const FRotator ControlRot = Controller->GetControlRotation();
+    const FRotator YawRot(0.f, ControlRot.Yaw, 0.f);
+
+    const FVector ForwardDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+    const FVector RightDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
+
+    AddMovementInput(ForwardDir, Y);
+    AddMovementInput(RightDir, X);
+
+    /*
+    FRotator ControlRotation = Controller->GetControlRotation();
+    FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
+
+    FVector Forward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+    FVector Right = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+
+    AddMovementInput(Forward, MovementVector.Y);
+    AddMovementInput(Right, MovementVector.X);
+    */
 }
 
 void APlayerCharacter::Look(const FVector2D& LookAxisVector)

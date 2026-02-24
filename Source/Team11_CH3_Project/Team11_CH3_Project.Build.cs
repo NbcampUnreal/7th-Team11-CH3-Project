@@ -1,6 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 using UnrealBuildTool;
+using UnrealBuildTool.Rules;
 
 public class Team11_CH3_Project : ModuleRules
 {
@@ -8,7 +9,7 @@ public class Team11_CH3_Project : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "NavigationSystem" , "AIModule" , "GameplayTasks"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "NavigationSystem" , "AIModule" , "GameplayTasks", "UMG", "Slate", "SlateCore", "GameplayTags", "CommonUI", "CommonInput"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 
