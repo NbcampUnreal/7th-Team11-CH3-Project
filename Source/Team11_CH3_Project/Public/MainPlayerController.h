@@ -4,6 +4,7 @@
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
+#include "GameplayTagContainer.h"
 #include "MainPlayerController.generated.h"
 
 class UInputMappingContext;
@@ -93,6 +94,11 @@ protected:
 	// aim move
 	void AimPressed();
 	void AimReleased();
+
+	bool bHUDShown = false;
+
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	FGameplayTag HUDRequestTag;
 
 private:
 

@@ -9,6 +9,10 @@
 #include "EnhancedInputSubsystems.h"
 #include "Characters/InventoryComponent.h"
 #include "Perception/AIPerceptionSystem.h"
+#include "Subsystems/GameInstanceSubsystem.h"
+#include "UI/Subsystem/UIManageSubsystem.h"
+#include "GameplayTagContainer.h"
+
 
 AMainPlayerController::AMainPlayerController()
 {
@@ -70,11 +74,44 @@ void AMainPlayerController::SetupInputComponent()
 void AMainPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-	//TODO HardCoded
+
+	// TODO HardCoded
 	TeamID = FGenericTeamId(0);
 	SetGenericTeamId(TeamID);
-}
 
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	if (bHUDShown)
+	{
+		return;
+	}
+
+	UGameInstance* GI = GetGameInstance();
+	if (!GI)
+	{
+		return;
+	}
+
+	UUIManageSubsystem* UI = GI->GetSubsystem<UUIManageSubsystem>();
+	if (!UI)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[HUD] UIManageSubsystem가 비어있음"));
+		return;
+	}
+
+	const FGameplayTag Tag = FGameplayTag::RequestGameplayTag(TEXT("UI.Request.HUD"));
+	if (!Tag.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[HUD] UI.Request.HUD tag가 없음. GameplayTags settings 확인 요망"));
+		return;
+	}
+
+	UI->ShowWidget(Tag);
+	bHUDShown = true;
+}
 FGenericTeamId AMainPlayerController::GetGenericTeamId() const
 {
 	return TeamID;
