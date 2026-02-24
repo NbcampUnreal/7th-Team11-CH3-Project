@@ -5,6 +5,7 @@
 
 #include "BrainComponent.h"
 #include "WeaponActor.h"
+#include "WeaponAnimInterface.h"
 #include "Characters/Monster/MonsterControllerBase.h"
 #include "Components/SkillManager.h"
 #include "Components/StatComponent.h"
@@ -12,7 +13,6 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AISense_Damage.h"
 #include "Subsystems/MonsterSubsystem.h"
-
 
 // Sets default values
 AMonsterBase::AMonsterBase()
@@ -69,7 +69,17 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 		                                                   SpawnInfo);
 		if (WeaponActor)
 		{
+
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    
+			if (AnimInstance && AnimInstance->GetClass()->ImplementsInterface(UWeaponAnimInterface::StaticClass()))
+			{
+				UAnimSequence* GripAnim = WeaponActor->GetGripAnimation();
+				IWeaponAnimInterface::Execute_UpdateGripAnim(AnimInstance, WeaponActor->GetGripAnimation(), (GripAnim != nullptr));
+			}
+			
 			WeaponActor->Init(WeaponItemData, GetMesh());
+			SkillComponent->EquipSkillGem()
 		}
 	}
 	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
@@ -121,7 +131,7 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 			AIController->GetBrainComponent()->PauseLogic(TEXT("Death"));
 		}
 		StopAnimMontage();
-		PlayAnimMontage(MonsterDieAnimMontage);
+		PlayAnimMontage(MonsterDieAnimMontage,1,TEXT("FullBody"));
 
 		FOnMontageEnded EndDelegate;
 		EndDelegate.BindUObject(this, &AMonsterBase::OnDieMontageEnded);
@@ -162,6 +172,11 @@ bool AMonsterBase::IsDead() const
 		return StatComponent->IsDead();
 	}
 	return true;
+}
+
+bool AMonsterBase::IsAttacking() const
+{
+	return bIsAttacking;
 }
 
 FVector AMonsterBase::GetOriginLocation() const
@@ -216,7 +231,7 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	}
 	bIsAttacking = true;
 	UAnimMontage* SkillMontage = SkillComponent->GetSkillSlot(Index)->GetEquippedSkill()->GetSkillMontage();
-	PlayAnimMontage(SkillMontage);
+	PlayAnimMontage(SkillMontage,1,TEXT("UpperBody"));
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);

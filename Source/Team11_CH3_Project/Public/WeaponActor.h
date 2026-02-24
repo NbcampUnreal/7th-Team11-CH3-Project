@@ -18,8 +18,9 @@ public:
 	AWeaponActor();
 	virtual void Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh);
 	float GetAttackRange() const;
-	//TODO
-
+	UFUNCTION(BlueprintPure)
+	UAnimSequence* GetGripAnimation() const;
+	
 	virtual void StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) {CurrentSkillData = Skill;}
 	virtual void PerformDamage() {}
 	virtual void EndAttack() {CurrentSkillData.Reset(); CurrentSkillData = nullptr;}
@@ -29,7 +30,8 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TObjectPtr<USkillDataAsset> DefaultSkill;
-
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
+	TSoftObjectPtr<UAnimSequence> GripAnimation;
 private:
 	UPROPERTY(VisibleInstanceOnly, Category="Weapon")
 	TWeakObjectPtr<USkillDataAsset> CurrentSkillData;
