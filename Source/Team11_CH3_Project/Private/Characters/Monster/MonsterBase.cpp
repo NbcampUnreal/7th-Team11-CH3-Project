@@ -80,7 +80,7 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	
 	OriginLocation = GetActorLocation();
 	GetMesh()->SetSkeletalMesh(MonsterData->SkeletalMesh.LoadSynchronous());
-	bIsAttacking = false;
+
 	//	TODO
 	if (AAIController* AIController = Cast<AAIController>(GetController()))
 	{
@@ -192,7 +192,11 @@ bool AMonsterBase::IsDead() const
 
 bool AMonsterBase::IsAttacking() const
 {
-	return bIsAttacking;
+	if (WeaponActor)
+	{
+		return WeaponActor->IsAttacking();
+	}
+	return false;
 }
 
 FVector AMonsterBase::GetOriginLocation() const
@@ -228,7 +232,6 @@ void AMonsterBase::PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLoc
 		CharacterMovementComponent->bUseControllerDesiredRotation = true;
 		CharacterMovementComponent->bOrientRotationToMovement = false;
 	}
-	bIsAttacking = true;
 	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
 	PlayAnimMontage(SkillMontage,1,TEXT("UpperBody"));
 	FOnMontageEnded EndDelegate;
@@ -241,7 +244,7 @@ void AMonsterBase::PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLoc
 
 bool AMonsterBase::TryAttack(AActor* Target)
 {
-	if (!Target || bIsAttacking)
+	if (!Target || !IsValid(WeaponActor) || WeaponActor->IsAttacking() )
 	{
 		return false;
 	}
@@ -276,7 +279,6 @@ void AMonsterBase::DealDamage()
 
 void AMonsterBase::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
 {
-	bIsAttacking = false;
 	OnAttackFinished.Broadcast();
 	if (WeaponActor)
 	{

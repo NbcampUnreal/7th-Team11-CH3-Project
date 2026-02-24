@@ -66,6 +66,5 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-	bool bIsAttacking;
 	int32 ScoreValue = 0;
 };

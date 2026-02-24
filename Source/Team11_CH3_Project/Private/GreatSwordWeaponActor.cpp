@@ -41,6 +41,7 @@ void AGreatSwordWeaponActor::PerformDamage()
 
 void AGreatSwordWeaponActor::EndAttack()
 {
+	Super::EndAttack();
 	Direction = FVector::ZeroVector;
 	UE_LOG(LogTemp, Warning, TEXT("EndAttack Called!"));
 }

@@ -31,9 +31,6 @@ void AStaffWeaponActor::StartAttack(const FVector& TargetLocation,  USkillDataAs
 {
 	Super::StartAttack(TargetLocation, Skill);
 	Direction = (TargetLocation - GetActorLocation()).GetSafeNormal();
-	DrawDebugSphere(GetWorld(), TargetLocation, 20.f, 12, FColor::Green, false, 1.f);
-	DrawDebugSphere(GetWorld(), GetActorLocation(), 20.f, 12, FColor::Green, false, 1.f);
-	GEngine->AddOnScreenDebugMessage(-1,1,FColor::Red,FString::Printf(TEXT("%f,%f,%f"),Direction.X,Direction.Y,Direction.Z));
 	UE_LOG(LogTemp, Warning, TEXT("StartAttack Called!"));
 }
 void AStaffWeaponActor::PerformDamage()
@@ -50,6 +47,7 @@ void AStaffWeaponActor::PerformDamage()
 
 void AStaffWeaponActor::EndAttack()
 {
-	//Direction = FVector::Zero();
+	Super::EndAttack();
+	Direction = FVector::Zero();
 	UE_LOG(LogTemp, Warning, TEXT("EndAttack Called!"));
 }

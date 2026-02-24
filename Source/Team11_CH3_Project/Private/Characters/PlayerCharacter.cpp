@@ -147,6 +147,7 @@ void APlayerCharacter::Attack(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Warning, TEXT("Weapon Empty!"));
 		return;
 	}
+
 	FVector TargetLocation;
 	GetSkillTargetLocation(TargetLocation);
 	PerformAttack(SkillComponent->GetSkillSlot(0), TargetLocation);
@@ -620,7 +621,10 @@ void APlayerCharacter::PlayDeathAnimation()
 void APlayerCharacter::PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLocation)
 {
 	//	SkillComponent
-
+	if (WeaponActor->IsAttacking())
+	{
+		return;
+	}
 	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
 	PlayAnimMontage(SkillMontage, 1,TEXT("UpperBody"));
 
