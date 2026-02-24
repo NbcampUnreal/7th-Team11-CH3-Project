@@ -22,7 +22,7 @@ void APickupActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 	auto* ItemManager = OtherActor->FindComponentByClass<UItemManager>();
 	if (IsValid(ItemManager))
 	{
-		ItemManager->UseItem(RowName, ItemType, Index);
+		ItemManager->UseItem(ItemID, ItemType, Index);
 		Destroy();
 	}
 }

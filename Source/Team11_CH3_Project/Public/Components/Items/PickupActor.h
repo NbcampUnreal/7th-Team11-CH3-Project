@@ -19,9 +19,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	EItemType ItemType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	FName RowName;
+	FName ItemID;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	int32 Index;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TSoftObjectPtr<UTexture2D> Thumbnail;
 
 protected:
 	UFUNCTION()

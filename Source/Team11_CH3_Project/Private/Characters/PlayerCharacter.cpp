@@ -50,13 +50,14 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->AirControl = 0.35f;
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-	StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
-	BuffManager = CreateDefaultSubobject<UBuffManager>(TEXT("BuffManager"));
+    StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
+    BuffManager = CreateDefaultSubobject<UBuffManager>(TEXT("BuffManager"));
 	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
 	ItemManager = CreateDefaultSubobject<UItemManager>(TEXT("ItemManager"));
 
-	bIsDodging = false;
-	bCanDodge = true;
+    bIsDodging = false;
+    bCanDodge = true;
+
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -242,13 +243,11 @@ void APlayerCharacter::BeginPlay()
 		InitialStat.CriticalDamage = 1.5f;
 		StatComponent->InitStat(InitialStat);
 
-		// 기본 장비 장착(시작은 기본 무기만)
-		ItemManager->UseItem(TEXT("StaffWeapon"), EItemType::Equipment, 0);
-		ItemManager->UseItem(TEXT("Foot"), EItemType::Equipment, 0);
-	}
+        // 기본 장비 장착(시작은 기본 무기만)
+        ItemManager->UseItem(TEXT("StaffWeapon"), EItemType::Equipment, 0);
+    }
 
-
-	UpdateMovementSpeed();
+    UpdateMovementSpeed();
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -300,11 +299,9 @@ void APlayerCharacter::PerformDodge()
 
 void APlayerCharacter::UpdateMovementSpeed()
 {
-	if (!GetCharacterMovement() || !StatComponent) return;
-	// 조준상태일때도 고려해서 최고속도 업데이트
-	GetCharacterMovement()->MaxWalkSpeed = bIsAiming
-		                                       ? AimWalkSpeed
-		                                       : WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
+    if (!GetCharacterMovement() || !StatComponent) return;
+    // 조준상태일때도 고려해서 최고속도 업데이트
+    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
 }
 
 EDodgeDir APlayerCharacter::GetDodgeDirectionFromInput() const
@@ -511,7 +508,7 @@ void APlayerCharacter::ResetDodgeCooldown()
 
 // TakeDamage로 변경
 float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
-                                   class AController* EventInstigator, AActor* DamageCauser)
+    class AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 

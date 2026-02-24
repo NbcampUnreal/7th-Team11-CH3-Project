@@ -8,6 +8,7 @@
 #include "Components/StatComponent.h"
 #include "Components/ItemManager.h"
 #include "Components/SkillManager.h"
+#include "Subsystems/ItemDropSubsystem.h"
 
 void AT11_GameState::BeginPlay()
 {
@@ -182,14 +183,22 @@ void AT11_GameState::CreateSpawnTimer(FString TimerName, float Interval, int32 T
         }, Interval, true);
 }
 
-void AT11_GameState::OnMonsterKilled()
+void AT11_GameState::OnMonsterKilled(FVector DropLocation)
 {
     SpawnedMonsterCount--;
+    //TODO : 점수 처리도 여기에 구현
+    // 아이템 드랍
+    if (UItemDropSubsystem* ItemDrop = GetWorld()->GetSubsystem<UItemDropSubsystem>())
+    {
+        ItemDrop->TryDropItem(DropLocation);
+    }
+    
     if (SpawnedMonsterCount == 0)
     {
         EndWave();
     }
 }
+
 
 /*
 

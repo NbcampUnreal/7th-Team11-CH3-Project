@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
@@ -35,9 +35,8 @@ public:
 	void SetPortalLevel(APortal* Portal);
 
 	void CreateSpawnTimer(FString TimerName, float Interval, int32 TotalCount, ASpawnVolume* SpawnVolume);
-
-	void OnMonsterKilled();
-
+	// 아이템 드랍 위치 매개변수 추가
+	void OnMonsterKilled(FVector DropLocation);
 
 	FTimerHandle WaveTimerHandle;
 	TMap<FString, FTimerHandle> SpawnTimerHandles;
