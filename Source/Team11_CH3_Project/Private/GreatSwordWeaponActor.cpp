@@ -1,11 +1,11 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "StaffWeaponActor.h"
-#include "Components/Skills/SkillDataAsset.h"
+#include "GreatSwordWeaponActor.h"
+
 
 // Sets default values
-AStaffWeaponActor::AStaffWeaponActor()
+AGreatSwordWeaponActor::AGreatSwordWeaponActor()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
@@ -15,7 +15,7 @@ AStaffWeaponActor::AStaffWeaponActor()
 	StaticMeshComponent->SetCollisionProfileName(FName("OverlapAll"));
 }
 
-void AStaffWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh)
+void AGreatSwordWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh)
 {
 	Super::Init(WeaponItem, SkeletalMesh);
 	FAttachmentTransformRules AttachRules(
@@ -27,26 +27,20 @@ void AStaffWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshCom
 	StaticMeshComponent->AttachToComponent(SkeletalMesh, AttachRules,TEXT("handslot_r"));
 }
 //TODO
-void AStaffWeaponActor::StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) 
+void AGreatSwordWeaponActor::StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) 
 {
 	Super::StartAttack(TargetLocation, Skill);
 	Direction = TargetLocation - GetActorLocation();
 	UE_LOG(LogTemp, Warning, TEXT("StartAttack Called!"));
 }
-void AStaffWeaponActor::PerformDamage()
+void AGreatSwordWeaponActor::PerformDamage()
 {
-	if (CurrentSkillData.IsValid())
-	{
-		CurrentSkillData->Activate(Cast<APawn>(GetOwner()), this,GetActorLocation(), Direction);
-	}else
-	{
-		check(false);
-	}
+	CurrentSkillData->Activate(Cast<APawn>(GetOwner()),this, GetActorLocation(), Direction);
 	UE_LOG(LogTemp, Warning, TEXT("PerformDamage Called!"));
 }
 
-void AStaffWeaponActor::EndAttack()
+void AGreatSwordWeaponActor::EndAttack()
 {
-	Direction = FVector::Zero();
+	Direction = FVector::ZeroVector;
 	UE_LOG(LogTemp, Warning, TEXT("EndAttack Called!"));
 }

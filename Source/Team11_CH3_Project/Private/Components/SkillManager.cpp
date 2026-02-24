@@ -99,6 +99,19 @@ void USkillManager::EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData
 	UE_LOG(LogTemp, Warning, TEXT("EquipGem : %s"), *NewSkillData->GetName());
 }
 
+void USkillManager::AddSKillGems(TArray<TSoftObjectPtr<USkillDataAsset>> Skills)
+{
+	for (TSoftObjectPtr<USkillDataAsset> SkillData : Skills)
+	{
+		if (IsValid(SkillData.LoadSynchronous()))
+		{
+			USkillSlot* NewSlot = NewObject<USkillSlot>(this);
+			NewSlot->EquipGem(SkillData.Get());
+			SkillSlots.Add(NewSlot);
+		}
+	}
+}
+
 bool USkillManager::IsSkillOnCooldown(int32 SlotIndex) const
 {
 	if (SkillSlots.IsValidIndex(SlotIndex) == false)
@@ -117,4 +130,9 @@ float USkillManager::GetCooldownRemaining(int32 SlotIndex) const
 		return FLT_MAX;
 	}
 	return SkillSlots[SlotIndex]->GetCooldownRemaining();
+}
+
+void USkillManager::Clear()
+{
+	SkillSlots.Empty();
 }

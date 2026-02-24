@@ -23,6 +23,7 @@ void AWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponen
 	WeaponItemData = *WeaponItem;
 	CurrentSkillData = nullptr;
 	DefaultSkill = WeaponItem->DefaultSkill.LoadSynchronous();
+	GripAnimation.LoadSynchronous();
 }
 
 
@@ -31,10 +32,19 @@ float AWeaponActor::GetAttackRange() const
 	return WeaponItemData.AttackRange;
 }
 
+UAnimSequence* AWeaponActor::GetGripAnimation() const
+{
+	return GripAnimation.Get();
+}
 
 
 EWeaponType AWeaponActor::GetWeaponType() const
 {
 	return WeaponItemData.WeaponType;
+}
+
+USkillDataAsset* AWeaponActor::GetDefaultSkillData() const
+{
+	return DefaultSkill;
 }
 
