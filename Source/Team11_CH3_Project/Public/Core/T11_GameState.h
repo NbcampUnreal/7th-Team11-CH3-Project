@@ -5,6 +5,7 @@
 #include "T11_GameState.generated.h"
 
 class ASpawnVolume;
+class APortal;
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API AT11_GameState : public AGameState
@@ -29,6 +30,9 @@ public:
 
 	void EndLevel();
 	void EndWave();
+
+	void ActivatePortals();
+	void SetPortalLevel(APortal* Portal);
 
 	void CreateSpawnTimer(FString TimerName, float Interval, int32 TotalCount, ASpawnVolume* SpawnVolume);
 
