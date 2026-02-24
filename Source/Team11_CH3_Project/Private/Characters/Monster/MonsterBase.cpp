@@ -75,8 +75,9 @@ void AMonsterBase::EquipWeapon(FWeaponItemData* WeaponItemData)
 void AMonsterBase::Init(const FMonsterData* MonsterData)
 {
 	StatComponent->InitStat(MonsterData->StatData);
-
-
+	// Monster의 점수 저장
+	ScoreValue = MonsterData->ScoreValue;
+	
 	OriginLocation = GetActorLocation();
 	GetMesh()->SetSkeletalMesh(MonsterData->SkeletalMesh.LoadSynchronous());
 	bIsAttacking = false;

@@ -183,10 +183,23 @@ void AT11_GameState::CreateSpawnTimer(FString TimerName, float Interval, int32 T
         }, Interval, true);
 }
 
-void AT11_GameState::OnMonsterKilled(FVector DropLocation)
+void AT11_GameState::OnMonsterKilled(FVector DropLocation, int32 ScoreValue)
 {
     SpawnedMonsterCount--;
-    //TODO : 점수 처리도 여기에 구현
+    // 점수 처리
+    UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
+    if (IsValid(GI) == false)
+        return;
+
+    int32& StageIndex = GI->CurrentStageIndex;
+    int32& TotalScore = GI->TotalScore;
+    int32& StageScore = GI->StageScore.FindOrAdd(StageIndex);
+    
+
+    StageScore += ScoreValue;
+    TotalScore += ScoreValue;
+    UE_LOG(LogTemp, Warning, TEXT("StageScore : %d , TotalScore : %d"), StageScore, TotalScore);
+    
     // 아이템 드랍
     if (UItemDropSubsystem* ItemDrop = GetWorld()->GetSubsystem<UItemDropSubsystem>())
     {
