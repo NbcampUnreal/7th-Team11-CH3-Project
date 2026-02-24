@@ -25,14 +25,17 @@ void USkillManager::BeginPlay()
 
 
 	SkillSlots.Empty();
-	for (USkillDataAsset* SkillData : DefaultSkillSlotData)
+	// for (USkillDataAsset* SkillData : DefaultSkillSlotData)
+	for (int32 i = 0;i<3;++i)
 	{
-		if (IsValid(SkillData))
-		{
-			USkillSlot* NewSlot = NewObject<USkillSlot>(this);
-			NewSlot->EquipGem(SkillData);
-			SkillSlots.Add(NewSlot);
-		}
+		USkillSlot* NewSlot = NewObject<USkillSlot>(this);
+		SkillSlots.Add(NewSlot);
+		// if (IsValid(SkillData))
+		// {
+		// 	USkillSlot* NewSlot = NewObject<USkillSlot>(this);
+		// 	NewSlot->EquipGem(SkillData);
+		// 	SkillSlots.Add(NewSlot);
+		// }
 	}
 }
 

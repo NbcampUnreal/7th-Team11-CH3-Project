@@ -54,8 +54,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<USkillSlot>> SkillSlots;
 	// 초기 스킬 클래스(블루프린트 설정용)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
-	TArray<TObjectPtr<USkillDataAsset>> DefaultSkillSlotData;
 	// 스킬 데이터 테이블(도전 기능때 구현)
 	//UPROPERTY(EditDefaultsOnly, Category = "Skill|Data", meta = (AllowPrivateAccess = "true"))
 	//TObjectPtr<class UDataTable> SkillDataTable;

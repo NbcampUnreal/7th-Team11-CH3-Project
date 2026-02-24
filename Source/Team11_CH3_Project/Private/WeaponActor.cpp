@@ -3,7 +3,6 @@
 
 #include "WeaponActor.h"
 
-#include "NaniteSceneProxy.h"
 
 // Sets default values
 AWeaponActor::AWeaponActor()

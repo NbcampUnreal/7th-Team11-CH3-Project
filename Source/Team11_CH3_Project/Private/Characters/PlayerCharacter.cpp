@@ -15,8 +15,6 @@
 #include "Components/ItemManager.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Core/T11_GameInstance.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -107,7 +105,7 @@ void APlayerCharacter::GetSkillTargetLocation(FVector& TargetLocation)
 		FHitResult HitResult;
 		if (PlayerController->GetHitResultAtScreenPosition(ScreenCenter, ECC_Camera, Params, HitResult))
 		{
-			TargetLocation = HitResult.Location;
+			TargetLocation = HitResult.ImpactPoint;
 		}
 		else
 		{
@@ -595,6 +593,7 @@ void APlayerCharacter::SetWeaponActor(AWeaponActor* NewWeapon)
     {
         WeaponActor->Destroy();
     } 
+
     WeaponActor = NewWeapon;
     SkillComponent->EquipSkillGem(0,NewWeapon->GetDefaultSkillData());
 		
@@ -629,6 +628,7 @@ void APlayerCharacter::PerformAttack(USkillSlot* SkillSlot, const FVector& Targe
 	EndDelegate.BindUObject(this, &APlayerCharacter::OnAttackMontageEnded);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
 	SkillSlot->StartCooldown();
+	
 	WeaponActor->StartAttack(TargetLocation,
 	                         SkillSlot->GetEquippedSkill());
 }
