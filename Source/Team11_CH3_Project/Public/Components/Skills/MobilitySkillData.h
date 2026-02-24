@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -14,4 +14,9 @@ class TEAM11_CH3_PROJECT_API UMobilitySkillData : public USkillDataAsset
 {
 	GENERATED_BODY()
 	
+protected:
+	virtual void Activate(APawn* Instigator, const FVector& Origin, const FVector& Direction) const override;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill|Mobility")
+	float MaxRange = 500;
 };

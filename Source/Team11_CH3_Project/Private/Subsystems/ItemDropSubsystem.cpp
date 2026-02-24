@@ -11,6 +11,8 @@ void UItemDropSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	Super::Initialize(Collection);
 	// Game Start -> 난이도 선택 + 조작법 UI 선택 -> 시작
 	// 아직 레벨완성이 안돼서 테스트용스테이지 1 2 쉬움만
+	// 1. 데이터 테이블을 불러오는 데이터 테이블만들어서(테이블 핸들) 로드
+	// 2. UDataTable* DropTable = DropTables.FindRef({ GI->CurrentStageIndex, GI->CurrentDifficulty }); 불러오기
 	DropTables.Add({ 0, 0 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DataTable/DT_DropItem")));
 	//DropTables.Add({ 0, 1 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DT_Drop_Stage1_Normal")));
 	DropTables.Add({ 1, 0 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DataTable/DT_DropItem")));

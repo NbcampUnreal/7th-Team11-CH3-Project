@@ -35,7 +35,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stage")
 	int32 CurrentStageIndex = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stage")
-	int32 CurrentDifficulty = 0; // 0 == Normal, 1 == Hard
+	int32 CurrentDifficulty = 0; // 0 == Normal, 1 == Hard Enum으로 설정하는 방향
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stat")
 	FStatData SavedStatData;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon")
