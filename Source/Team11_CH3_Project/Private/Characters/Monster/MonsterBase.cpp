@@ -79,7 +79,6 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 			}
 			
 			WeaponActor->Init(WeaponItemData, GetMesh());
-			SkillComponent->EquipSkillGem()
 		}
 	}
 	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
