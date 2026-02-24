@@ -189,7 +189,25 @@ void AMonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-//Toilet
+void AMonsterBase::PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLocation)
+{
+	//	SkillComponent
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		CharacterMovementComponent->bUseControllerDesiredRotation = true;
+		CharacterMovementComponent->bOrientRotationToMovement = false;
+	}
+	bIsAttacking = true;
+	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
+	PlayAnimMontage(SkillMontage);
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
+	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
+	SkillSlot->StartCooldown();
+	WeaponActor->StartAttack(TargetLocation,
+	                         SkillSlot->GetEquippedSkill());
+}
+
 bool AMonsterBase::TryAttack(AActor* Target)
 {
 	if (!Target || bIsAttacking)
@@ -207,23 +225,10 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	{
 		return false;
 	}
+	USkillSlot* SkillSlot = SkillComponent->GetSkillSlot(Index);
+	FVector TargetLocation = Target->GetActorLocation();
 
-	//	SkillComponent
-	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
-	{
-		CharacterMovementComponent->bUseControllerDesiredRotation = true;
-		CharacterMovementComponent->bOrientRotationToMovement = false;
-	}
-	bIsAttacking = true;
-	UAnimMontage* SkillMontage = SkillComponent->GetSkillSlot(Index)->GetEquippedSkill()->GetSkillMontage();
-	PlayAnimMontage(SkillMontage);
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
-	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
-
-	SkillComponent->StartSkillCooldown(Index);
-	WeaponActor->StartAttack(Target->GetActorLocation(),
-	                         SkillComponent->GetSkillSlot(Index)->GetEquippedSkill());
+	PerformAttack(SkillSlot, TargetLocation);
 
 	return true;
 }

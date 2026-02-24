@@ -20,7 +20,8 @@ public:
 	float GetAttackRange() const;
 	//TODO
 
-	virtual void StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) {CurrentSkillData = Skill;}
+
+	virtual void StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) {CurrentSkillData = Skill; }
 	virtual void PerformDamage() {}
 	virtual void EndAttack() {CurrentSkillData.Reset(); CurrentSkillData = nullptr;}
 
@@ -29,10 +30,9 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TObjectPtr<USkillDataAsset> DefaultSkill;
-
-private:
 	UPROPERTY(VisibleInstanceOnly, Category="Weapon")
 	TWeakObjectPtr<USkillDataAsset> CurrentSkillData;
 	FWeaponItemData WeaponItemData;
+
 
 };

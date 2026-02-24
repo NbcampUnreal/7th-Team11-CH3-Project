@@ -6,6 +6,7 @@
 #include "FMonsterData.h"
 #include "GenericTeamAgentInterface.h"
 #include "MonsterControllerBase.h"
+#include "Components/Skills/SkillSlot.h"
 #include "GameFramework/Character.h"
 #include "MonsterBase.generated.h"
 
@@ -26,6 +27,7 @@ public:
 	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
 	void OnDieMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
 	bool TryAttack(AActor* Target);
+	void PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLocation);
 	
 	void DealDamage();
 	void BlackboardUpdate();

@@ -12,6 +12,7 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class USkillSlot;
 class AWeaponActor;
 class USkillManager;
 class USpringArmComponent;
@@ -244,6 +245,9 @@ protected:
     void Attack(const FInputActionValue& Value);
     void SkillQ(const FInputActionValue& Value);
     void SkillE(const FInputActionValue& Value);
+	void PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLocation);
+	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
+	void GetSkillTargetLocation(FVector& TargetLocation);
 
     void DodgeStep();
 
@@ -251,7 +255,9 @@ protected:
 	EDodgeDir GetDodgeDirectionFromInput() const;
 
 	void PlayDodgeMontage(EDodgeDir Dir);
-
+public:
+	void DealDamage();
+	
 private:
     bool bIsDead = false;
 

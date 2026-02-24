@@ -29,16 +29,18 @@ void AStaffWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshCom
 //TODO
 void AStaffWeaponActor::StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) 
 {
-	FVector Direction = TargetLocation - GetActorLocation();
-	Skill->Activate(Cast<APawn>(GetOwner()), GetActorLocation(), Direction);
+	Super::StartAttack(TargetLocation, Skill);
+	Direction = TargetLocation - GetActorLocation();
 	UE_LOG(LogTemp, Warning, TEXT("StartAttack Called!"));
 }
 void AStaffWeaponActor::PerformDamage()
 {
+	CurrentSkillData->Activate(Cast<APawn>(GetOwner()), GetActorLocation(), Direction);
 	UE_LOG(LogTemp, Warning, TEXT("PerformDamage Called!"));
 }
 
 void AStaffWeaponActor::EndAttack()
 {
+	Direction = FVector::Zero();
 	UE_LOG(LogTemp, Warning, TEXT("EndAttack Called!"));
 }

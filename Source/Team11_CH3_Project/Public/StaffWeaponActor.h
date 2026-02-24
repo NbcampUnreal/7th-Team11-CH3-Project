@@ -22,4 +22,6 @@ public:
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;
+private:
+	FVector Direction;
 };

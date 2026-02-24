@@ -3,6 +3,7 @@
 
 #include "AN_Monster_DealDamage.h"
 
+#include "Characters/PlayerCharacter.h"
 #include "Characters/Monster/MonsterBase.h"
 
 void UAN_Monster_DealDamage::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation,
@@ -18,6 +19,10 @@ void UAN_Monster_DealDamage::Notify(USkeletalMeshComponent* MeshComp, UAnimSeque
 		if (AMonsterBase* Monster = Cast<AMonsterBase>(Actor))
 		{
 			Monster->DealDamage();
+		}
+		else if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Actor))
+		{
+			PlayerCharacter->DealDamage();
 		}
 	}
 	
