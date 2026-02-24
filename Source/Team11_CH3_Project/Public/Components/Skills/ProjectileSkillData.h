@@ -19,10 +19,10 @@ public:
 	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const override;
 protected:
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|Projectile")
+	UPROPERTY(EditDefaultsOnly, Category = "Skill|Projectile")
 	float ProjectileSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Skill|Projectile")
+	UPROPERTY(EditDefaultsOnly, Category = "Skill|Projectile")
 	TSubclassOf<ABaseProjectile> ProjectileClass;
 
 };
