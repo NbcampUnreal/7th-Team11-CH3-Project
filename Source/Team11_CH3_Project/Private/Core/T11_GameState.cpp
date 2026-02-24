@@ -1,7 +1,8 @@
-﻿#include "Core/T11_GameState.h"
+#include "Core/T11_GameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Core/WaveData.h"
 #include "Core/SpawnVolume.h"
+#include "Core/Portal.h"
 #include "Characters/PlayerCharacter.h"
 #include "Core/T11_GameInstance.h"
 #include "Components/StatComponent.h"
@@ -25,7 +26,6 @@ void AT11_GameState::StartLevel()
     if (CurrentWorld && MapDataConfigs.Contains(CurrentWorld->GetName()))
     {
         WaveData = MapDataConfigs[CurrentWorld->GetName()];
-        
         
         if (!WaveData)
         {
@@ -95,8 +95,9 @@ void AT11_GameState::EndLevel()
         Pawn->FindComponentByClass<USkillManager>()
     );
 
+    ActivatePortals();
     // 임의로 다음 스테이지로 이동
-    UGameplayStatics::OpenLevel(GetWorld(), FName("L_Stage2_Test"));
+    //UGameplayStatics::OpenLevel(GetWorld(), FName("L_Stage2_Test"));
 }
 
 void AT11_GameState::EndWave()
@@ -112,6 +113,43 @@ void AT11_GameState::EndWave()
         CurrentWaveIndex++;
         StartNextWave();
     }
+}
+
+void AT11_GameState::ActivatePortals()
+{
+    TArray<AActor*> FoundPortals;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), APortal::StaticClass(), FoundPortals);
+
+    for (AActor* Portal : FoundPortals)
+    {
+        APortal* PortalClass = Cast<APortal>(Portal);
+        if (PortalClass)
+        {
+            SetPortalLevel(PortalClass);
+            PortalClass->SetPortalActive(true);
+        }
+    }
+}
+
+void AT11_GameState::SetPortalLevel(APortal* Portal)
+{
+    TArray<FString> LvlArray;
+    MapDataConfigs.GenerateKeyArray(LvlArray);
+
+    FString CurrentLvl = UGameplayStatics::GetCurrentLevelName(GetWorld());
+
+    for (int32 i = 0; i < LvlArray.Num(); i++)
+    {
+        if (LvlArray[i] == CurrentLvl)
+        {
+            LvlArray.RemoveAtSwap(i);
+            break;
+        }
+    }
+
+    int32 RandomIndex = FMath::RandRange(0, LvlArray.Num() - 1);
+
+    Portal->SetTargetLevel(LvlArray[RandomIndex]);
 }
 
 void AT11_GameState::CreateSpawnTimer(FString TimerName, float Interval, int32 TotalCount, ASpawnVolume* SpawnVolume)
