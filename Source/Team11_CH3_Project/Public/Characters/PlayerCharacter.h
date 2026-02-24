@@ -4,6 +4,7 @@
 #include "BaseCharacter.h"
 #include "InputActionValue.h"
 #include "GenericTeamAgentInterface.h"
+#include "WeaponActor.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
@@ -210,7 +211,7 @@ public:
 	                         class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void Die() override;
 
-	void SetWeaponActor(AWeaponActor* NewWeapon) { WeaponActor = NewWeapon; }
+	void SetWeaponActor(AWeaponActor* NewWeapon);
 
 	void ExecuteDodge();
 

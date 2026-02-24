@@ -30,7 +30,7 @@ void AStaffWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshCom
 void AStaffWeaponActor::StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) 
 {
 	FVector Direction = TargetLocation - GetActorLocation();
-	Skill->Activate(Cast<APawn>(GetOwner()), GetActorLocation(), Direction);
+	Skill->Activate(Cast<APawn>(GetOwner()), this, GetActorLocation(), Direction);
 	UE_LOG(LogTemp, Warning, TEXT("StartAttack Called!"));
 }
 void AStaffWeaponActor::PerformDamage()

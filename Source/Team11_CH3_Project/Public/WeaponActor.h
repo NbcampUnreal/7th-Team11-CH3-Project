@@ -26,15 +26,15 @@ public:
 	virtual void EndAttack() {CurrentSkillData.Reset(); CurrentSkillData = nullptr;}
 
 	EWeaponType GetWeaponType() const;
-
+	USkillDataAsset* GetDefaultSkillData() const;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TObjectPtr<USkillDataAsset> DefaultSkill;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TSoftObjectPtr<UAnimSequence> GripAnimation;
-private:
 	UPROPERTY(VisibleInstanceOnly, Category="Weapon")
 	TWeakObjectPtr<USkillDataAsset> CurrentSkillData;
+private:
 	FWeaponItemData WeaponItemData;
 
 };

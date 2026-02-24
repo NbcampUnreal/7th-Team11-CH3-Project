@@ -513,6 +513,17 @@ void APlayerCharacter::Die()
     }
 }
 
+void APlayerCharacter::SetWeaponActor(AWeaponActor* NewWeapon)
+{
+    if (WeaponActor)
+    {
+        WeaponActor->Destroy();
+    } 
+    WeaponActor = NewWeapon;
+    SkillComponent->EquipSkillGem(0,NewWeapon->GetDefaultSkillData());
+		
+}
+
 // dodge, death anim
 /*
 void APlayerCharacter::PlayDodgeAnimation()

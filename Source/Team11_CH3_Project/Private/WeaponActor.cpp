@@ -43,3 +43,8 @@ EWeaponType AWeaponActor::GetWeaponType() const
 	return WeaponItemData.WeaponType;
 }
 
+USkillDataAsset* AWeaponActor::GetDefaultSkillData() const
+{
+	return DefaultSkill;
+}
+

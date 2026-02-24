@@ -21,6 +21,7 @@ class TEAM11_CH3_PROJECT_API AMonsterBase : public ACharacter
 
 public:
 	AMonsterBase();
+	void EquipWeapon(FWeaponItemData* WeaponItemData);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);

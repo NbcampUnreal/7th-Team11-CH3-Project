@@ -29,16 +29,18 @@ void AGreatSwordWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMe
 //TODO
 void AGreatSwordWeaponActor::StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) 
 {
-	FVector Direction = TargetLocation - GetActorLocation();
-	Skill->Activate(Cast<APawn>(GetOwner()), GetActorLocation(), Direction);
+	Super::StartAttack(TargetLocation, Skill);
+	Direction = TargetLocation - GetActorLocation();
 	UE_LOG(LogTemp, Warning, TEXT("StartAttack Called!"));
 }
 void AGreatSwordWeaponActor::PerformDamage()
 {
+	CurrentSkillData->Activate(Cast<APawn>(GetOwner()),this, GetActorLocation(), Direction);
 	UE_LOG(LogTemp, Warning, TEXT("PerformDamage Called!"));
 }
 
 void AGreatSwordWeaponActor::EndAttack()
 {
+	Direction = FVector::ZeroVector;
 	UE_LOG(LogTemp, Warning, TEXT("EndAttack Called!"));
 }

@@ -6,6 +6,7 @@
 #include "Engine/DataAsset.h"
 #include "SkillDataAsset.generated.h"
 
+class AWeaponActor;
 class ABaseSkill;
 /**
  * 
@@ -16,7 +17,7 @@ class TEAM11_CH3_PROJECT_API USkillDataAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 
 public:
-	virtual void Activate(APawn* Instigator, const FVector& Origin, const FVector& Direction) const
+	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const
 	{
 	}
 	float GetCooldownTime() const { return CooldownTime; };

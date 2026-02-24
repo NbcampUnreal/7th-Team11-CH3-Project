@@ -36,13 +36,15 @@ public:
 	// 스킬 보석 교체
 	UFUNCTION(BlueprintCallable)
 	void EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData);
-
+	UFUNCTION(BlueprintCallable)
+	void AddSKillGems(TArray<TSoftObjectPtr<USkillDataAsset>> Skills);	
 	// 쿨타임 조회
 	UFUNCTION(BlueprintCallable)
 	bool IsSkillOnCooldown(int32 SlotIndex) const;
 	UFUNCTION(BlueprintCallable)
 	float GetCooldownRemaining(int32 SlotIndex) const;
 
+	void Clear();
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
