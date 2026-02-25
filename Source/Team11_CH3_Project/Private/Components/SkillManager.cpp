@@ -3,6 +3,7 @@
 
 #include "Components/SkillManager.h"
 
+#include "Components/Skills/ActiveSkillSlot.h"
 #include "Components/Skills/SkillDataAsset.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Engine/Engine.h"
@@ -12,9 +13,16 @@ USkillManager::USkillManager()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+}
+
+void USkillManager::TickComponent(float DeltaTime, enum ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	TickActiveSkill(DeltaTime,GetOwner());
 }
 
 
@@ -29,6 +37,7 @@ void USkillManager::BeginPlay()
 	for (int32 i = 0;i<3;++i)
 	{
 		USkillSlot* NewSlot = NewObject<USkillSlot>(this);
+		NewSlot->Init(this);
 		SkillSlots.Add(NewSlot);
 		// if (IsValid(SkillData))
 		// {
@@ -37,6 +46,8 @@ void USkillManager::BeginPlay()
 		// 	SkillSlots.Add(NewSlot);
 		// }
 	}
+	ActiveSkillSlot = NewObject<UActiveSkillSlot>(this);
+	ActiveSkillSlot->Init(this);
 }
 
 
@@ -57,6 +68,23 @@ TArray<int32> USkillManager::FindReadySlotIndexes() const
 		if (SkillSlots.IsValidIndex(i) && IsValid(SkillSlots[i]->GetEquippedSkill()) &&  !SkillSlots[i]->IsSkillOnCooldown())
 		{
 			Ret.Add(i);
+		}
+	}
+	return Ret;
+}
+
+int32 USkillManager::GetBestSkill(AActor* Actor, AActor* Target) const
+{
+	TArray<int32> ReadySkillIndexes = FindReadySlotIndexes();
+	float MaxScore = -1;
+	int32 Ret=-1;
+	for (int32 i = 0; i < ReadySkillIndexes.Num(); i++)
+	{
+		float Score = SkillSlots[i]->GetScore(Actor,Target);
+		if (MaxScore < Score)
+		{
+			MaxScore = Score;
+			Ret = i;
 		}
 	}
 	return Ret;
@@ -138,4 +166,33 @@ float USkillManager::GetCooldownRemaining(int32 SlotIndex) const
 void USkillManager::Clear()
 {
 	SkillSlots.Empty();
+}
+
+UActiveSkillSlot* USkillManager::GetActiveSkillSlot() const
+{
+	return ActiveSkillSlot.Get();
+}
+
+void USkillManager::ActiveSkill(USkillDataAsset* Skill) const
+{
+	ActiveSkillSlot->OnStartSkill(Skill);
+}
+
+void USkillManager::TickActiveSkill(float DeltaSeconds, AActor* Owner) const
+{
+	ActiveSkillSlot->OnTick(DeltaSeconds, Owner);
+	if (ActiveSkillSlot->GetIsEnd())
+	{
+		ExitActiveSkill();
+	}
+}
+
+void USkillManager::ExecuteActiveSkill() const
+{
+	ActiveSkillSlot->OnExecute();
+}
+
+void USkillManager::ExitActiveSkill() const
+{
+	ActiveSkillSlot->OnExit();
 }

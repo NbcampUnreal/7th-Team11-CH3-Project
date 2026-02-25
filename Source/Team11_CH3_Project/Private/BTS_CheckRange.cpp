@@ -26,6 +26,8 @@ void UBTS_CheckRange::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMem
 	{
 		float Range = BB->GetValueAsFloat("AttackRange");
 		bool bIsInRange = FVector::DistSquared(Target->GetActorLocation(), Pawn->GetActorLocation()) < Range*Range;
+		BB->SetValueAsBool(IsInRangeKey.SelectedKeyName,bIsInRange);
+		
 		if (!bIsInRange)
 		{
 			BB->SetValueAsBool(IsInRangeKey.SelectedKeyName,false);

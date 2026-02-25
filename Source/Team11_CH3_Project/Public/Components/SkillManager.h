@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "SkillManager.generated.h"
 
+
+class UActiveSkillSlot;
 class UStatComponent;
 class USkillSlot;
 class USkillDataAsset;
@@ -20,15 +22,17 @@ public:
 	USkillManager();
 	// Called every frame FTimerHandle 사용 예정(프로젝트에서 Tick으로 진행한다면 다시 주석 해제) 
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	// Getter
 
 	UFUNCTION(BlueprintCallable)
 	USkillSlot* GetSkillSlot(int32 Index) const { return SkillSlots.IsValidIndex(Index) ? SkillSlots[Index] : nullptr; }
 	UFUNCTION(BlueprintCallable)
 	TArray<int32> FindReadySlotIndexes()const;	
-	
-	// 스킬 쿨타임
+	UFUNCTION(BlueprintCallable)
+	int32 GetBestSkill(AActor* Actor, AActor* Target)const;
+
+	// 스킬 실행
 	UFUNCTION(BlueprintCallable)
 	void StartSkillCooldown(int32 Index);
 	
@@ -44,13 +48,19 @@ public:
 	float GetCooldownRemaining(int32 SlotIndex) const;
 
 	void Clear();
+	
+	UActiveSkillSlot* GetActiveSkillSlot() const;
+	void ActiveSkill(USkillDataAsset* Skill) const;
+	void TickActiveSkill(float DeltaSeconds, AActor* Owner) const;
+	void ExecuteActiveSkill() const;
+	void ExitActiveSkill() const;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 private:
 	// 스킬 배열
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<USkillSlot>> SkillSlots;
 	// 초기 스킬 클래스(블루프린트 설정용)
 	// 스킬 데이터 테이블(도전 기능때 구현)
@@ -60,4 +70,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess = "true"))
 	TWeakObjectPtr<UStatComponent> StatComp;
 	// 쿨다운 관리
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UActiveSkillSlot> ActiveSkillSlot;
 };

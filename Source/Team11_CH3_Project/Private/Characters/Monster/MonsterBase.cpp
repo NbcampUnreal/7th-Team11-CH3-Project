@@ -49,7 +49,8 @@ AMonsterBase::AMonsterBase()
 
 void AMonsterBase::EquipWeapon(FWeaponItemData* WeaponItemData)
 {
-	if (WeaponActor){
+	if (WeaponActor)
+	{
 		WeaponActor->Destroy();
 	}
 	FActorSpawnParameters SpawnInfo;
@@ -58,17 +59,17 @@ void AMonsterBase::EquipWeapon(FWeaponItemData* WeaponItemData)
 	                                                   SpawnInfo);
 	if (WeaponActor)
 	{
-
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-    
+
 		if (AnimInstance && AnimInstance->GetClass()->ImplementsInterface(UWeaponAnimInterface::StaticClass()))
 		{
 			UAnimSequence* GripAnim = WeaponActor->GetGripAnimation();
-			IWeaponAnimInterface::Execute_UpdateGripAnim(AnimInstance, WeaponActor->GetGripAnimation(), (GripAnim != nullptr));
+			IWeaponAnimInterface::Execute_UpdateGripAnim(AnimInstance, WeaponActor->GetGripAnimation(),
+			                                             (GripAnim != nullptr));
 		}
-			
+
 		WeaponActor->Init(WeaponItemData, GetMesh());
-		SkillComponent->EquipSkillGem(0,WeaponActor->GetDefaultSkillData());
+		SkillComponent->EquipSkillGem(0, WeaponActor->GetDefaultSkillData());
 	}
 }
 
@@ -77,7 +78,7 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	StatComponent->InitStat(MonsterData->StatData);
 	// Monster의 점수 저장
 	ScoreValue = MonsterData->ScoreValue;
-	
+
 	OriginLocation = GetActorLocation();
 	GetMesh()->SetSkeletalMesh(MonsterData->SkeletalMesh.LoadSynchronous());
 
@@ -94,9 +95,9 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	}
 	if (SkillComponent)
 	{
-		SkillComponent->AddSKillGems(MonsterData->Skills);	
+		SkillComponent->AddSKillGems(MonsterData->Skills);
 	}
-	
+
 	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
 	{
 		SkeletalMeshComponent->SetAnimInstanceClass(MonsterData->AnimBlueprint.LoadSynchronous());
@@ -114,7 +115,8 @@ void AMonsterBase::Clear()
 	{
 		AIController->GetBrainComponent()->PauseLogic(TEXT("Death"));
 	}
-	if (WeaponActor){
+	if (WeaponActor)
+	{
 		WeaponActor->Destroy();
 	}
 	SkillComponent->Clear();
@@ -147,7 +149,7 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 			AIController->GetBrainComponent()->PauseLogic(TEXT("Death"));
 		}
 		StopAnimMontage();
-		PlayAnimMontage(MonsterDieAnimMontage,1,TEXT("FullBody"));
+		PlayAnimMontage(MonsterDieAnimMontage, 1,TEXT("FullBody"));
 
 		FOnMontageEnded EndDelegate;
 		EndDelegate.BindUObject(this, &AMonsterBase::OnDieMontageEnded);
@@ -192,6 +194,13 @@ bool AMonsterBase::IsDead() const
 
 bool AMonsterBase::IsAttacking() const
 {
+	if (UActiveSkillSlot* ActiveSkillSlot = SkillComponent->GetActiveSkillSlot())
+	{
+		if (ActiveSkillSlot->GetSkill())
+		{
+			return true;
+		}
+	}
 	if (WeaponActor)
 	{
 		return WeaponActor->IsAttacking();
@@ -233,33 +242,27 @@ void AMonsterBase::PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLoc
 		CharacterMovementComponent->bOrientRotationToMovement = false;
 	}
 	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
-	PlayAnimMontage(SkillMontage,1,TEXT("UpperBody"));
+	PlayAnimMontage(SkillMontage, 1,TEXT("UpperBody"));
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
-	SkillSlot->StartCooldown();
-	WeaponActor->StartAttack(TargetLocation,
-	                         SkillSlot->GetEquippedSkill());
+	WeaponActor->StartAttack(TargetLocation, SkillSlot);
 }
 
 bool AMonsterBase::TryAttack(AActor* Target)
 {
-	if (!Target || !IsValid(WeaponActor) || WeaponActor->IsAttacking() )
+	if (!Target || !IsValid(WeaponActor) || WeaponActor->IsAttacking())
 	{
 		return false;
 	}
 
-	TArray<int32> Indexes = SkillComponent->FindReadySlotIndexes();
-	if (Indexes.Num() == 0)
+	int32 BestSkillIdx = SkillComponent->GetBestSkill(this, Target);
+	if (SkillComponent->GetCooldownRemaining(BestSkillIdx) > 0.0f)
 	{
 		return false;
 	}
-	int32 Index = Indexes[FMath::RandRange(0, Indexes.Num() - 1)];
-	if (SkillComponent->GetCooldownRemaining(Index) > 0.0f)
-	{
-		return false;
-	}
-	USkillSlot* SkillSlot = SkillComponent->GetSkillSlot(Index);
+
+	USkillSlot* SkillSlot = SkillComponent->GetSkillSlot(BestSkillIdx);
 	FVector TargetLocation = Target->GetActorLocation();
 
 	PerformAttack(SkillSlot, TargetLocation);

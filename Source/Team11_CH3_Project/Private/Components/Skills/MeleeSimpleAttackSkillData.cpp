@@ -86,3 +86,12 @@ void UMeleeSimpleAttackSkillData::Activate(APawn* Instigator, AWeaponActor* Weap
 	
 	
 }
+
+float UMeleeSimpleAttackSkillData::GetScore(AActor* Actor, AActor* Target) const
+{
+	if (FVector::DistSquared(Actor->GetActorLocation(), Target->GetActorLocation()) < Range*Range)
+	{
+		return 100.0f;
+	}
+	return -1.0f;
+}

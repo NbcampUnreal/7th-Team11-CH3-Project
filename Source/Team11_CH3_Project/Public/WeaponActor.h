@@ -3,11 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Components/SkillManager.h"
 #include "Components/Items/Equipments/WeaponItemData.h"
 #include "GameFramework/Actor.h"
 #include "Types/StatTypes.h"
 #include "Components/Skills/SkillDataAsset.h"
+#include "Components/Skills/SkillSlot.h"
 #include "WeaponActor.generated.h"
+
+
+class USkillSlot;
 
 UCLASS(Blueprintable, BlueprintType)
 class TEAM11_CH3_PROJECT_API AWeaponActor : public AActor
@@ -21,9 +26,14 @@ public:
 	UFUNCTION(BlueprintPure)
 	UAnimSequence* GetGripAnimation() const;
 
-	virtual void StartAttack(const FVector& TargetLocation, USkillDataAsset* Skill)
+	virtual void StartAttack(const FVector& TargetLocation, USkillSlot* SkillSlot)
 	{
-		CurrentSkillData = Skill;
+		CurrentSkillData = SkillSlot->GetEquippedSkill();
+		SkillSlot->StartCooldown();
+		if (CurrentSkillData->GetSkillType() == ESkillType::Aiming || CurrentSkillData->GetSkillType() == ESkillType::Duration)
+		{
+			SkillSlot->GetSkillComponent()->ActiveSkill(CurrentSkillData.Get());
+		}
 		bIsAttacking = true;
 	}
 

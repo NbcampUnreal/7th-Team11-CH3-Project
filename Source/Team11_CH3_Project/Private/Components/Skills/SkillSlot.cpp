@@ -5,6 +5,11 @@
 #include "Components/Skills/SkillDataAsset.h"
 #include "Engine/Engine.h"
 
+void USkillSlot::Init(USkillManager* SkillManager)
+{
+	SkillComponent = SkillManager;
+}
+
 void USkillSlot::EquipGem(USkillDataAsset* NewSkillData)
 {
 	if (IsValid(NewSkillData) == false)
@@ -50,4 +55,16 @@ bool USkillSlot::IsSkillOnCooldown() const
 float USkillSlot::GetCooldownRemaining() const
 {
 	return GetWorld()->GetTimerManager().GetTimerRemaining(CooldownTimer);
+}
+
+float USkillSlot::GetScore(AActor* Actor, AActor* Target) const
+{
+	if (IsSkillOnCooldown())
+		return -1;
+	return GetEquippedSkill()->GetScore(Actor,Target);
+}
+
+USkillManager* USkillSlot::GetSkillComponent() const
+{
+	return SkillComponent.Get();
 }

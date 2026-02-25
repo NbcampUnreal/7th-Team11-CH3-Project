@@ -27,9 +27,9 @@ void AGreatSwordWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMe
 	StaticMeshComponent->AttachToComponent(SkeletalMesh, AttachRules,TEXT("handslot_r"));
 }
 //TODO
-void AGreatSwordWeaponActor::StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) 
+void AGreatSwordWeaponActor::StartAttack(const FVector& TargetLocation,  USkillSlot* SkillSlot) 
 {
-	Super::StartAttack(TargetLocation, Skill);
+	Super::StartAttack(TargetLocation, SkillSlot);
 	Direction = TargetLocation - GetActorLocation();
 	UE_LOG(LogTemp, Warning, TEXT("StartAttack Called!"));
 }

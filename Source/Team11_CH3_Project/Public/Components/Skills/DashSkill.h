@@ -4,18 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "SkillDataAsset.h"
-#include "MeleeSimpleAttackSkillData.generated.h"
+#include "DashSkill.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TEAM11_CH3_PROJECT_API UMeleeSimpleAttackSkillData : public USkillDataAsset
+class TEAM11_CH3_PROJECT_API UDashSkill : public USkillDataAsset
 {
 	GENERATED_BODY()
-
 public:
 	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
-	                      const FVector& Direction) const override;
+						  const FVector& Direction) const override;
 	virtual float GetScore(AActor* Actor, AActor* Target) const override;
 };
