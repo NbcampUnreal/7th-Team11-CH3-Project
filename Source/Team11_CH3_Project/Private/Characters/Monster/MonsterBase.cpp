@@ -122,6 +122,11 @@ void AMonsterBase::Clear()
 	SkillComponent->Clear();
 }
 
+AWeaponActor* AMonsterBase::GetWeaponActor() const
+{
+	return WeaponActor;
+}
+
 float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
                                class AController* EventInstigator, AActor* DamageCauser)
 {
@@ -194,18 +199,7 @@ bool AMonsterBase::IsDead() const
 
 bool AMonsterBase::IsAttacking() const
 {
-	if (UActiveSkillSlot* ActiveSkillSlot = SkillComponent->GetActiveSkillSlot())
-	{
-		if (ActiveSkillSlot->GetSkill())
-		{
-			return true;
-		}
-	}
-	if (WeaponActor)
-	{
-		return WeaponActor->IsAttacking();
-	}
-	return false;
+	return SkillComponent->IsSkillActive();
 }
 
 FVector AMonsterBase::GetOriginLocation() const
@@ -233,25 +227,33 @@ void AMonsterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void AMonsterBase::PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLocation)
+void AMonsterBase::PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLocation)
 {
+	if (SkillComponent->IsSkillActive())
+	{
+		return;
+	}
+	
+	if (IsValid(SkillSlot->GetEquippedSkill()) == false)
+		return;
+	if (IsValid(SkillSlot->GetEquippedSkill()->GetSkillMontage()) == false)
+		return;
+	
 	//	SkillComponent
 	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
 	{
 		CharacterMovementComponent->bUseControllerDesiredRotation = true;
 		CharacterMovementComponent->bOrientRotationToMovement = false;
 	}
-	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
-	PlayAnimMontage(SkillMontage, 1,TEXT("UpperBody"));
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &AMonsterBase::OnAttackMontageEnded);
-	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
-	WeaponActor->StartAttack(TargetLocation, SkillSlot);
+	
+	
+	SkillComponent->ActiveSkill(this,TargetLocation, SkillSlot);
+
 }
 
 bool AMonsterBase::TryAttack(AActor* Target)
 {
-	if (!Target || !IsValid(WeaponActor) || WeaponActor->IsAttacking())
+	if (!Target ||  SkillComponent->IsSkillActive())
 	{
 		return false;
 	}
@@ -265,7 +267,7 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	USkillSlot* SkillSlot = SkillComponent->GetSkillSlot(BestSkillIdx);
 	FVector TargetLocation = Target->GetActorLocation();
 
-	PerformAttack(SkillSlot, TargetLocation);
+	PerformSkill(SkillSlot, TargetLocation);
 
 	return true;
 }
@@ -273,20 +275,13 @@ bool AMonsterBase::TryAttack(AActor* Target)
 //CallByAnimNotify
 void AMonsterBase::DealDamage()
 {
-	if (IsValid(this) && WeaponActor)
-	{
-		WeaponActor->PerformDamage();
-	}
+	SkillComponent->GetActiveSkillSlot()->Notify(TEXT("DealDamage"));
 }
 
 
-void AMonsterBase::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
+void AMonsterBase::OnAttackEnded()
 {
 	OnAttackFinished.Broadcast();
-	if (WeaponActor)
-	{
-		WeaponActor->EndAttack();
-	}
 	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
 	{
 		CharacterMovementComponent->bUseControllerDesiredRotation = false;

@@ -18,6 +18,7 @@ class TEAM11_CH3_PROJECT_API UProjectileSkillData : public USkillDataAsset
 public:
 	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const override;
 	virtual float GetScore(AActor* Actor, AActor* Target)const override;
+	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name) override;
 protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Projectile")

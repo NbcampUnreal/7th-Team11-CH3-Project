@@ -3,10 +3,13 @@
 
 #include "Components/SkillManager.h"
 
+#include "Characters/PlayerCharacter.h"
+#include "Characters/Monster/MonsterBase.h"
 #include "Components/Skills/ActiveSkillSlot.h"
 #include "Components/Skills/SkillDataAsset.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Engine/Engine.h"
+#include "GameFramework/Character.h"
 
 // Sets default values for this component's properties
 USkillManager::USkillManager()
@@ -22,7 +25,7 @@ void USkillManager::TickComponent(float DeltaTime, enum ELevelTick TickType,
 	FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	TickActiveSkill(DeltaTime,GetOwner());
+	TickActiveSkill(DeltaTime);
 }
 
 
@@ -166,6 +169,10 @@ float USkillManager::GetCooldownRemaining(int32 SlotIndex) const
 void USkillManager::Clear()
 {
 	SkillSlots.Empty();
+	if (IsSkillActive())
+	{
+		ExitActiveSkill();
+	}
 }
 
 UActiveSkillSlot* USkillManager::GetActiveSkillSlot() const
@@ -173,15 +180,40 @@ UActiveSkillSlot* USkillManager::GetActiveSkillSlot() const
 	return ActiveSkillSlot.Get();
 }
 
-void USkillManager::ActiveSkill(USkillSlot* CurrentSlot)
+void USkillManager::ActiveSkill(AActor* Owner, const FVector& TargetLocation, USkillSlot* SkillSlot)
 {
-	//CurrentActiveSkillSlot = CurrentSlot;
-	ActiveSkillSlot->OnStartSkill(CurrentSlot);
+	USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
+	if (ACharacter* Character = Cast<ACharacter>(Owner))
+	{
+		SkeletalMeshComponent = Character->GetMesh();
+		if (!IsValid(SkeletalMeshComponent))
+		{
+			SkeletalMeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>();
+		}
+	}
+	if (!IsValid(SkeletalMeshComponent))
+	{
+		return;	
+	}
+	
+	
+	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
+	UAnimInstance* AnimInstance = SkeletalMeshComponent->GetAnimInstance();
+	if (!IsValid(AnimInstance))
+	{
+		return;
+	}
+	AnimInstance->Montage_Play(SkillMontage);
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &USkillManager::OnAttackMontageEnded);
+	SkeletalMeshComponent->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
+	
+	ActiveSkillSlot->OnStartSkill(Owner, TargetLocation, SkillSlot);
 }
 
-void USkillManager::TickActiveSkill(float DeltaSeconds, AActor* Owner)
+void USkillManager::TickActiveSkill(float DeltaSeconds)
 {
-	ActiveSkillSlot->OnTick(DeltaSeconds, Owner);
+	ActiveSkillSlot->OnTick(DeltaSeconds);
 	if (ActiveSkillSlot->GetIsEnd())
 	{
 		ExitActiveSkill();
@@ -196,4 +228,45 @@ void USkillManager::ExecuteActiveSkill()
 void USkillManager::ExitActiveSkill()
 {
 	ActiveSkillSlot->OnExit();
+	if (AActor* Owner = GetOwner())
+	{
+		if (AMonsterBase* MonsterBase = Cast<AMonsterBase>(Owner))
+		{
+			MonsterBase->OnAttackEnded();
+		}
+		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Owner))
+		{
+			PlayerCharacter->OnAttackEnded();
+		}
+	}
+}
+
+bool USkillManager::IsSkillActive() const
+{
+	if (ActiveSkillSlot->GetSkillSlot() )
+	{
+		return true;
+	}
+	return false;
+}
+
+void USkillManager::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
+{
+	if (USkillSlot* SkillSlot = GetActiveSkillSlot()->GetSkillSlot())
+	{
+		if (USkillDataAsset* SkillDataAsset = SkillSlot->GetEquippedSkill())
+		{
+			switch (SkillDataAsset->GetSkillType())
+			{
+			case ESkillType::Immediately:
+				ActiveSkillSlot->SetIsEnd(true);
+				break;
+			case ESkillType::Aiming:
+				break;
+			case ESkillType::Duration:
+				break;
+			default: ;
+			}
+		}
+	}
 }

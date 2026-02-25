@@ -44,6 +44,8 @@ public:
 	
 	float GetRange() const { return Range; }
 	float GetDuration()const{return Duration;}
+	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
+						  const FVector& Direction, FName Name){};
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")

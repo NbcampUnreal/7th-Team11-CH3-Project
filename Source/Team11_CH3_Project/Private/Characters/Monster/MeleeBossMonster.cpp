@@ -19,7 +19,7 @@ AMeleeBossMonster::AMeleeBossMonster()
 bool AMeleeBossMonster::TryAttack(AActor* Target)
 {
 	
-	if (!Target || !IsValid(WeaponActor) || WeaponActor->IsAttacking() )
+	if (!Target || !IsValid(WeaponActor) || SkillComponent->IsSkillActive())
 	{
 		return false;
 	}
@@ -33,7 +33,7 @@ bool AMeleeBossMonster::TryAttack(AActor* Target)
 	USkillSlot* SkillSlot = SkillComponent->GetSkillSlot(BestSkillIdx);
 	FVector TargetLocation = Target->GetActorLocation();
 
-	PerformAttack(SkillSlot, TargetLocation);
+	PerformSkill(SkillSlot, TargetLocation);
 
 	return true;
 }

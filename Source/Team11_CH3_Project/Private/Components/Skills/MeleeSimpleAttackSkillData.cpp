@@ -12,7 +12,7 @@
 void UMeleeSimpleAttackSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const
 {
 	// StatComp 불러오기
-	if (!IsValid(Instigator))
+	if (!IsValid(Instigator) || !IsValid(WeaponActor))
 	{
 		return;
 	}
@@ -94,4 +94,14 @@ float UMeleeSimpleAttackSkillData::GetScore(AActor* Actor, AActor* Target) const
 		return 100.0f;
 	}
 	return -1.0f;
+}
+
+void UMeleeSimpleAttackSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
+	const FVector& Direction, FName Name)
+{
+	Super::Notify(Instigator, WeaponActor, Origin, Direction, Name);
+	if (Name == TEXT("DealDamage"))
+	{
+		Activate(Instigator,WeaponActor,Origin,Direction);
+	}
 }

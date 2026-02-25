@@ -12,35 +12,37 @@ class UStatComponent;
 class USkillSlot;
 class USkillDataAsset;
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TEAM11_CH3_PROJECT_API USkillManager : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	USkillManager();
 	// Called every frame FTimerHandle 사용 예정(프로젝트에서 Tick으로 진행한다면 다시 주석 해제) 
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType,
+	                           FActorComponentTickFunction* ThisTickFunction) override;
 	// Getter
 
 	UFUNCTION(BlueprintCallable)
 	USkillSlot* GetSkillSlot(int32 Index) const { return SkillSlots.IsValidIndex(Index) ? SkillSlots[Index] : nullptr; }
+
 	UFUNCTION(BlueprintCallable)
-	TArray<int32> FindReadySlotIndexes()const;	
+	TArray<int32> FindReadySlotIndexes() const;
 	UFUNCTION(BlueprintCallable)
-	int32 GetBestSkill(AActor* Actor, AActor* Target)const;
+	int32 GetBestSkill(AActor* Actor, AActor* Target) const;
 
 	// 스킬 실행
 	UFUNCTION(BlueprintCallable)
 	void StartSkillCooldown(int32 Index);
-	
+
 	// 스킬 보석 교체
 	UFUNCTION(BlueprintCallable)
 	void EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData);
 	UFUNCTION(BlueprintCallable)
-	void AddSKillGems(TArray<TSoftObjectPtr<USkillDataAsset>> Skills);	
+	void AddSKillGems(TArray<TSoftObjectPtr<USkillDataAsset>> Skills);
 	// 쿨타임 조회
 	UFUNCTION(BlueprintCallable)
 	bool IsSkillOnCooldown(int32 SlotIndex) const;
@@ -48,12 +50,15 @@ public:
 	float GetCooldownRemaining(int32 SlotIndex) const;
 
 	void Clear();
-	
+
 	UActiveSkillSlot* GetActiveSkillSlot() const;
-	void ActiveSkill(USkillSlot* CurrentSlot);
-	void TickActiveSkill(float DeltaSeconds, AActor* Owner);
+	void ActiveSkill(AActor* Owner, const FVector& TargetLocation, USkillSlot* CurrentSlot);
+	void TickActiveSkill(float DeltaSeconds);
 	void ExecuteActiveSkill();
 	void ExitActiveSkill();
+	bool IsSkillActive() const;
+	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

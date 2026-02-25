@@ -61,6 +61,8 @@ float USkillSlot::GetScore(AActor* Actor, AActor* Target) const
 {
 	if (IsSkillOnCooldown())
 		return -1;
+	if (!GetEquippedSkill())
+		return -1;
 	return GetEquippedSkill()->GetScore(Actor,Target);
 }
 

@@ -25,45 +25,14 @@ public:
 	float GetAttackRange() const;
 	UFUNCTION(BlueprintPure)
 	UAnimSequence* GetGripAnimation() const;
-
-	virtual void StartAttack(const FVector& TargetLocation, USkillSlot* SkillSlot)
-	{
-		CurrentSkillData = SkillSlot->GetEquippedSkill();
-		
-		if (CurrentSkillData->GetSkillType() == ESkillType::Aiming || CurrentSkillData->GetSkillType() == ESkillType::Duration)
-		{
-			SkillSlot->GetSkillComponent()->ActiveSkill(SkillSlot);
-		}
-		else
-		{
-			SkillSlot->StartCooldown();
-		}
-		bIsAttacking = true;
-	}
-
-	virtual void PerformDamage()
-	{
-	}
-
-	virtual void EndAttack()
-	{
-		CurrentSkillData.Reset();
-		CurrentSkillData = nullptr;
-		bIsAttacking = false;
-	}
-
 	EWeaponType GetWeaponType() const;
 	USkillDataAsset* GetDefaultSkillData() const;
-	bool IsAttacking() const { return bIsAttacking; }
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TObjectPtr<USkillDataAsset> DefaultSkill;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TSoftObjectPtr<UAnimSequence> GripAnimation;
-	UPROPERTY(VisibleInstanceOnly, Category="Weapon")
-	TWeakObjectPtr<USkillDataAsset> CurrentSkillData;
-	bool bIsAttacking;
 
 private:
 	FWeaponItemData WeaponItemData;

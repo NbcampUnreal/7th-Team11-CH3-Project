@@ -20,18 +20,18 @@ APlayerCharacter::APlayerCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-    
-    CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
-    CameraBoom->SetupAttachment(RootComponent);
-    CameraBoom->TargetArmLength = CameraBoomLength;
-    CameraBoom->bUsePawnControlRotation = true;
-    CameraBoom->bEnableCameraLag = !bIsAiming;
-    CameraBoom->CameraLagSpeed = 20.0f;
-    CameraBoom->CameraLagMaxDistance = 0.f;
-    CameraBoom->bEnableCameraRotationLag = false;
-    CameraBoom->CameraRotationLagSpeed = 20.f;
-    CameraBoom->bUseCameraLagSubstepping = true;
-    CameraBoom->CameraLagMaxTimeStep = 1.f / 60.f;
+
+	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(RootComponent);
+	CameraBoom->TargetArmLength = CameraBoomLength;
+	CameraBoom->bUsePawnControlRotation = true;
+	CameraBoom->bEnableCameraLag = !bIsAiming;
+	CameraBoom->CameraLagSpeed = 20.0f;
+	CameraBoom->CameraLagMaxDistance = 0.f;
+	CameraBoom->bEnableCameraRotationLag = false;
+	CameraBoom->CameraRotationLagSpeed = 20.f;
+	CameraBoom->bUseCameraLagSubstepping = true;
+	CameraBoom->CameraLagMaxTimeStep = 1.f / 60.f;
 
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
@@ -43,25 +43,24 @@ APlayerCharacter::APlayerCharacter()
 	// 매쉬와 카메라 사이 충돌 비활성화
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
-    bUseControllerRotationPitch = false;
-    bUseControllerRotationYaw = true;
-    bUseControllerRotationRoll = false;
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = false;
 
-    GetCharacterMovement()->bOrientRotationToMovement = false;
-    GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
-    GetCharacterMovement()->JumpZVelocity = 600.0f;
-    GetCharacterMovement()->AirControl = 0.35f;
-    GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-    GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);
+	GetCharacterMovement()->JumpZVelocity = 600.0f;
+	GetCharacterMovement()->AirControl = 0.35f;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 
-    StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
-    BuffManager = CreateDefaultSubobject<UBuffManager>(TEXT("BuffManager"));
+	StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
+	BuffManager = CreateDefaultSubobject<UBuffManager>(TEXT("BuffManager"));
 	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
 	ItemManager = CreateDefaultSubobject<UItemManager>(TEXT("ItemManager"));
 
-    bIsDodging = false;
-    bCanDodge = true;
-
+	bIsDodging = false;
+	bCanDodge = true;
 }
 
 void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -123,9 +122,9 @@ void APlayerCharacter::GetSkillTargetLocation(FVector& TargetLocation)
 
 void APlayerCharacter::DealDamage()
 {
-	if (IsValid(this) && WeaponActor)
+	if (UActiveSkillSlot* ActiveSkillSlot = SkillComponent->GetActiveSkillSlot())
 	{
-		WeaponActor->PerformDamage();
+		ActiveSkillSlot->Notify(TEXT("DealDamage"));
 	}
 }
 
@@ -148,17 +147,12 @@ void APlayerCharacter::Attack(const FInputActionValue& Value)
 	{
 		return;
 	}
-	if (!IsValid(WeaponActor))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Weapon Empty!"));
-		return;
-	}
 
 	// if (SkillComponent->CurrentActiveSkill) 체크로 지금 활성화된 스킬이 있으면 그거 사용 아니면 넘겨서 아래 함수로 넘어감 
 	// 처음 등록의 skillmanager의 enter함수 Tick 다시 누르면 Excute함수 쓰면서 스킬 발동 발동 끝나는 시점에 Exit
 	FVector TargetLocation;
 	GetSkillTargetLocation(TargetLocation);
-	PerformAttack(SkillComponent->GetSkillSlot(0), TargetLocation);
+	PerformSkill(SkillComponent->GetSkillSlot(0), TargetLocation);
 }
 
 void APlayerCharacter::SkillQ(const FInputActionValue& Value)
@@ -191,7 +185,7 @@ void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 
 	FVector TargetLocation;
 	GetSkillTargetLocation(TargetLocation);
-	PerformAttack(SkillComponent->GetSkillSlot(1), TargetLocation);
+	PerformSkill(SkillComponent->GetSkillSlot(1), TargetLocation);
 }
 
 void APlayerCharacter::SkillE(const FInputActionValue& Value)
@@ -220,7 +214,7 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
 
 	FVector TargetLocation;
 	GetSkillTargetLocation(TargetLocation);
-	PerformAttack(SkillComponent->GetSkillSlot(2), TargetLocation);
+	PerformSkill(SkillComponent->GetSkillSlot(2), TargetLocation);
 }
 
 void APlayerCharacter::SetAiming(bool bNewAiming)
@@ -230,22 +224,21 @@ void APlayerCharacter::SetAiming(bool bNewAiming)
 		SkillComponent->ExitActiveSkill();
 		return;
 	}
-	
+
 
 	UE_LOG(LogTemp, Warning, TEXT("SetAiming: %d"), bNewAiming);
 	bIsAiming = bNewAiming;
 
-    bUseControllerRotationYaw = false;
-    GetCharacterMovement()->bOrientRotationToMovement = false;
-    GetCharacterMovement()->bUseControllerDesiredRotation = true;
-    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : DefaultWalkSpeed;
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : DefaultWalkSpeed;
 	UpdateMovementSpeed();
 
-    if (AMainPlayerController* PC = Cast<AMainPlayerController>(GetController()))
-    {
-        PC->BP_SetCrosshairVisible(bIsAiming);
-    }
-
+	if (AMainPlayerController* PC = Cast<AMainPlayerController>(GetController()))
+	{
+		PC->BP_SetCrosshairVisible(bIsAiming);
+	}
 }
 
 void APlayerCharacter::BeginPlay()
@@ -277,29 +270,34 @@ void APlayerCharacter::BeginPlay()
 		InitialStat.CriticalDamage = 1.5f;
 		StatComponent->InitStat(InitialStat);
 
-        // 기본 장비 장착(시작은 기본 무기만)
-        ItemManager->UseItem(TEXT("StaffWeapon"), EItemType::Equipment, 0);
-    }
+		// 기본 장비 장착(시작은 기본 무기만)
+		ItemManager->UseItem(TEXT("StaffWeapon"), EItemType::Equipment, 0);
+	}
 
-    UpdateMovementSpeed();
+	UpdateMovementSpeed();
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-    const FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
-    CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
-    /*
-    float TargetArm = bIsAiming ? AimArmLength : DefaultArmLength;
-    FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
+	const FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
+	CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
+	/*
+	float TargetArm = bIsAiming ? AimArmLength : DefaultArmLength;
+	FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
 
-    CameraBoom->TargetArmLength =
-        FMath::FInterpTo(CameraBoom->TargetArmLength, TargetArm, DeltaTime, CameraInterpSpeed);
+	CameraBoom->TargetArmLength =
+	    FMath::FInterpTo(CameraBoom->TargetArmLength, TargetArm, DeltaTime, CameraInterpSpeed);
 
-    CameraBoom->SocketOffset =
-        FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
-        */
+	CameraBoom->SocketOffset =
+	    FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
+	    */
+}
+
+AWeaponActor* APlayerCharacter::GetWeaponActor() const
+{
+	return WeaponActor;
 }
 
 
@@ -309,35 +307,35 @@ void APlayerCharacter::Move(const FVector2D& MovementVector)
 
 	if (!Controller) return;
 
-    SmoothedMoveInput = FMath::Vector2DInterpTo(
-        SmoothedMoveInput,
-        MovementVector,
-        GetWorld()->GetDeltaSeconds(),
-        MoveInputSmoothSpeed
-    );
+	SmoothedMoveInput = FMath::Vector2DInterpTo(
+		SmoothedMoveInput,
+		MovementVector,
+		GetWorld()->GetDeltaSeconds(),
+		MoveInputSmoothSpeed
+	);
 
-    const float X = SmoothedMoveInput.X;
-    const float Y = SmoothedMoveInput.Y;
+	const float X = SmoothedMoveInput.X;
+	const float Y = SmoothedMoveInput.Y;
 
-    const FRotator ControlRot = Controller->GetControlRotation();
-    const FRotator YawRot(0.f, ControlRot.Yaw, 0.f);
+	const FRotator ControlRot = Controller->GetControlRotation();
+	const FRotator YawRot(0.f, ControlRot.Yaw, 0.f);
 
-    const FVector ForwardDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
-    const FVector RightDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
+	const FVector ForwardDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+	const FVector RightDir = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
 
-    AddMovementInput(ForwardDir, Y);
-    AddMovementInput(RightDir, X);
+	AddMovementInput(ForwardDir, Y);
+	AddMovementInput(RightDir, X);
 
-    /*
-    FRotator ControlRotation = Controller->GetControlRotation();
-    FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
+	/*
+	FRotator ControlRotation = Controller->GetControlRotation();
+	FRotator YawRotation(0.f, ControlRotation.Yaw, 0.f);
 
-    FVector Forward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-    FVector Right = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+	FVector Forward = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+	FVector Right = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
-    AddMovementInput(Forward, MovementVector.Y);
-    AddMovementInput(Right, MovementVector.X);
-    */
+	AddMovementInput(Forward, MovementVector.Y);
+	AddMovementInput(Right, MovementVector.X);
+	*/
 }
 
 void APlayerCharacter::Look(const FVector2D& LookAxisVector)
@@ -358,9 +356,11 @@ void APlayerCharacter::PerformDodge()
 
 void APlayerCharacter::UpdateMovementSpeed()
 {
-    if (!GetCharacterMovement() || !StatComponent) return;
-    // 조준상태일때도 고려해서 최고속도 업데이트
-    GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
+	if (!GetCharacterMovement() || !StatComponent) return;
+	// 조준상태일때도 고려해서 최고속도 업데이트
+	GetCharacterMovement()->MaxWalkSpeed = bIsAiming
+		                                       ? AimWalkSpeed
+		                                       : WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
 }
 
 EDodgeDir APlayerCharacter::GetDodgeDirectionFromInput() const
@@ -567,7 +567,7 @@ void APlayerCharacter::ResetDodgeCooldown()
 
 // TakeDamage로 변경
 float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
-    class AController* EventInstigator, AActor* DamageCauser)
+                                   class AController* EventInstigator, AActor* DamageCauser)
 {
 	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
@@ -615,14 +615,13 @@ void APlayerCharacter::Die()
 
 void APlayerCharacter::SetWeaponActor(AWeaponActor* NewWeapon)
 {
-    if (WeaponActor)
-    {
-        WeaponActor->Destroy();
-    } 
+	if (WeaponActor)
+	{
+		WeaponActor->Destroy();
+	}
 
-    WeaponActor = NewWeapon;
-    SkillComponent->EquipSkillGem(0,NewWeapon->GetDefaultSkillData());
-		
+	WeaponActor = NewWeapon;
+	SkillComponent->EquipSkillGem(0, NewWeapon->GetDefaultSkillData());
 }
 
 // dodge, death anim
@@ -643,35 +642,23 @@ void APlayerCharacter::PlayDeathAnimation()
     }
 }
 */
-void APlayerCharacter::PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLocation)
+void APlayerCharacter::PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLocation)
 {
-	//	SkillComponent
-	if (WeaponActor->IsAttacking())
+	if (SkillComponent->IsSkillActive())
 	{
 		return;
 	}
+
 	// Q,E 스킬 없으면 터지는거 방지
 	if (IsValid(SkillSlot->GetEquippedSkill()) == false)
 		return;
 	if (IsValid(SkillSlot->GetEquippedSkill()->GetSkillMontage()) == false)
 		return;
 
-	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
-
-	PlayAnimMontage(SkillMontage, 1,TEXT("UpperBody"));
-
-	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &APlayerCharacter::OnAttackMontageEnded);
-	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
-	WeaponActor->StartAttack(TargetLocation,
-	                         SkillSlot);
+	SkillComponent->ActiveSkill(this, TargetLocation, SkillSlot);
 }
 
 
-void APlayerCharacter::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
+void APlayerCharacter::OnAttackEnded()
 {
-	if (WeaponActor)
-	{
-		WeaponActor->EndAttack();
-	}
 }

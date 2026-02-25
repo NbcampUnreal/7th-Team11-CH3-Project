@@ -73,3 +73,16 @@ float UProjectileSkillData::GetScore(AActor* Actor, AActor* Target) const
 	
 	return -1.0f;
 }
+
+
+
+void UProjectileSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
+	const FVector& Direction, FName Name)
+{
+	Super::Notify(Instigator, WeaponActor, Origin, Direction, Name);
+	if (Name == TEXT("DealDamage"))
+	{
+		Activate(Instigator,WeaponActor,Origin,Direction);
+	}
+	
+}
