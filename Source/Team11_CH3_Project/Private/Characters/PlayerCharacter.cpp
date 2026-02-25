@@ -148,6 +148,8 @@ void APlayerCharacter::Attack(const FInputActionValue& Value)
 		return;
 	}
 
+	// if (SkillComponent->CurrentActiveSkill) 체크로 지금 활성화된 스킬이 있으면 그거 사용 아니면 넘겨서 아래 함수로 넘어감 
+	// 처음 등록의 skillmanager의 enter함수 Tick 다시 누르면 Excute함수 쓰면서 스킬 발동 발동 끝나는 시점에 Exit
 	FVector TargetLocation;
 	GetSkillTargetLocation(TargetLocation);
 	PerformAttack(SkillComponent->GetSkillSlot(0), TargetLocation);
@@ -173,6 +175,10 @@ void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Warning, TEXT("Weapon Empty!"));
 		return;
 	}
+
+
+	// if (SkillComponent->CurrentActiveSkill) 체크로 지금 활성화된 스킬이 있으면 return 
+
 
 	FVector TargetLocation;
 	GetSkillTargetLocation(TargetLocation);
@@ -625,7 +631,14 @@ void APlayerCharacter::PerformAttack(USkillSlot* SkillSlot, const FVector& Targe
 	{
 		return;
 	}
+	// Q,E 스킬 없으면 터지는거 방지
+	if (IsValid(SkillSlot->GetEquippedSkill()) == false)
+		return;
+	if (IsValid(SkillSlot->GetEquippedSkill()->GetSkillMontage()) == false)
+		return;
+
 	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
+
 	PlayAnimMontage(SkillMontage, 1,TEXT("UpperBody"));
 
 	FOnMontageEnded EndDelegate;

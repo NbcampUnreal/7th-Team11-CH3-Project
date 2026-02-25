@@ -6,7 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "SkillManager.generated.h"
 
-
 class UStatComponent;
 class USkillSlot;
 class USkillDataAsset;
@@ -29,7 +28,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<int32> FindReadySlotIndexes()const;	
 	
-	// 스킬 실행
+	// 스킬 쿨타임
 	UFUNCTION(BlueprintCallable)
 	void StartSkillCooldown(int32 Index);
 	

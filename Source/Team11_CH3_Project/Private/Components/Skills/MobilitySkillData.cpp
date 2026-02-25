@@ -5,7 +5,7 @@
 #include "GameFramework/Character.h"
 #include "Components/CapsuleComponent.h"
 
-void UMobilitySkillData::Activate(APawn* Instigator, const FVector& Origin, const FVector& Direction) const
+void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const
 {
 	if (IsValid(Instigator) == false)
 		return;
