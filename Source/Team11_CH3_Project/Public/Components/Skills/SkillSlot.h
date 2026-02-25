@@ -27,6 +27,8 @@ public:
 	void StartCooldown();
 	bool IsSkillOnCooldown()const;
 	float GetCooldownRemaining() const;
+	float GetScore(AActor* Actor, AActor* Target) const;
+
 private:
 	UPROPERTY()
 	TObjectPtr<USkillDataAsset> EquippedSkill;

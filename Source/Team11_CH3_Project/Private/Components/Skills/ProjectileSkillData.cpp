@@ -51,3 +51,25 @@ void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor
 		Projectile->Initialize(ActualDamage, ActualProjectileSpeed);
 	}
 }
+
+float UProjectileSkillData::GetScore(AActor* Actor, AActor* Target) const
+{
+	FHitResult Hit;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(Actor);
+	if (!IsValid(Actor)||!IsValid(Target))
+	{
+		return -1.0f;
+	}
+	Actor->GetWorld()->LineTraceSingleByChannel(Hit,Actor->GetActorLocation(),Target->GetActorLocation(),ECollisionChannel::ECC_WorldStatic,CollisionParams);
+
+	if (Hit.bBlockingHit)
+	{
+		if (Hit.GetActor() == Target)
+		{
+			return 100.0f;
+		}
+	}
+	
+	return -1.0f;
+}

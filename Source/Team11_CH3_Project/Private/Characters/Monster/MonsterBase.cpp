@@ -94,7 +94,7 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	}
 	if (SkillComponent)
 	{
-		SkillComponent->AddSKillGems(MonsterData->Skills);	
+		SkillComponent->AddSKillGems(MonsterData->Skills);
 	}
 	
 	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
@@ -249,17 +249,13 @@ bool AMonsterBase::TryAttack(AActor* Target)
 		return false;
 	}
 
-	TArray<int32> Indexes = SkillComponent->FindReadySlotIndexes();
-	if (Indexes.Num() == 0)
+	int32 BestSkillIdx = SkillComponent->GetBestSkill(this,Target);
+	if (SkillComponent->GetCooldownRemaining(BestSkillIdx) > 0.0f)
 	{
 		return false;
 	}
-	int32 Index = Indexes[FMath::RandRange(0, Indexes.Num() - 1)];
-	if (SkillComponent->GetCooldownRemaining(Index) > 0.0f)
-	{
-		return false;
-	}
-	USkillSlot* SkillSlot = SkillComponent->GetSkillSlot(Index);
+	
+	USkillSlot* SkillSlot = SkillComponent->GetSkillSlot(BestSkillIdx);
 	FVector TargetLocation = Target->GetActorLocation();
 
 	PerformAttack(SkillSlot, TargetLocation);

@@ -28,7 +28,9 @@ public:
 	USkillSlot* GetSkillSlot(int32 Index) const { return SkillSlots.IsValidIndex(Index) ? SkillSlots[Index] : nullptr; }
 	UFUNCTION(BlueprintCallable)
 	TArray<int32> FindReadySlotIndexes()const;	
-	
+	UFUNCTION(BlueprintCallable)
+	int32 GetBestSkill(AActor* Actor, AActor* Target)const;
+
 	// 스킬 실행
 	UFUNCTION(BlueprintCallable)
 	void StartSkillCooldown(int32 Index);

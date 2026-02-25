@@ -27,7 +27,7 @@ public:
 
 	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
 	void OnDieMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
-	bool TryAttack(AActor* Target);
+	virtual bool TryAttack(AActor* Target);
 	void PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLocation);
 	
 	void DealDamage();
@@ -51,6 +51,8 @@ protected:
 	TObjectPtr<AWeaponActor> WeaponActor;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> MonsterDieAnimMontage;
+
+	int32 ScoreValue = 0;
 	
 public:
 	UFUNCTION(BlueprintPure)
@@ -65,6 +67,4 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-private:
-	int32 ScoreValue = 0;
 };

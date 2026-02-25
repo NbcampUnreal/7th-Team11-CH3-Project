@@ -62,6 +62,23 @@ TArray<int32> USkillManager::FindReadySlotIndexes() const
 	return Ret;
 }
 
+int32 USkillManager::GetBestSkill(AActor* Actor, AActor* Target) const
+{
+	TArray<int32> ReadySkillIndexes = FindReadySlotIndexes();
+	float MaxScore = -1;
+	int32 Ret=-1;
+	for (int32 i = 0; i < ReadySkillIndexes.Num(); i++)
+	{
+		float Score = SkillSlots[i]->GetScore(Actor,Target);
+		if (MaxScore < Score)
+		{
+			MaxScore = Score;
+			Ret = i;
+		}
+	}
+	return Ret;
+}
+
 void USkillManager::StartSkillCooldown(int32 Index)
 {
 	// 예외 상황 체크

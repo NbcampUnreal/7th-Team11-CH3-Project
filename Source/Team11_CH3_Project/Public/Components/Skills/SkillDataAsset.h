@@ -17,11 +17,16 @@ class TEAM11_CH3_PROJECT_API USkillDataAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 
 public:
-	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const
+	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
+	                      const FVector& Direction) const
 	{
 	}
-	float GetCooldownTime() const { return CooldownTime; };
-	UAnimMontage* GetSkillMontage()const{return SkillMontage;};
+
+	float GetCooldownTime() const { return CooldownTime; }
+	virtual float GetScore(AActor* Actor, AActor* Target) const{return -1.0f;}
+	UAnimMontage* GetSkillMontage() const { return SkillMontage; };
+	float GetRange() const { return Range; };
+	
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
 	FName SkillID;
@@ -35,6 +40,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
 	float Damage = 0.f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Skill")
+	float Range = 0.0f;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TObjectPtr<UAnimMontage> SkillMontage = nullptr;
