@@ -50,10 +50,10 @@ public:
 	void Clear();
 	
 	UActiveSkillSlot* GetActiveSkillSlot() const;
-	void ActiveSkill(USkillDataAsset* Skill) const;
-	void TickActiveSkill(float DeltaSeconds, AActor* Owner) const;
-	void ExecuteActiveSkill() const;
-	void ExitActiveSkill() const;
+	void ActiveSkill(USkillSlot* CurrentSlot);
+	void TickActiveSkill(float DeltaSeconds, AActor* Owner);
+	void ExecuteActiveSkill();
+	void ExitActiveSkill();
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

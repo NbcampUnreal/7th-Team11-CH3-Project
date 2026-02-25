@@ -8,6 +8,7 @@
 
 class USkillManager;
 class USkillDataAsset;
+class USkillSlot;
 /**
  * 
  */
@@ -17,21 +18,23 @@ class TEAM11_CH3_PROJECT_API UActiveSkillSlot : public UObject
 	GENERATED_BODY()
 public:	
 	void Init(USkillManager* SkillManager);
-	void OnStartSkill(USkillDataAsset* Skill);
+	void OnStartSkill(USkillSlot* Skill);
 	void OnExecute();
 	void OnTick(float DeltaSeconds, AActor* Owner);
 	void OnExit();
 	float GetElapsedTime() const;
 	UFUNCTION(BlueprintCallable)
-	USkillDataAsset* GetSkill() const { return  CurrentSKill; }
+	USkillSlot* GetSkill() const { return  CurrentActiveSkillSlot.Get(); }
 
 	bool GetIsEnd();
 
 private:
-	UPROPERTY()
-	TObjectPtr<USkillDataAsset> CurrentSKill;
+	//UPROPERTY()
+	//TObjectPtr<USkillDataAsset> CurrentSKill;
 	float ElapsedTime;	
 	UPROPERTY()
 	TWeakObjectPtr<USkillManager> SkillComponent;
 	bool bIsEnd;
+	// 현재 사용중인 스킬 슬롯데이터
+	TWeakObjectPtr<USkillSlot> CurrentActiveSkillSlot;
 };

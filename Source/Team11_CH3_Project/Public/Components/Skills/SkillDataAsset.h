@@ -25,7 +25,7 @@ UCLASS()
 class TEAM11_CH3_PROJECT_API USkillDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
-
+	
 public:
 	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
 	                      const FVector& Direction) const

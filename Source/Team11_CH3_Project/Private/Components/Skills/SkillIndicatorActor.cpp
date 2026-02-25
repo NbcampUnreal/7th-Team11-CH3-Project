@@ -31,8 +31,8 @@ void ASkillIndicatorActor::BeginPlay()
 // Called every frame
 void ASkillIndicatorActor::Tick(float DeltaTime)
 {
-	Super::Tick(DeltaTime);
-
+    Super::Tick(DeltaTime);
+    UpdateLocation();
 }
 
 void ASkillIndicatorActor::Initialize(APawn* InInstigator, float InMaxRange)

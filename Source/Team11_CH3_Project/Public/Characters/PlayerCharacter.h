@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
@@ -37,10 +37,6 @@ enum class EDodgeDir : uint8
 	Left,
 	Right
 };
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintStarted);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintEnded);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeStarted);
 

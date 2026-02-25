@@ -18,12 +18,10 @@ class TEAM11_CH3_PROJECT_API ULocationSkillData : public USkillDataAsset
 	
 public:
 	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const override;
-
-	void Confirm();
-
-	void Cancel();
-
-	bool IsSelectingLocation() const { return bIsSelectingLocation; }
+	virtual void Enter() const override;
+	virtual void Execute() const override;
+	virtual void Tick(float DeltaSeconds, AActor* Actor) const override;
+	virtual void OnExit() const override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Location")
@@ -32,13 +30,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Location")
 	TSubclassOf<AActor> SkillEffectClass;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Skill|Location")
-	float MaxRange = 1500.f;
-
 
 private:
-	bool bIsSelectingLocation = false;
 
 	UPROPERTY()
-	TObjectPtr<ASkillIndicatorActor> SpawnedIndicator;
+	mutable TObjectPtr<ASkillIndicatorActor> SpawnedIndicator;
 };

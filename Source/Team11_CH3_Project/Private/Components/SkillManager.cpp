@@ -173,12 +173,13 @@ UActiveSkillSlot* USkillManager::GetActiveSkillSlot() const
 	return ActiveSkillSlot.Get();
 }
 
-void USkillManager::ActiveSkill(USkillDataAsset* Skill) const
+void USkillManager::ActiveSkill(USkillSlot* CurrentSlot)
 {
-	ActiveSkillSlot->OnStartSkill(Skill);
+	//CurrentActiveSkillSlot = CurrentSlot;
+	ActiveSkillSlot->OnStartSkill(CurrentSlot);
 }
 
-void USkillManager::TickActiveSkill(float DeltaSeconds, AActor* Owner) const
+void USkillManager::TickActiveSkill(float DeltaSeconds, AActor* Owner)
 {
 	ActiveSkillSlot->OnTick(DeltaSeconds, Owner);
 	if (ActiveSkillSlot->GetIsEnd())
@@ -187,12 +188,12 @@ void USkillManager::TickActiveSkill(float DeltaSeconds, AActor* Owner) const
 	}
 }
 
-void USkillManager::ExecuteActiveSkill() const
+void USkillManager::ExecuteActiveSkill()
 {
 	ActiveSkillSlot->OnExecute();
 }
 
-void USkillManager::ExitActiveSkill() const
+void USkillManager::ExitActiveSkill()
 {
 	ActiveSkillSlot->OnExit();
 }

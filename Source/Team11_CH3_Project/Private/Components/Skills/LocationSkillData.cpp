@@ -6,21 +6,54 @@
 
 void ULocationSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const
 {
-	if (IsValid(Instigator) == false)
-		return;
-	if (IsValid(IndicatorClass) == false)
-		return;
-	if (bIsSelectingLocation)
-		return;
+}
 
-	ULocationSkillData* MutableThis = const_cast<ULocationSkillData*>(this);
+void ULocationSkillData::Enter() const
+{
+}
+
+void ULocationSkillData::Execute() const
+{
+
+	if (IsValid(SpawnedIndicator) == false)
+		return;
+	FVector SkillLocation = SpawnedIndicator->GetIndicatorLocation();
+
+	if (IsValid(SkillEffectClass) == false)
+		return;
 
 	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = Instigator;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	ASkillIndicatorActor* Indicator = Instigator->GetWorld()->SpawnActor<ASkillIndicatorActor>(
+	AActor* Effect = SpawnedIndicator->GetWorld()->SpawnActor<AActor>(
+		SkillEffectClass,
+		SkillLocation,
+		FRotator::ZeroRotator,
+		SpawnParams
+	);
+
+	UE_LOG(LogTemp, Warning, TEXT("Spawned Effect: %s at %s"),
+		*GetNameSafe(Effect), *SkillLocation.ToString());
+
+	SpawnedIndicator->Destroy();
+	SpawnedIndicator = nullptr;
+}
+
+void ULocationSkillData::Tick(float DeltaSeconds, AActor* Actor) const
+{
+	if (IsValid(SpawnedIndicator) || IsValid(Actor) == false || IsValid(IndicatorClass) == false)
+		return;
+
+	APawn* Instigator = Cast<APawn>(Actor);
+	if (IsValid(Instigator) == false)
+		return;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = Actor;
+
+	ASkillIndicatorActor* Indicator = Actor->GetWorld()->SpawnActor<ASkillIndicatorActor>(
 		IndicatorClass,
-		Instigator->GetActorLocation(),
+		Actor->GetActorLocation(),
 		FRotator::ZeroRotator,
 		SpawnParams
 	);
@@ -28,15 +61,16 @@ void ULocationSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, 
 	if (IsValid(Indicator) == false)
 		return;
 
-	Indicator->Initialize(Instigator, MaxRange);
-	MutableThis->SpawnedIndicator = Indicator;
-	MutableThis->bIsSelectingLocation = true;
+	Indicator->Initialize(Instigator, Range);
+	SpawnedIndicator = Indicator;
 }
 
-void ULocationSkillData::Confirm()
+void ULocationSkillData::OnExit() const
 {
-}
+	if (IsValid(SpawnedIndicator) == false)
+		return;
 
-void ULocationSkillData::Cancel()
-{
+	SpawnedIndicator->Destroy();
+	SpawnedIndicator = nullptr;
+	
 }

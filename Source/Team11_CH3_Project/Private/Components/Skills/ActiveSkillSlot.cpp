@@ -2,7 +2,7 @@
 
 
 #include "Components/Skills/ActiveSkillSlot.h"
-
+#include "Components/Skills/SkillSlot.h"
 #include "Components/Skills/SkillDataAsset.h"
 
 void UActiveSkillSlot::Init(USkillManager* SkillManager)
@@ -10,38 +10,58 @@ void UActiveSkillSlot::Init(USkillManager* SkillManager)
 	SkillComponent = SkillManager;
 }
 
-void UActiveSkillSlot::OnStartSkill(USkillDataAsset* Skill)
+void UActiveSkillSlot::OnStartSkill(USkillSlot* Skill) // 여기서 슬롯을 받게
 {
-	CurrentSKill = Skill;
-	CurrentSKill->Enter();
+	CurrentActiveSkillSlot = Skill;
+	CurrentActiveSkillSlot->GetEquippedSkill()->Enter();
+	// Aiming 아닌경우 쿨타임 여기서
+	if (CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillType() != ESkillType::Aiming)
+	{
+		CurrentActiveSkillSlot->StartCooldown();
+	}
+	
+	//CurrentActiveSkillSlot->Enter();
 	ElapsedTime = 0.0f;
+	bIsEnd = false;
 }
 
 void UActiveSkillSlot::OnExecute()
 {
-	CurrentSKill->Execute();
+	// Aiming인 경우에만 쿨타임시작
+	if (CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Aiming)
+	{
+		CurrentActiveSkillSlot->StartCooldown();
+	}
+
+	CurrentActiveSkillSlot->GetEquippedSkill()->Execute();
+	CurrentActiveSkillSlot->GetEquippedSkill()->OnExit();
+	CurrentActiveSkillSlot = nullptr;
 	bIsEnd = true;
 }
 
 void UActiveSkillSlot::OnTick(float DeltaSeconds, AActor* Owner)
 {
-	if (CurrentSKill == nullptr)
+	if (CurrentActiveSkillSlot == nullptr || CurrentActiveSkillSlot->GetEquippedSkill() == nullptr)
 	{	
 		bIsEnd = true;
 		return;
 	}
-	CurrentSKill->Tick(DeltaSeconds, Owner);
+	CurrentActiveSkillSlot->GetEquippedSkill()->Tick(DeltaSeconds, Owner);
 	ElapsedTime += DeltaSeconds;
-	if (CurrentSKill->GetSkillType() == ESkillType::Duration)
+	if (CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Duration)
 	{
-		bIsEnd = ElapsedTime > CurrentSKill->GetDuration();
+		bIsEnd = ElapsedTime > CurrentActiveSkillSlot->GetEquippedSkill()->GetDuration();
 	}
 }
 
 void UActiveSkillSlot::OnExit()
 {
-	CurrentSKill = nullptr;
-	CurrentSKill->OnExit();
+	if (CurrentActiveSkillSlot == nullptr || IsValid(CurrentActiveSkillSlot->GetEquippedSkill()) == false)
+		return;
+
+	CurrentActiveSkillSlot->GetEquippedSkill()->OnExit();
+	CurrentActiveSkillSlot = nullptr;
+	bIsEnd = false;
 }
 
 float UActiveSkillSlot::GetElapsedTime() const
@@ -51,7 +71,7 @@ float UActiveSkillSlot::GetElapsedTime() const
 
 bool UActiveSkillSlot::GetIsEnd()
 {
-	if (CurrentSKill == nullptr)
+	if (CurrentActiveSkillSlot == nullptr)
 	{
 		return true;
 	}

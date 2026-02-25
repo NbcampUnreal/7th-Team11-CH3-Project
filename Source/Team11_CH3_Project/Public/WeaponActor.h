@@ -29,10 +29,14 @@ public:
 	virtual void StartAttack(const FVector& TargetLocation, USkillSlot* SkillSlot)
 	{
 		CurrentSkillData = SkillSlot->GetEquippedSkill();
-		SkillSlot->StartCooldown();
+		
 		if (CurrentSkillData->GetSkillType() == ESkillType::Aiming || CurrentSkillData->GetSkillType() == ESkillType::Duration)
 		{
-			SkillSlot->GetSkillComponent()->ActiveSkill(CurrentSkillData.Get());
+			SkillSlot->GetSkillComponent()->ActiveSkill(SkillSlot);
+		}
+		else
+		{
+			SkillSlot->StartCooldown();
 		}
 		bIsAttacking = true;
 	}

@@ -132,6 +132,12 @@ void APlayerCharacter::DealDamage()
 // 스킬 정의
 void APlayerCharacter::Attack(const FInputActionValue& Value)
 {
+	if (SkillComponent->GetActiveSkillSlot()->GetIsEnd() == false)
+	{
+		SkillComponent->ExecuteActiveSkill();
+		return;
+	}
+
 	if (IsValid(SkillComponent->GetSkillSlot(0)) == false)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Skill Empty!"));
@@ -157,6 +163,9 @@ void APlayerCharacter::Attack(const FInputActionValue& Value)
 
 void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 {
+	if (SkillComponent->GetActiveSkillSlot()->GetIsEnd() == false)
+		return;
+
 	UE_LOG(LogTemp, Warning, TEXT("Skill Q Used"));
 
 	if (IsValid(SkillComponent->GetSkillSlot(1)) == false)
@@ -187,6 +196,9 @@ void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 
 void APlayerCharacter::SkillE(const FInputActionValue& Value)
 {
+	if (SkillComponent->GetActiveSkillSlot()->GetIsEnd() == false)
+		return;
+
 	UE_LOG(LogTemp, Warning, TEXT("Skill E Used"));
 
 	if (IsValid(SkillComponent->GetSkillSlot(2)) == false)
@@ -213,6 +225,13 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
 
 void APlayerCharacter::SetAiming(bool bNewAiming)
 {
+	if (SkillComponent->GetActiveSkillSlot()->GetIsEnd() == false)
+	{
+		SkillComponent->ExitActiveSkill();
+		return;
+	}
+	
+
 	UE_LOG(LogTemp, Warning, TEXT("SetAiming: %d"), bNewAiming);
 	bIsAiming = bNewAiming;
 
