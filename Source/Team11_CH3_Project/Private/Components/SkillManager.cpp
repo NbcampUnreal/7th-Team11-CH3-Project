@@ -3,6 +3,7 @@
 
 #include "Components/SkillManager.h"
 
+#include "Components/Skills/ActiveSkillSlot.h"
 #include "Components/Skills/SkillDataAsset.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Engine/Engine.h"
@@ -29,6 +30,7 @@ void USkillManager::BeginPlay()
 	for (int32 i = 0;i<3;++i)
 	{
 		USkillSlot* NewSlot = NewObject<USkillSlot>(this);
+		NewSlot->Init(this);
 		SkillSlots.Add(NewSlot);
 		// if (IsValid(SkillData))
 		// {
@@ -37,6 +39,8 @@ void USkillManager::BeginPlay()
 		// 	SkillSlots.Add(NewSlot);
 		// }
 	}
+	ActiveSkillSlot = NewObject<UActiveSkillSlot>(this);
+	ActiveSkillSlot->Init(this);
 }
 
 
@@ -155,4 +159,33 @@ float USkillManager::GetCooldownRemaining(int32 SlotIndex) const
 void USkillManager::Clear()
 {
 	SkillSlots.Empty();
+}
+
+UActiveSkillSlot* USkillManager::GetActiveSkillSlot() const
+{
+	return ActiveSkillSlot.Get();
+}
+
+void USkillManager::ActiveSkill(USkillDataAsset* Skill) const
+{
+	ActiveSkillSlot->OnStartSkill(Skill);
+}
+
+void USkillManager::TickActiveSkill(float DeltaSeconds, AActor* Owner) const
+{
+	ActiveSkillSlot->OnTick(DeltaSeconds, Owner);
+	if (ActiveSkillSlot->GetIsEnd())
+	{
+		ExitActiveSkill();
+	}
+}
+
+void USkillManager::ExecuteActiveSkill() const
+{
+	ActiveSkillSlot->OnExecute();
+}
+
+void USkillManager::ExitActiveSkill() const
+{
+	ActiveSkillSlot->OnExit();
 }

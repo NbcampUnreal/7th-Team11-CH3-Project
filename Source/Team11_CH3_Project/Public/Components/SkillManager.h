@@ -7,6 +7,7 @@
 #include "SkillManager.generated.h"
 
 
+class UActiveSkillSlot;
 class UStatComponent;
 class USkillSlot;
 class USkillDataAsset;
@@ -47,13 +48,19 @@ public:
 	float GetCooldownRemaining(int32 SlotIndex) const;
 
 	void Clear();
+	
+	UActiveSkillSlot* GetActiveSkillSlot() const;
+	void ActiveSkill(USkillDataAsset* Skill) const;
+	void TickActiveSkill(float DeltaSeconds, AActor* Owner) const;
+	void ExecuteActiveSkill() const;
+	void ExitActiveSkill() const;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 private:
 	// 스킬 배열
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Skill|SkillSlot", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<USkillSlot>> SkillSlots;
 	// 초기 스킬 클래스(블루프린트 설정용)
 	// 스킬 데이터 테이블(도전 기능때 구현)
@@ -63,4 +70,6 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess = "true"))
 	TWeakObjectPtr<UStatComponent> StatComp;
 	// 쿨다운 관리
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Stat", meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<UActiveSkillSlot> ActiveSkillSlot;
 };

@@ -631,10 +631,8 @@ void APlayerCharacter::PerformAttack(USkillSlot* SkillSlot, const FVector& Targe
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &APlayerCharacter::OnAttackMontageEnded);
 	GetMesh()->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
-	SkillSlot->StartCooldown();
-	
 	WeaponActor->StartAttack(TargetLocation,
-	                         SkillSlot->GetEquippedSkill());
+	                         SkillSlot);
 }
 
 
