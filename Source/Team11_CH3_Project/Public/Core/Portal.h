@@ -17,6 +17,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Portal")
 	FString TargetLevel;
+	UPROPERTY(EditAnywhere, Category = "Portal")
+	FString Difficulty;
 
 protected:
 	virtual void PostInitializeComponents() override;
