@@ -25,6 +25,11 @@ void UActiveSkillSlot::OnExecute()
 
 void UActiveSkillSlot::OnTick(float DeltaSeconds, AActor* Owner)
 {
+	if (CurrentSKill == nullptr)
+	{	
+		bIsEnd = true;
+		return;
+	}
 	CurrentSKill->Tick(DeltaSeconds, Owner);
 	ElapsedTime += DeltaSeconds;
 	if (CurrentSKill->GetSkillType() == ESkillType::Duration)
