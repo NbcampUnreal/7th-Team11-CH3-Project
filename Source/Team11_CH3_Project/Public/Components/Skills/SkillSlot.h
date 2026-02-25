@@ -19,7 +19,7 @@ public:
 	void Init(USkillManager* SkillManager);
 	// 보석 장착
 	UFUNCTION(BlueprintCallable)
-	void EquipGem(USkillDataAsset* NewSkillData);
+	void EquipGem(const USkillDataAsset* NewSkillData);
 	// 슬롯 비우기
 	UFUNCTION(BlueprintCallable)
 	void ClearSlot();

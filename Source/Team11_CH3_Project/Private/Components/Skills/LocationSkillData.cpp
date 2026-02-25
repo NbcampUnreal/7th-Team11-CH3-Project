@@ -8,11 +8,11 @@ void ULocationSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, 
 {
 }
 
-void ULocationSkillData::Enter() const
+void ULocationSkillData::Enter() 
 {
 }
 
-void ULocationSkillData::Execute() const
+void ULocationSkillData::Execute() 
 {
 
 	if (IsValid(SpawnedIndicator) == false)
@@ -39,7 +39,7 @@ void ULocationSkillData::Execute() const
 	SpawnedIndicator = nullptr;
 }
 
-void ULocationSkillData::Tick(float DeltaSeconds, AActor* Actor) const
+void ULocationSkillData::Tick(float DeltaSeconds, AActor* Actor) 
 {
 	if (IsValid(SpawnedIndicator) || IsValid(Actor) == false || IsValid(IndicatorClass) == false)
 		return;
@@ -65,7 +65,7 @@ void ULocationSkillData::Tick(float DeltaSeconds, AActor* Actor) const
 	SpawnedIndicator = Indicator;
 }
 
-void ULocationSkillData::OnExit() const
+void ULocationSkillData::OnExit() 
 {
 	if (IsValid(SpawnedIndicator) == false)
 		return;

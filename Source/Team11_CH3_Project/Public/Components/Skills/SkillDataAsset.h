@@ -31,15 +31,15 @@ public:
 	                      const FVector& Direction) const
 	{
 	}
-
+	FText GetSKillName()const { return SkillName; }
 	float GetCooldownTime() const { return CooldownTime; }
 	virtual float GetScore(AActor* Actor, AActor* Target) const { return -1.0f; }
 	UAnimMontage* GetSkillMontage() const { return SkillMontage; }
 
-	virtual void Enter() const{}
-	virtual void Execute() const{}
-	virtual void Tick(float DeltaSeconds, AActor* Actor) const{}
-	virtual void OnExit() const{}
+	virtual void Enter() {}
+	virtual void Execute() {}
+	virtual void Tick(float DeltaSeconds, AActor* Actor) {}
+	virtual void OnExit() {}
 	ESkillType GetSkillType() const { return SkillType; }
 	
 	float GetRange() const { return Range; }
