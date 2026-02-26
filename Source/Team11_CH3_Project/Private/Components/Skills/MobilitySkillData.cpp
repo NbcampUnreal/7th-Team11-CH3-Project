@@ -5,7 +5,7 @@
 #include "GameFramework/Character.h"
 #include "Components/CapsuleComponent.h"
 
-void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const
+void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
 {
 	if (IsValid(Instigator) == false)
 		return;
@@ -21,7 +21,7 @@ void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, 
 
 	// 캐릭터 정면에서 바라보는 방향으로 장애물 또는 사거리 탐색
 	FHitResult HitResult;
-	FVector TargetLocation;
+	FVector Destination;
 	if (Instigator->GetWorld()->LineTraceSingleByChannel(
 		HitResult,
 		TraceStart,
@@ -31,19 +31,19 @@ void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, 
 	))
 	{
 		// 장애물 충돌 시 충돌 직전 위치 보정(50cm정도 여유 남기고)
-		TargetLocation = HitResult.Location - (ForwardDirection * 50.f);
+		Destination = HitResult.Location - (ForwardDirection * 50.f);
 	}
 	else
 	{
 		// 충돌 없으면 최대 사거리
-		TargetLocation = TraceEnd;
+		Destination = TraceEnd;
 	}
 
 
 	// 바닥 체크해서 위치 보정
 	FHitResult GroundHit;
-	FVector GroundTraceStart = TargetLocation + FVector(0.f, 0.f, 200.f);
-	FVector GroundTraceEnd = TargetLocation - FVector(0.f, 0.f, 500.f);
+	FVector GroundTraceStart = Destination + FVector(0.f, 0.f, 200.f);
+	FVector GroundTraceEnd = Destination - FVector(0.f, 0.f, 500.f);
 
 	if (Instigator->GetWorld()->LineTraceSingleByChannel(
 		GroundHit,
@@ -56,15 +56,15 @@ void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, 
 		// 캐릭터 발이 바닥에 닿도록
 		ACharacter* Character = Cast<ACharacter>(Instigator);
 		float HalfHeight = Character ? Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : 0.f;
-		TargetLocation.Z = GroundHit.Location.Z + HalfHeight;
+		Destination.Z = GroundHit.Location.Z + HalfHeight;
 	}
 	else
 	{
 		// 바닥을 못 찾으면 현재 캐릭터 Z 유지
-		TargetLocation.Z = Instigator->GetActorLocation().Z;
+		Destination.Z = Instigator->GetActorLocation().Z;
 	}
 
-	Instigator->SetActorLocation(TargetLocation, true);
+	Instigator->SetActorLocation(Destination, true);
 }
 
 void UMobilitySkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name)

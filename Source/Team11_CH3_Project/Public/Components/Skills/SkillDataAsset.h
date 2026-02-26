@@ -28,24 +28,24 @@ class TEAM11_CH3_PROJECT_API USkillDataAsset : public UPrimaryDataAsset
 	
 public:
 	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
-	                      const FVector& Direction) const
+	                      const FVector& TargetLocation)
 	{
 	}
 	FText GetSKillName()const { return SkillName; }
 	float GetCooldownTime() const { return CooldownTime; }
-	virtual float GetScore(AActor* Actor, AActor* Target) const { return -1.0f; }
+	virtual float GetScore(const AActor* Actor, const AActor* Target) const { return -1.0f; }
 	UAnimMontage* GetSkillMontage() const { return SkillMontage; }
 
-	virtual void Enter() {}
+	virtual void Enter(AActor* Actor, const FVector& TargetLocation) {}
 	virtual void Execute() {}
-	virtual void Tick(float DeltaSeconds, AActor* Actor) {}
+	virtual void Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* ActiveSkillSlot) {}
 	virtual void OnExit() {}
 	ESkillType GetSkillType() const { return SkillType; }
 	
 	float GetRange() const { return Range; }
 	float GetDuration()const{return Duration;}
 	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
-						  const FVector& Direction, FName Name){};
+						  const FVector& TargetLocation, FName Name){};
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
