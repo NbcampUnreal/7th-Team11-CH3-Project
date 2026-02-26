@@ -272,6 +272,13 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	return true;
 }
 
+bool AMonsterBase::CanUseSkill(AActor* Target) const
+{
+	//TODO Optimization
+	int32 BestSkillIdx = SkillComponent->GetBestSkill(this, Target);
+	return BestSkillIdx>=0;
+}
+
 //CallByAnimNotify
 void AMonsterBase::DealDamage()
 {

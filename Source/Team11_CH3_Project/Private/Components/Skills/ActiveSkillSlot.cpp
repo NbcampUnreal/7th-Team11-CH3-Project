@@ -19,14 +19,14 @@ void UActiveSkillSlot::OnStartSkill(AActor* InOwner, const FVector& InTargetLoca
 	Owner = InOwner;
 	TargetLocation = InTargetLocation;
 	CurrentActiveSkillSlot = SkillSlot;
-	CurrentActiveSkillSlot->GetEquippedSkill()->Enter();
+	CurrentActiveSkillSlot->GetEquippedSkill()->Enter(InOwner,TargetLocation);
 	// Aiming 아닌경우 쿨타임 여기서
 	if (CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillType() != ESkillType::Aiming)
 	{
 		CurrentActiveSkillSlot->StartCooldown();
 	}
 	ElapsedTime = 0.0f;
-	bIsEnd = false;
+	SetIsEnd(false);
 }
 
 void UActiveSkillSlot::OnExecute()
@@ -35,7 +35,6 @@ void UActiveSkillSlot::OnExecute()
 	if (CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Aiming)
 	{
 		CurrentActiveSkillSlot->StartCooldown();
-		bIsEnd = true;
 	}
 	CurrentActiveSkillSlot->GetEquippedSkill()->Execute();
 }
@@ -44,14 +43,14 @@ void UActiveSkillSlot::OnTick(float DeltaSeconds)
 {
 	if (CurrentActiveSkillSlot == nullptr || CurrentActiveSkillSlot->GetEquippedSkill() == nullptr)
 	{
-		bIsEnd = true;
+		SetIsEnd(true);
 		return;
 	}
-	CurrentActiveSkillSlot->GetEquippedSkill()->Tick(DeltaSeconds, Owner.Get());
+	CurrentActiveSkillSlot->GetEquippedSkill()->Tick(DeltaSeconds, Owner.Get(), this);
 	ElapsedTime += DeltaSeconds;
 	if (CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Duration)
 	{
-		bIsEnd = ElapsedTime > CurrentActiveSkillSlot->GetEquippedSkill()->GetDuration();
+		SetIsEnd(ElapsedTime > CurrentActiveSkillSlot->GetEquippedSkill()->GetDuration());
 	}
 }
 
@@ -63,7 +62,7 @@ void UActiveSkillSlot::OnExit()
 	CurrentActiveSkillSlot->GetEquippedSkill()->OnExit();
 	CurrentActiveSkillSlot.Reset();
 	CurrentActiveSkillSlot = nullptr;
-	bIsEnd = false;
+	SetIsEnd(false);
 	Owner = nullptr;
 	TargetLocation = FVector::ZeroVector;
 }
@@ -85,8 +84,7 @@ void UActiveSkillSlot::Notify(FName NotifyName)
 		WeaponActor = MonsterBase->GetWeaponActor();
 	}
 	CurrentActiveSkillSlot->GetEquippedSkill()->Notify(Cast<APawn>(Owner), WeaponActor, Owner->GetActorLocation(),
-	                                                   (TargetLocation - Owner->GetActorLocation()).GetSafeNormal(),
-	                                                   NotifyName);
+	                                                   TargetLocation, NotifyName);
 }
 
 float UActiveSkillSlot::GetElapsedTime() const

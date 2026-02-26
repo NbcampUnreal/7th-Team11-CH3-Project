@@ -4,7 +4,7 @@
 #include "Components/Skills/BuffSkillData.h"
 
 
-void UBuffSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const
+void UBuffSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
 {
 	if (IsValid(Instigator) == false)
 		return;

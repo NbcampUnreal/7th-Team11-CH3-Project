@@ -4,11 +4,11 @@
 #include "Components/Skills/LocationSkillData.h"
 #include "Components/Skills/SkillIndicatorActor.h"
 
-void ULocationSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const
+void ULocationSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
 {
 }
 
-void ULocationSkillData::Enter() 
+void ULocationSkillData::Enter(AActor* Actor, const FVector& TargetLocation) 
 {
 }
 
@@ -39,7 +39,7 @@ void ULocationSkillData::Execute()
 	SpawnedIndicator = nullptr;
 }
 
-void ULocationSkillData::Tick(float DeltaSeconds, AActor* Actor) 
+void ULocationSkillData::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* ActiveSkillSlot) 
 {
 	if (IsValid(SpawnedIndicator) || IsValid(Actor) == false || IsValid(IndicatorClass) == false)
 		return;
