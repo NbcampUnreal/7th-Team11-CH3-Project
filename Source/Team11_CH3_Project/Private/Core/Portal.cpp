@@ -2,6 +2,7 @@
 #include "Characters/PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/CapsuleComponent.h"
+#include "Core/T11_GameInstance.h"
 
 APortal::APortal()
 {
@@ -33,6 +34,12 @@ void APortal::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherA
 {
 	if (OtherActor->IsA(APlayerCharacter::StaticClass()))
 	{
+		UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
+		if (IsValid(GI) == false) return;
+
+		if(Difficulty == "Easy") GI->CurrentDifficulty = 0;
+		else if (Difficulty == "Hard") GI->CurrentDifficulty = 1;
+
 		UGameplayStatics::OpenLevel(this, FName(TargetLevel));
 	}
 }

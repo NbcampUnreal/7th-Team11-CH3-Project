@@ -15,9 +15,6 @@ public:
 	// Sets default values for this actor's properties
 	AGreatSwordWeaponActor();
 	virtual void Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh) override;
-	virtual void StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) override;
-	virtual void PerformDamage() override;
-	virtual void EndAttack() override;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")

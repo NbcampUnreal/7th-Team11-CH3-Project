@@ -18,15 +18,18 @@ ASpawnVolume::ASpawnVolume()
 	SpawnMonsterDataTable = nullptr;
 }
 
-void ASpawnVolume::SpawnRandomMonster()
+void ASpawnVolume::SpawnRandomMonster(int32 StageIndex)
 {
 	UMonsterSubsystem* MonsterSubsystem = GetWorld()->GetSubsystem<UMonsterSubsystem>();
 
 	if (FSpawnMonsterData* SelectedRow = GetRandomMonster())
 	{
-		FMonsterData* MonsterDataRow = SelectedRow->MonsterData.GetRow<FMonsterData>(TEXT("MonsterData"));
-
-		MonsterSubsystem->SpawnMonster(MonsterDataRow, GetRandomPointInVolume());
+		FMonsterData MonsterDataRow = *SelectedRow->MonsterData.GetRow<FMonsterData>(TEXT("MonsterData"));
+		float LogScale = FMath::Loge((StageIndex - 1) * 2.0f + 1.0f) + 1.0f;
+		MonsterDataRow.StatData.MaxHP *= LogScale;
+		MonsterDataRow.StatData.DEF *= LogScale;
+		MonsterDataRow.StatData.AttackDamage *= LogScale;
+		MonsterSubsystem->SpawnMonster(&MonsterDataRow, GetRandomPointInVolume());
 	}
 }
 

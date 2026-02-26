@@ -25,10 +25,10 @@ public:
 	void EquipWeapon(FWeaponItemData* WeaponItemData);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
-	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
+	void OnAttackEnded();
 	void OnDieMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
-	bool TryAttack(AActor* Target);
-	void PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLocation);
+	virtual bool TryAttack(AActor* Target);
+	void PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLocation);
 	
 	void DealDamage();
 	void BlackboardUpdate();
@@ -36,6 +36,7 @@ public:
 	void Clear();
 	// Getter
 	int32 GetScoreValue() const { return ScoreValue; }
+	AWeaponActor* GetWeaponActor()const;
 	FOnAttackFinished OnAttackFinished;
 	
 protected:
@@ -51,6 +52,8 @@ protected:
 	TObjectPtr<AWeaponActor> WeaponActor;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> MonsterDieAnimMontage;
+
+	int32 ScoreValue = 0;
 	
 public:
 	UFUNCTION(BlueprintPure)
@@ -65,6 +68,4 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-private:
-	int32 ScoreValue = 0;
 };

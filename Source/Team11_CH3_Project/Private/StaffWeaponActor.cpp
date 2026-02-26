@@ -26,28 +26,3 @@ void AStaffWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshCom
 	);
 	StaticMeshComponent->AttachToComponent(SkeletalMesh, AttachRules,TEXT("handslot_r"));
 }
-//TODO
-void AStaffWeaponActor::StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) 
-{
-	Super::StartAttack(TargetLocation, Skill);
-	Direction = (TargetLocation - GetActorLocation()).GetSafeNormal();
-	UE_LOG(LogTemp, Warning, TEXT("StartAttack Called!"));
-}
-void AStaffWeaponActor::PerformDamage()
-{
-	if (CurrentSkillData.IsValid())
-	{
-		CurrentSkillData->Activate(Cast<APawn>(GetOwner()), this,GetActorLocation(), Direction);
-	}else
-	{
-		check(false);
-	}
-	UE_LOG(LogTemp, Warning, TEXT("PerformDamage Called!"));
-}
-
-void AStaffWeaponActor::EndAttack()
-{
-	Super::EndAttack();
-	Direction = FVector::Zero();
-	UE_LOG(LogTemp, Warning, TEXT("EndAttack Called!"));
-}

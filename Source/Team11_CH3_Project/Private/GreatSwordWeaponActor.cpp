@@ -26,22 +26,3 @@ void AGreatSwordWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMe
 	);
 	StaticMeshComponent->AttachToComponent(SkeletalMesh, AttachRules,TEXT("handslot_r"));
 }
-//TODO
-void AGreatSwordWeaponActor::StartAttack(const FVector& TargetLocation,  USkillDataAsset* Skill) 
-{
-	Super::StartAttack(TargetLocation, Skill);
-	Direction = TargetLocation - GetActorLocation();
-	UE_LOG(LogTemp, Warning, TEXT("StartAttack Called!"));
-}
-void AGreatSwordWeaponActor::PerformDamage()
-{
-	CurrentSkillData->Activate(Cast<APawn>(GetOwner()),this, GetActorLocation(), Direction);
-	UE_LOG(LogTemp, Warning, TEXT("PerformDamage Called!"));
-}
-
-void AGreatSwordWeaponActor::EndAttack()
-{
-	Super::EndAttack();
-	Direction = FVector::ZeroVector;
-	UE_LOG(LogTemp, Warning, TEXT("EndAttack Called!"));
-}

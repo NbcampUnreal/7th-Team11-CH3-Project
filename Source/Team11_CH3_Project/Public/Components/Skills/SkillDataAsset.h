@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ActiveSkillSlot.h"
+#include "Components/SkillManager.h"
 #include "Engine/DataAsset.h"
 #include "SkillDataAsset.generated.h"
 
@@ -11,17 +13,40 @@ class ABaseSkill;
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class ESkillType : uint8
+{
+	Immediately,
+	Aiming,
+	Duration
+};
+
 UCLASS()
 class TEAM11_CH3_PROJECT_API USkillDataAsset : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
-
+	
 public:
-	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const
+	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
+	                      const FVector& Direction) const
 	{
 	}
-	float GetCooldownTime() const { return CooldownTime; };
-	UAnimMontage* GetSkillMontage()const{return SkillMontage;};
+	FText GetSKillName()const { return SkillName; }
+	float GetCooldownTime() const { return CooldownTime; }
+	virtual float GetScore(AActor* Actor, AActor* Target) const { return -1.0f; }
+	UAnimMontage* GetSkillMontage() const { return SkillMontage; }
+
+	virtual void Enter() {}
+	virtual void Execute() {}
+	virtual void Tick(float DeltaSeconds, AActor* Actor) {}
+	virtual void OnExit() {}
+	ESkillType GetSkillType() const { return SkillType; }
+	
+	float GetRange() const { return Range; }
+	float GetDuration()const{return Duration;}
+	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
+						  const FVector& Direction, FName Name){};
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
 	FName SkillID;
@@ -35,7 +60,15 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
 	float Damage = 0.f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Skill")
+	float Range = 0.0f;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Skill")
+	float Duration = 100.0f;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TObjectPtr<UAnimMontage> SkillMontage = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	ESkillType SkillType;
 };

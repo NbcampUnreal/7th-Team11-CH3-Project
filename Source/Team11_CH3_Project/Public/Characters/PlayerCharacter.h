@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "BaseCharacter.h"
@@ -38,10 +38,6 @@ enum class EDodgeDir : uint8
 	Right
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintStarted);
-
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnSprintEnded);
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeStarted);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDodgeEnded);
@@ -62,6 +58,7 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
+	AWeaponActor* GetWeaponActor() const;
 
 #pragma region Camera
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
@@ -248,8 +245,7 @@ protected:
     void Attack(const FInputActionValue& Value);
     void SkillQ(const FInputActionValue& Value);
     void SkillE(const FInputActionValue& Value);
-	void PerformAttack(USkillSlot* SkillSlot, const FVector& TargetLocation);
-	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
+	void PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLocation);
 	void GetSkillTargetLocation(FVector& TargetLocation);
 
     void DodgeStep();
@@ -260,6 +256,7 @@ protected:
 	void PlayDodgeMontage(EDodgeDir Dir);
 public:
 	void DealDamage();
+	void OnAttackEnded();
 	
 private:
     bool bIsDead = false;

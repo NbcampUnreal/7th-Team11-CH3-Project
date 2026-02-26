@@ -3,18 +3,29 @@
 
 #include "Components/SkillManager.h"
 
+#include "Characters/PlayerCharacter.h"
+#include "Characters/Monster/MonsterBase.h"
+#include "Components/Skills/ActiveSkillSlot.h"
 #include "Components/Skills/SkillDataAsset.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Engine/Engine.h"
+#include "GameFramework/Character.h"
 
 // Sets default values for this component's properties
 USkillManager::USkillManager()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+}
+
+void USkillManager::TickComponent(float DeltaTime, enum ELevelTick TickType,
+	FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	TickActiveSkill(DeltaTime);
 }
 
 
@@ -29,6 +40,7 @@ void USkillManager::BeginPlay()
 	for (int32 i = 0;i<3;++i)
 	{
 		USkillSlot* NewSlot = NewObject<USkillSlot>(this);
+		NewSlot->Init(this);
 		SkillSlots.Add(NewSlot);
 		// if (IsValid(SkillData))
 		// {
@@ -37,6 +49,8 @@ void USkillManager::BeginPlay()
 		// 	SkillSlots.Add(NewSlot);
 		// }
 	}
+	ActiveSkillSlot = NewObject<UActiveSkillSlot>(this);
+	ActiveSkillSlot->Init(this);
 }
 
 
@@ -57,6 +71,23 @@ TArray<int32> USkillManager::FindReadySlotIndexes() const
 		if (SkillSlots.IsValidIndex(i) && IsValid(SkillSlots[i]->GetEquippedSkill()) &&  !SkillSlots[i]->IsSkillOnCooldown())
 		{
 			Ret.Add(i);
+		}
+	}
+	return Ret;
+}
+
+int32 USkillManager::GetBestSkill(AActor* Actor, AActor* Target) const
+{
+	TArray<int32> ReadySkillIndexes = FindReadySlotIndexes();
+	float MaxScore = -1;
+	int32 Ret=-1;
+	for (int32 i = 0; i < ReadySkillIndexes.Num(); i++)
+	{
+		float Score = SkillSlots[i]->GetScore(Actor,Target);
+		if (MaxScore < Score)
+		{
+			MaxScore = Score;
+			Ret = i;
 		}
 	}
 	return Ret;
@@ -138,4 +169,104 @@ float USkillManager::GetCooldownRemaining(int32 SlotIndex) const
 void USkillManager::Clear()
 {
 	SkillSlots.Empty();
+	if (IsSkillActive())
+	{
+		ExitActiveSkill();
+	}
+}
+
+UActiveSkillSlot* USkillManager::GetActiveSkillSlot() const
+{
+	return ActiveSkillSlot.Get();
+}
+
+void USkillManager::ActiveSkill(AActor* Owner, const FVector& TargetLocation, USkillSlot* SkillSlot)
+{
+	USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
+	if (ACharacter* Character = Cast<ACharacter>(Owner))
+	{
+		SkeletalMeshComponent = Character->GetMesh();
+		if (!IsValid(SkeletalMeshComponent))
+		{
+			SkeletalMeshComponent = Owner->FindComponentByClass<USkeletalMeshComponent>();
+		}
+	}
+	if (!IsValid(SkeletalMeshComponent))
+	{
+		return;	
+	}
+	
+	
+	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
+	UAnimInstance* AnimInstance = SkeletalMeshComponent->GetAnimInstance();
+	if (!IsValid(AnimInstance))
+	{
+		return;
+	}
+	AnimInstance->Montage_Play(SkillMontage);
+	FOnMontageEnded EndDelegate;
+	EndDelegate.BindUObject(this, &USkillManager::OnAttackMontageEnded);
+	SkeletalMeshComponent->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
+	
+	ActiveSkillSlot->OnStartSkill(Owner, TargetLocation, SkillSlot);
+}
+
+void USkillManager::TickActiveSkill(float DeltaSeconds)
+{
+	ActiveSkillSlot->OnTick(DeltaSeconds);
+	if (ActiveSkillSlot->GetIsEnd())
+	{
+		ExitActiveSkill();
+	}
+}
+
+void USkillManager::ExecuteActiveSkill()
+{
+	ActiveSkillSlot->OnExecute();
+}
+
+void USkillManager::ExitActiveSkill()
+{
+	ActiveSkillSlot->OnExit();
+	if (AActor* Owner = GetOwner())
+	{
+		if (AMonsterBase* MonsterBase = Cast<AMonsterBase>(Owner))
+		{
+			MonsterBase->OnAttackEnded();
+		}
+		if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Owner))
+		{
+			PlayerCharacter->OnAttackEnded();
+		}
+	}
+}
+
+bool USkillManager::IsSkillActive() const
+{
+	if (ActiveSkillSlot->GetSkillSlot() )
+	{
+		return true;
+	}
+	return false;
+}
+
+void USkillManager::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
+{
+	if (USkillSlot* SkillSlot = GetActiveSkillSlot()->GetSkillSlot())
+	{
+		if (USkillDataAsset* SkillDataAsset = SkillSlot->GetEquippedSkill())
+		{
+			switch (SkillDataAsset->GetSkillType())
+			{
+			case ESkillType::Immediately:
+				ActiveSkillSlot->SetIsEnd(true);
+				break;
+			case ESkillType::Aiming:
+				break;
+			case ESkillType::Duration:
+				break;
+			default: ;
+			}
+		}
+	}
 }

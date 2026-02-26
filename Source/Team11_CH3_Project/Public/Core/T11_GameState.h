@@ -48,6 +48,7 @@ public:
 	TMap<FString, FTimerHandle> SpawnTimerHandles;
 	TMap<FString, FSpawnState> SpawnStates;
 
+	int CurrentStageIndex;
 	int CurrentWaveIndex;
 	int MaxWave;
 	int SpawnedMonsterCount;
