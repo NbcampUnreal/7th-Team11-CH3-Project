@@ -31,13 +31,23 @@ void UActiveSkillSlot::OnStartSkill(AActor* InOwner, const FVector& InTargetLoca
 
 void UActiveSkillSlot::OnExecute()
 {
+
+	ACharacter* Character = Cast<ACharacter>(Owner);
+	if (IsValid(Character) == false)
+		return;
+
+	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+	UAnimMontage* SkillMontage = CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillMontage();
+	if (!IsValid(AnimInstance))
+		return;
+
 	// Aiming인 경우에만 쿨타임시작
 	if (CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Aiming)
 	{
+		AnimInstance->Montage_JumpToSection("EndCasting", SkillMontage);
 		CurrentActiveSkillSlot->StartCooldown();
-		bIsEnd = true;
 	}
-	CurrentActiveSkillSlot->GetEquippedSkill()->Execute();
+	//CurrentActiveSkillSlot->GetEquippedSkill()->Execute();
 }
 
 void UActiveSkillSlot::OnTick(float DeltaSeconds)
@@ -59,6 +69,15 @@ void UActiveSkillSlot::OnExit()
 {
 	if (CurrentActiveSkillSlot == nullptr || IsValid(CurrentActiveSkillSlot->GetEquippedSkill()) == false)
 		return;
+	ACharacter* Character = Cast<ACharacter>(Owner.Get());
+	if (IsValid(Character) == false)
+		return;
+
+	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+	UAnimMontage* SkillMontage = CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillMontage();
+	if (IsValid(AnimInstance) == false || IsValid(SkillMontage) == false)
+		return;
+	AnimInstance->Montage_Stop(0.2f, SkillMontage);
 
 	CurrentActiveSkillSlot->GetEquippedSkill()->OnExit();
 	CurrentActiveSkillSlot.Reset();

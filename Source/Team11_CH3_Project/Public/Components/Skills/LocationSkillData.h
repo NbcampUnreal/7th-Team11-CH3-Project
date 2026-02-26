@@ -23,6 +23,8 @@ public:
 	virtual void Tick(float DeltaSeconds, AActor* Actor)  override;
 	virtual void OnExit()  override;
 
+	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name) override;
+
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Location")
 	TSubclassOf<ASkillIndicatorActor> IndicatorClass;

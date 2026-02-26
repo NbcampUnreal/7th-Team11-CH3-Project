@@ -16,7 +16,5 @@ class TEAM11_CH3_PROJECT_API UMobilitySkillData : public USkillDataAsset
 	
 protected:
 	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const override;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Skill|Mobility")
-	float MaxRange = 500;
+	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name) override;
 };
