@@ -17,7 +17,7 @@ public:
 	ASpawnVolume();
 
 	UFUNCTION(BlueprintCallable, Category = "Spawning")
-	void SpawnRandomMonster();
+	void SpawnRandomMonster(int32 StageIndex);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Spawning")
 	USceneComponent* Scene;

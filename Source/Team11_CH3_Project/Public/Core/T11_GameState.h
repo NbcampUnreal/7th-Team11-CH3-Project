@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameState.h"
@@ -42,6 +42,7 @@ public:
 	TMap<FString, FTimerHandle> SpawnTimerHandles;
 	TMap<FString, FSpawnState> SpawnStates;
 
+	int CurrentStageIndex;
 	int CurrentWaveIndex;
 	int MaxWave;
 	int SpawnedMonsterCount;

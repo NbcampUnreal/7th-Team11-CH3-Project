@@ -24,9 +24,17 @@ void AT11_GameState::StartLevel()
     CurrentWaveIndex = 1;
     TSoftObjectPtr<UWorld> CurrentWorld = GetWorld();
     UE_LOG(LogTemp, Warning, TEXT("Map Name: %s"), *CurrentWorld->GetName());
-    if (CurrentWorld && MapDataConfigs.Contains(CurrentWorld->GetName()))
+
+    UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
+    if (IsValid(GI) == false) return;
+    CurrentStageIndex = GI->CurrentStageIndex;
+    FString MapName;
+    if (GI->CurrentDifficulty == 0) MapName = CurrentWorld->GetName() + "_Easy";
+    else if (GI->CurrentDifficulty == 1) MapName = CurrentWorld->GetName() + "_Hard";
+
+    if (CurrentWorld && MapDataConfigs.Contains(MapName))
     {
-        WaveData = MapDataConfigs[CurrentWorld->GetName()];
+        WaveData = MapDataConfigs[MapName];
         
         if (!WaveData)
         {
@@ -134,8 +142,13 @@ void AT11_GameState::ActivatePortals()
 
 void AT11_GameState::SetPortalLevel(APortal* Portal)
 {
-    TArray<FString> LvlArray;
-    MapDataConfigs.GenerateKeyArray(LvlArray);
+    TSet<FString> UniqueLvl;
+
+    for (auto& Map : MapDataConfigs)
+    {
+        UniqueLvl.Add(Map.Key.LeftChop(5));
+    }
+    TArray<FString> LvlArray = UniqueLvl.Array();
 
     FString CurrentLvl = UGameplayStatics::GetCurrentLevelName(GetWorld());
 
@@ -168,7 +181,7 @@ void AT11_GameState::CreateSpawnTimer(FString TimerName, float Interval, int32 T
             if (State && State->RemainingCount > 0)
             {
                 // 실제 소환 로직
-                SpawnVolume->SpawnRandomMonster();
+                SpawnVolume->SpawnRandomMonster(CurrentStageIndex);
                 State->RemainingCount--;
 
                 UE_LOG(LogTemp, Log, TEXT("[%s] 남은 마리수: %d"), *State->WaveName, State->RemainingCount);
