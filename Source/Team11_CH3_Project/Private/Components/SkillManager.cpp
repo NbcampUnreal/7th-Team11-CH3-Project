@@ -2,7 +2,7 @@
 
 
 #include "Components/SkillManager.h"
-
+#include "Components/StatComponent.h"
 #include "Characters/PlayerCharacter.h"
 #include "Characters/Monster/MonsterBase.h"
 #include "Components/Skills/ActiveSkillSlot.h"
@@ -33,7 +33,6 @@ void USkillManager::TickComponent(float DeltaTime, enum ELevelTick TickType,
 void USkillManager::BeginPlay()
 {
 	Super::BeginPlay();
-
 
 	SkillSlots.Empty();
 	// for (USkillDataAsset* SkillData : DefaultSkillSlotData)
@@ -199,11 +198,18 @@ void USkillManager::ActiveSkill(AActor* Owner, const FVector& TargetLocation, US
 	
 	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
 	UAnimInstance* AnimInstance = SkeletalMeshComponent->GetAnimInstance();
+	float CastSpeed = 1.0f;
+	StatComp = GetOwner()->FindComponentByClass<UStatComponent>();
+	
+	if (StatComp.IsValid() == false)
+		return;
+	CastSpeed += StatComp->GetCurrentStat(EStat::CastSpeed);  
+
 	if (!IsValid(AnimInstance))
 	{
 		return;
 	}
-	AnimInstance->Montage_Play(SkillMontage);
+	AnimInstance->Montage_Play(SkillMontage, CastSpeed);
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &USkillManager::OnAttackMontageEnded);
 	SkeletalMeshComponent->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);

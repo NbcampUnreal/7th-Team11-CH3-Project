@@ -74,3 +74,12 @@ void ULocationSkillData::OnExit()
 	SpawnedIndicator = nullptr;
 	
 }
+
+void ULocationSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name)
+{
+	Super::Notify(Instigator, WeaponActor, Origin, Direction, Name);
+	if (Name == TEXT("DealDamage"))
+	{
+		Execute();
+	}
+}
