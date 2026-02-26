@@ -18,6 +18,7 @@ class TEAM11_CH3_PROJECT_API UBuffSkillData : public USkillDataAsset
 	
 protected:
 	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const override;
+	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name) override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Buff")
 	EStat TargetStat;

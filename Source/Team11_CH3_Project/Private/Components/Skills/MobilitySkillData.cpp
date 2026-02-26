@@ -14,7 +14,7 @@ void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, 
 	FVector ForwardDirection = ControlYaw.Vector();
 	// LineTrace를 캐릭터 중심보다 약간 위로 설정해서 바닥이랑 즉시 충돌 방지
 	FVector TraceStart = Instigator->GetActorLocation() + FVector(0.f, 0.f, 50.f);
-	FVector TraceEnd = TraceStart + (ForwardDirection * MaxRange);
+	FVector TraceEnd = TraceStart + (ForwardDirection * Range);
 
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(Instigator);
@@ -65,4 +65,13 @@ void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, 
 	}
 
 	Instigator->SetActorLocation(TargetLocation, true);
+}
+
+void UMobilitySkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name)
+{
+	Super::Notify(Instigator, WeaponActor, Origin, Direction, Name);
+	if (Name == TEXT("DealDamage"))
+	{
+		Activate(Instigator, WeaponActor, Origin, Direction);
+	}
 }
