@@ -1,10 +1,11 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "GenericTeamAgentInterface.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
 #include "GameplayTagContainer.h"
+#include "Types/StatTypes.h"
 #include "MainPlayerController.generated.h"
 
 class UInputMappingContext;
@@ -95,6 +96,32 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	FGameplayTag HUDRequestTag;
 
+public:
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HUD")
+	UUserWidget* HUDWidgetInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
+	TSubclassOf<UUserWidget> HUDWidgetClass;
+
+	UFUNCTION(BlueprintPure, Category = "HUD")
+	UUserWidget* GetHUDWidget() const;
+
+	UFUNCTION()
+	void UpdateMonsterCount(int32 MonsterCount);
+	UFUNCTION()
+	void UpdateStageInfo(int32 MaxWave);
+	UFUNCTION()
+	void UpdateWaveInfo(int32 WaveIndex, int32 MaxWave);
+	UFUNCTION()
+	void UpdateHP(float CurrentHP, float MaxHP);
+
+	void SetHUD();
+
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UTexture2D> WaveYellowTexture;
+	UPROPERTY(EditAnywhere)
+	TSoftObjectPtr<UTexture2D> WaveRedTexture;
 private:
 
 	FGenericTeamId TeamID;

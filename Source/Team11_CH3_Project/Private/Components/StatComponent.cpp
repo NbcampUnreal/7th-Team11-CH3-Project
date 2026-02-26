@@ -1,4 +1,4 @@
-﻿#include "Components/StatComponent.h"
+#include "Components/StatComponent.h"
 
 UStatComponent::UStatComponent()
 {
@@ -17,6 +17,7 @@ void UStatComponent::InitStat(const FStatData& StatData)
 	BaseStat = StatData;
 	CurrentStat = BaseStat;
 	CurrentHP = BaseStat.MaxHP;
+	OnHPChanged.Broadcast(CurrentHP, GetCurrentStat(EStat::MaxHP));
 }
 
 void UStatComponent::SetBaseStat(EStat TargetStat, float Amount)
@@ -25,6 +26,7 @@ void UStatComponent::SetBaseStat(EStat TargetStat, float Amount)
 	{
 	case EStat::MaxHP:
 		BaseStat.MaxHP = FMath::Max(Amount, 0.0f);
+		OnHPChanged.Broadcast(CurrentHP, GetCurrentStat(EStat::MaxHP));
 		break;
 	case EStat::DEF:
 		BaseStat.DEF = Amount;
@@ -58,6 +60,7 @@ void UStatComponent::SetCurrentStat(EStat TargetStat, float Amount)
 	{
 	case EStat::MaxHP:
 		CurrentStat.MaxHP = FMath::Max(Amount, 0.0f);
+		OnHPChanged.Broadcast(CurrentHP, GetCurrentStat(EStat::MaxHP));
 		break;
 	case EStat::DEF:
 		CurrentStat.DEF = Amount;
@@ -141,11 +144,13 @@ float UStatComponent::GetCurrentStat(EStat TargetStat) const
 void UStatComponent::SetCurrentHP(float Amount)
 {
 	CurrentHP = FMath::Max(Amount, 0.0f);
+	OnHPChanged.Broadcast(CurrentHP, GetCurrentStat(EStat::MaxHP));
 }
 
 void UStatComponent::AddCurrentHP(float Amount)
 {
 	CurrentHP = FMath::Clamp(CurrentHP + Amount, 0.0f, GetCurrentStat(EStat::MaxHP));
+	OnHPChanged.Broadcast(CurrentHP, GetCurrentStat(EStat::MaxHP));
 }
 
 float UStatComponent::GetCurrentHP() const

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
@@ -29,6 +29,7 @@ struct TEAM11_CH3_PROJECT_API FStatData
 };
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStatChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHPChanged, float, HP, float, MaxHP);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TEAM11_CH3_PROJECT_API UStatComponent : public UActorComponent
@@ -77,6 +78,8 @@ public:
 	// 스탯 변경 시 브로드캐스트
 	UPROPERTY(BlueprintAssignable)
 	FOnStatChanged OnStatChanged;
+	UPROPERTY(BlueprintAssignable)
+	FOnHPChanged OnHPChanged;
 
 public:
 	UPROPERTY()

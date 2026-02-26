@@ -7,6 +7,12 @@
 class ASpawnVolume;
 class APortal;
 
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLevelStart, int32, MaxWaveCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWaveStart, int32, CurrentWaveCount, int32, MaxWaveCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMonsterSpawn, int32, CurrentMonsterCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMonsterKilled, int32, CurrentMonsterCount);
+
 UCLASS()
 class TEAM11_CH3_PROJECT_API AT11_GameState : public AGameState
 {
@@ -46,10 +52,21 @@ public:
 	int CurrentWaveIndex;
 	int MaxWave;
 	int SpawnedMonsterCount;
-	int RemainingMonsterCount;
 
 	UPROPERTY(EditAnywhere)
 	TMap<FString, UDataTable*> MapDataConfigs;
 
 	TSoftObjectPtr<UDataTable> WaveData;
+
+	UPROPERTY(BlueprintAssignable)
+	FLevelStart LevelStarted;
+	UPROPERTY(BlueprintAssignable)
+	FWaveStart WaveStarted;
+	UPROPERTY(BlueprintAssignable)
+	FMonsterSpawn MonsterSpawned;
+	UPROPERTY(BlueprintAssignable)
+	FMonsterKilled MonsterKilled;
+
+	void LvlStartedBroadCast();
+	void WaveStartedBroadCast();
 };

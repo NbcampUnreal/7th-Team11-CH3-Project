@@ -9,18 +9,20 @@
 #include "Components/ItemManager.h"
 #include "Components/SkillManager.h"
 #include "Subsystems/ItemDropSubsystem.h"
+#include "MainPlayerController.h"
+#include "Components/TextBlock.h"
+#include "Components/Image.h"
+#include "Blueprint/UserWidget.h"
 
 void AT11_GameState::BeginPlay()
 {
     Super::BeginPlay();
-
     StartLevel();
 }
 
 void AT11_GameState::StartLevel()
 {
     SpawnedMonsterCount = 0;
-    RemainingMonsterCount = 0;
     CurrentWaveIndex = 1;
     TSoftObjectPtr<UWorld> CurrentWorld = GetWorld();
     UE_LOG(LogTemp, Warning, TEXT("Map Name: %s"), *CurrentWorld->GetName());
@@ -42,6 +44,10 @@ void AT11_GameState::StartLevel()
         }
         MaxWave = WaveData->GetRowMap().Num();
         UE_LOG(LogTemp, Warning, TEXT("Level Start"));
+
+        FTimerHandle TempHandle;
+        GetWorldTimerManager().SetTimer(TempHandle, this, &AT11_GameState::LvlStartedBroadCast, 0.2f, false);
+       
         StartNextWave();
     }
 }
@@ -54,7 +60,11 @@ void AT11_GameState::StartNextWave()
     FWaveData* CurrentWaveData;
     static const FString ContextString(TEXT("Wave Data Reading"));
     CurrentWaveData = WaveData->FindRow<FWaveData>(FName(*FString::Printf(TEXT("Wave_%d"), CurrentWaveIndex)), ContextString);
+
     UE_LOG(LogTemp, Warning, TEXT("Wave Start"));
+    FTimerHandle TempHandle;
+    GetWorldTimerManager().SetTimer(TempHandle, this, &AT11_GameState::WaveStartedBroadCast, 0.2f, false);
+
     if (CurrentWaveData->WaveNum == CurrentWaveIndex)
     {
         float WaveDuration = CurrentWaveData->WaveDuration;
@@ -68,7 +78,6 @@ void AT11_GameState::StartNextWave()
                     ASpawnVolume* CurrentSpawnVolume;
                     CurrentSpawnVolume = Cast<ASpawnVolume>(Volume);
                     MonsterToSpawn = VolumePair.Value;
-                    SpawnedMonsterCount += MonsterToSpawn;
                     UE_LOG(LogTemp, Warning, TEXT("Spawn Start"));
                     CreateSpawnTimer(VolumePair.Key.ToString(), 1.0f, MonsterToSpawn, CurrentSpawnVolume);
                 }
@@ -183,6 +192,8 @@ void AT11_GameState::CreateSpawnTimer(FString TimerName, float Interval, int32 T
                 // 실제 소환 로직
                 SpawnVolume->SpawnRandomMonster(CurrentStageIndex);
                 State->RemainingCount--;
+                SpawnedMonsterCount++;
+                MonsterSpawned.Broadcast(SpawnedMonsterCount);
 
                 UE_LOG(LogTemp, Log, TEXT("[%s] 남은 마리수: %d"), *State->WaveName, State->RemainingCount);
 
@@ -199,6 +210,7 @@ void AT11_GameState::CreateSpawnTimer(FString TimerName, float Interval, int32 T
 void AT11_GameState::OnMonsterKilled(FVector DropLocation, int32 ScoreValue)
 {
     SpawnedMonsterCount--;
+    MonsterKilled.Broadcast(SpawnedMonsterCount);
     // 점수 처리
     UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
     if (IsValid(GI) == false)
@@ -223,6 +235,16 @@ void AT11_GameState::OnMonsterKilled(FVector DropLocation, int32 ScoreValue)
     {
         EndWave();
     }
+}
+
+void AT11_GameState::LvlStartedBroadCast()
+{
+    LevelStarted.Broadcast(MaxWave);
+}
+
+void AT11_GameState::WaveStartedBroadCast()
+{
+    WaveStarted.Broadcast(CurrentWaveIndex, MaxWave);
 }
 
 
