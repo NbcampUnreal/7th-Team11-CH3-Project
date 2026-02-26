@@ -38,6 +38,7 @@ public:
 	// Getter
 	int32 GetScoreValue() const { return ScoreValue; }
 	AWeaponActor* GetWeaponActor()const;
+	void UpdateTargetLocation(const FVector& Vector);
 	FOnAttackFinished OnAttackFinished;
 	
 protected:

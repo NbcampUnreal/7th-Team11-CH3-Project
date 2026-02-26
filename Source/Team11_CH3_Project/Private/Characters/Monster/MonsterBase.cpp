@@ -127,6 +127,18 @@ AWeaponActor* AMonsterBase::GetWeaponActor() const
 	return WeaponActor;
 }
 
+void AMonsterBase::UpdateTargetLocation(const FVector& Vector)
+{
+	if (SkillComponent)
+	{
+		if (UActiveSkillSlot* ActiveSkillSlot = SkillComponent->GetActiveSkillSlot())
+		{
+			ActiveSkillSlot->SetTargetLocation(Vector);
+		}
+	}
+	
+}
+
 float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
                                class AController* EventInstigator, AActor* DamageCauser)
 {
@@ -253,11 +265,16 @@ void AMonsterBase::PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLoca
 
 bool AMonsterBase::TryAttack(AActor* Target)
 {
-	if (!Target ||  SkillComponent->IsSkillActive())
+	if (!Target)
+	{
+		return false;
+	}
+	if (SkillComponent->IsSkillActive())
 	{
 		return false;
 	}
 
+	
 	int32 BestSkillIdx = SkillComponent->GetBestSkill(this, Target);
 	if (SkillComponent->GetCooldownRemaining(BestSkillIdx) > 0.0f)
 	{

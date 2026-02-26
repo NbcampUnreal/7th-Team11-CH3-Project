@@ -16,7 +16,8 @@ UCLASS()
 class TEAM11_CH3_PROJECT_API UActiveSkillSlot : public UObject
 {
 	GENERATED_BODY()
-public:	
+
+public:
 	void Init(USkillManager* SkillManager);
 	void OnStartSkill(AActor* InOwner, const FVector& InTargetLocation, USkillSlot* SkillSlot);
 	void OnExecute();
@@ -25,15 +26,17 @@ public:
 	void Notify(FName NotifyName);
 	float GetElapsedTime() const;
 	UFUNCTION(BlueprintCallable)
-	USkillSlot* GetSkillSlot() const { return  CurrentActiveSkillSlot.Get(); }
+	USkillSlot* GetSkillSlot() const { return CurrentActiveSkillSlot.Get(); }
 
+	void SetTargetLocation(const FVector& InTargetLocation);
+	FVector GetTargetLocation() const;
 	bool GetIsEnd();
 	void SetIsEnd(bool isEnd);
 
 private:
 	TWeakObjectPtr<AActor> Owner;
 	FVector TargetLocation;
-	float ElapsedTime;	
+	float ElapsedTime;
 	UPROPERTY()
 	TWeakObjectPtr<USkillManager> SkillComponent;
 	bool bIsEnd;
