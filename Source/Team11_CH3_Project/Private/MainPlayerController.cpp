@@ -1,4 +1,4 @@
-﻿#include "MainPlayerController.h"
+#include "MainPlayerController.h"
 #include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
@@ -10,9 +10,14 @@
 #include "Characters/InventoryComponent.h"
 #include "Perception/AIPerceptionSystem.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "Core/T11_GameState.h"
+#include "Components/StatComponent.h"
 #include "UI/Subsystem/UIManageSubsystem.h"
 #include "GameplayTagContainer.h"
-
+#include "Blueprint/UserWidget.h"
+#include "Components/TextBlock.h"
+#include "Components/Image.h"
+#include "Components/ProgressBar.h"
 
 AMainPlayerController::AMainPlayerController()
 {
@@ -37,7 +42,16 @@ void AMainPlayerController::BeginPlay()
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
 	
+	if (HUDWidgetClass)
+	{
+		HUDWidgetInstance = CreateWidget<UUserWidget>(this, HUDWidgetClass);
+		if (HUDWidgetInstance)
+		{
+			HUDWidgetInstance->AddToViewport();
+		}
+	}
 
+	SetHUD();
 }
 
 void AMainPlayerController::SetupInputComponent()
@@ -245,15 +259,6 @@ void AMainPlayerController::AimPressed()
 	}
 }
 
-void AMainPlayerController::AimReleased()
-{
-	if (APlayerCharacter* ControlledPawn =
-		Cast<APlayerCharacter>(GetPawn()))
-	{
-		ControlledPawn->SetAiming(false);
-	}
-}
-
 bool AMainPlayerController::GetAimPoint(FVector& OutAimPoint) const
 {
 	int32 SX, SY;
@@ -274,4 +279,108 @@ bool AMainPlayerController::GetAimPoint(FVector& OutAimPoint) const
 	const bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, Params);
 	OutAimPoint = bHit ? Hit.ImpactPoint : End;
 	return true;
+}
+
+void AMainPlayerController::AimReleased()
+{
+	if (APlayerCharacter* ControlledPawn =
+		Cast<APlayerCharacter>(GetPawn()))
+	{
+		ControlledPawn->SetAiming(false);
+	}
+}
+
+UUserWidget* AMainPlayerController::GetHUDWidget() const
+{
+	return HUDWidgetInstance;
+}
+
+void AMainPlayerController::UpdateMonsterCount(int32 MonsterCount)
+{
+	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	{
+		if (UTextBlock* MonsterCountText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("RemainingCount"))))
+		{
+			MonsterCountText->SetText(FText::AsNumber(MonsterCount));
+		}
+	}
+}
+
+void AMainPlayerController::UpdateStageInfo(int32 MaxWave)
+{
+	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	{
+		if (UTextBlock* StageNameText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("StageName"))))
+		{
+			FString CurrentWorldName = GetWorld()->GetName();
+			StageNameText->SetText(FText::FromString(CurrentWorldName));
+		}
+		for (int32 WaveIndex = MaxWave + 1; WaveIndex <= 5; WaveIndex++)
+		{
+			if (UImage* WaveImage = Cast<UImage>(HUDWidget->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
+			{
+				WaveImage->SetVisibility(ESlateVisibility::Collapsed);
+			}
+		}
+	}
+}
+
+void AMainPlayerController::UpdateWaveInfo(int32 CurrentWaveIndex, int32 MaxWave)
+{
+	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	{
+		for (int32 WaveIndex = 1; WaveIndex < CurrentWaveIndex; WaveIndex++)
+		{
+			if (UImage* WaveImage = Cast<UImage>(HUDWidget->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
+			{
+				UTexture2D* Texture = WaveYellowTexture.LoadSynchronous();
+				WaveImage->SetBrushFromTexture(Texture);
+			}
+		}
+		if (UImage* WaveImage = Cast<UImage>(HUDWidget->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), CurrentWaveIndex)))))
+		{
+			UTexture2D* Texture = WaveRedTexture.LoadSynchronous();
+			WaveImage->SetBrushFromTexture(Texture);
+		}
+
+		if (UTextBlock* WaveIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Wave"))))
+		{
+			WaveIndexText->SetText(FText::FromString(FString::Printf(TEXT("WAVE %d/%d"), CurrentWaveIndex, MaxWave)));
+		}
+	}
+}
+
+void AMainPlayerController::UpdateHP(float CurrentHP, float MaxHP)
+{
+	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	{
+		if (UTextBlock* WaveIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("CurrentHP"))))
+		{
+			WaveIndexText->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), int32(CurrentHP), int32(MaxHP))));
+		}
+
+		if (UProgressBar* HPBar = Cast<UProgressBar>(HUDWidget->GetWidgetFromName(TEXT("HPBar"))))
+		{
+			float HealthPercent = (MaxHP > 0.0f) ? (CurrentHP / MaxHP) : 0.0f;
+			HPBar->SetPercent(HealthPercent);
+		}
+	}
+}
+
+void AMainPlayerController::SetHUD()
+{
+	AT11_GameState* GameState = GetWorld()->GetGameState<AT11_GameState>();
+
+	if (GameState)
+	{
+		GameState->LevelStarted.AddDynamic(this, &AMainPlayerController::UpdateStageInfo);
+		GameState->WaveStarted.AddDynamic(this, &AMainPlayerController::UpdateWaveInfo);
+		GameState->MonsterSpawned.AddDynamic(this, &AMainPlayerController::UpdateMonsterCount);
+		GameState->MonsterKilled.AddDynamic(this, &AMainPlayerController::UpdateMonsterCount);
+	}
+	if (APlayerCharacter* PlayerCharacter =
+		Cast<APlayerCharacter>(GetPawn()))
+	{
+		PlayerCharacter->FindComponentByClass<UStatComponent>()->OnHPChanged.AddDynamic(this, &AMainPlayerController::UpdateHP);
+	}
 }
