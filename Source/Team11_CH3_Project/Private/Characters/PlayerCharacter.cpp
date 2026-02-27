@@ -219,12 +219,12 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
 
 void APlayerCharacter::SetAiming(bool bNewAiming)
 {
-	if (SkillComponent->GetActiveSkillSlot()->GetIsEnd() == false)
+	UActiveSkillSlot* ActiveSkillSlot = SkillComponent->GetActiveSkillSlot();
+	if (IsValid(ActiveSkillSlot) && ActiveSkillSlot->GetIsEnd() == false)
 	{
-		SkillComponent->ExitActiveSkill();
+		ActiveSkillSlot->Notify(TEXT("Cancel"));
 		return;
 	}
-
 
 	UE_LOG(LogTemp, Warning, TEXT("SetAiming: %d"), bNewAiming);
 	bIsAiming = bNewAiming;

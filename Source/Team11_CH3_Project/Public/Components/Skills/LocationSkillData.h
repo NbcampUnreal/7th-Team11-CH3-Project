@@ -37,4 +37,5 @@ private:
 
 	UPROPERTY()
 	mutable TObjectPtr<ASkillIndicatorActor> SpawnedIndicator;
+	bool bIsExecuted = false;
 };

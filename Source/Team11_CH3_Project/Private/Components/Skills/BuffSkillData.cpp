@@ -2,7 +2,7 @@
 
 
 #include "Components/Skills/BuffSkillData.h"
-
+#include "NiagaraFunctionLibrary.h"
 
 void UBuffSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
 {
@@ -12,6 +12,20 @@ void UBuffSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, cons
 
 	if (IsValid(BuffManager) == false)
 		return;
+
+	UNiagaraSystem* MagicCircle = GetMagicCircleEffect();
+	if (IsValid(MagicCircle) == false)
+		return;
+
+	FVector SpawnLocation = Instigator->GetActorLocation();
+	SpawnLocation.Z -= 85.f;
+
+	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		Instigator->GetWorld(),
+		MagicCircle,
+		SpawnLocation,
+		Instigator->GetActorRotation()
+	);
 
 	BuffManager->AddBuff(TargetStat, BuffType, BuffAmount, BuffDuration);
 	UE_LOG(LogTemp, Warning, TEXT("Buff : %s"), *Instigator->GetName());

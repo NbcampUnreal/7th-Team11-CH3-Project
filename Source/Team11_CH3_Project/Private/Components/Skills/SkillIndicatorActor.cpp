@@ -19,13 +19,7 @@ ASkillIndicatorActor::ASkillIndicatorActor()
 void ASkillIndicatorActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	//if (IsValid(IndicatorEffect) == false)
-	//	return;
-	//if (IsValid(NiagaraComponent) == false)
-	//	return;
 
-	//NiagaraComponent->SetAsset(IndicatorEffect);
 }
 
 // Called every frame
@@ -39,16 +33,31 @@ void ASkillIndicatorActor::Initialize(APawn* InInstigator, float InMaxRange)
 {
     OwnerInstigator = InInstigator;
 	MaxRange = InMaxRange;
+
+    if (IsValid(IndicatorEffect) == false)
+        return;
+    if (IsValid(NiagaraComponent) == false)
+        return;
+
+    NiagaraComponent->SetAsset(IndicatorEffect);
 }
 
 void ASkillIndicatorActor::UpdateLocation()
 {
-    if (OwnerInstigator.IsValid() == false) 
+    if (OwnerInstigator.IsValid() == false)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Indicator] OwnerInstigator Invalid"));
         return;
-
+    }
     UCameraComponent* Camera = OwnerInstigator->FindComponentByClass<UCameraComponent>();
-    if (IsValid(Camera) == false) 
+    if (IsValid(Camera) == false)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("[Indicator] Camera Not Found"));
         return;
+    }
+
+    UE_LOG(LogTemp, Log, TEXT("[Indicator] MaxRange: %.1f, CamFwd: %s"),
+        MaxRange, *Camera->GetForwardVector().ToString());
 
     FVector CameraLocation = Camera->GetComponentLocation();
     FVector CameraForward = Camera->GetForwardVector();
@@ -69,6 +78,7 @@ void ASkillIndicatorActor::UpdateLocation()
     {
         // 바닥 충돌 위치
         IndicatorLocation = HitResult.Location;
+        UE_LOG(LogTemp, Log, TEXT("[Indicator] Direct Hit: %s"), *IndicatorLocation.ToString());
     }
     else
     {
@@ -94,11 +104,15 @@ void ASkillIndicatorActor::UpdateLocation()
             }
         }
 
-        if (bFoundGround == false) 
+        if (bFoundGround == false)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("[Indicator] No Ground Found"));
             return;
+        }
+        UE_LOG(LogTemp, Log, TEXT("[Indicator] Ground Hit: %s"), *IndicatorLocation.ToString());
     }
 
-    SetActorLocation(IndicatorLocation);
+    SetActorLocation(IndicatorLocation + FVector(0.f, 0.f, 5.f));
 }
 
 

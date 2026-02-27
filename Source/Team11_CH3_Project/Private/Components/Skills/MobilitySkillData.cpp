@@ -4,11 +4,32 @@
 #include "Components/Skills/MobilitySkillData.h"
 #include "GameFramework/Character.h"
 #include "Components/CapsuleComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
 {
+	// 마법진 소환
 	if (IsValid(Instigator) == false)
 		return;
+
+	ACharacter* Character = Cast<ACharacter>(Instigator);
+	if (IsValid(Character) == false)
+		return;
+
+	UNiagaraSystem* MagicCircle = GetMagicCircleEffect();
+	if (IsValid(MagicCircle) == false)
+		return;
+
+	FVector SpawnLocation = Instigator->GetActorLocation();
+	SpawnLocation.Z -= 85.f;
+
+	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		Instigator->GetWorld(),
+		MagicCircle,
+		SpawnLocation,
+		Instigator->GetActorRotation()
+	);
+
 	// 플레이어가 바라보는 방향 Yaw가 Z축기준
 	FRotator ControlYaw = FRotator(0.f, Instigator->GetControlRotation().Yaw, 0.f);
 	FVector ForwardDirection = ControlYaw.Vector();
@@ -54,8 +75,7 @@ void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, 
 	))
 	{
 		// 캐릭터 발이 바닥에 닿도록
-		ACharacter* Character = Cast<ACharacter>(Instigator);
-		float HalfHeight = Character ? Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() : 0.f;
+		float HalfHeight = Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 		Destination.Z = GroundHit.Location.Z + HalfHeight;
 	}
 	else

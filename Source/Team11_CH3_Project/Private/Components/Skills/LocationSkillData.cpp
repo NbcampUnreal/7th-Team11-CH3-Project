@@ -3,6 +3,11 @@
 
 #include "Components/Skills/LocationSkillData.h"
 #include "Components/Skills/SkillIndicatorActor.h"
+#include "Components/Skills/ExplosionSkillActor.h" 
+#include "Components/StatComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "GameFramework/Character.h"
+#include "Characters/PlayerCharacter.h"
 
 void ULocationSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
 {
@@ -10,20 +15,51 @@ void ULocationSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, 
 
 void ULocationSkillData::Enter(AActor* Actor, const FVector& TargetLocation) 
 {
+	if (IsValid(Actor) == false)
+		return;
+
+	UNiagaraSystem* MagicCircle = GetMagicCircleEffect();
+	if (IsValid(MagicCircle) == false)
+		return;
+
+	FVector SpawnLocation = Actor->GetActorLocation();
+	SpawnLocation.Z -= 85.f;
+
+	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		Actor->GetWorld(),
+		MagicCircle,
+		SpawnLocation,
+		Actor->GetActorRotation()
+	);
 }
 
 void ULocationSkillData::Execute() 
 {
+	if (bIsExecuted)
+		return;
+	bIsExecuted = true;
 
 	if (IsValid(SpawnedIndicator) == false)
 		return;
-	FVector SkillLocation = SpawnedIndicator->GetIndicatorLocation();
+	APawn* Instigator = Cast<APawn>(SpawnedIndicator->GetOwner());
+	ACharacter* Character = Cast<ACharacter>(Instigator);
+	if (IsValid(Character) == false)
+		return;
+	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+	if (IsValid(AnimInstance) == false)
+		return;
 
+	AnimInstance->Montage_JumpToSection("EndCasting", SkillMontage);
+
+	FVector SkillLocation = SpawnedIndicator->GetIndicatorLocation();
+	SkillLocation.Z += 5;
 	if (IsValid(SkillEffectClass) == false)
 		return;
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Owner = SpawnedIndicator->GetOwner();
+	SpawnParams.Instigator = Cast<APawn>(SpawnedIndicator->GetOwner());
 
 	AActor* Effect = SpawnedIndicator->GetWorld()->SpawnActor<AActor>(
 		SkillEffectClass,
@@ -31,7 +67,19 @@ void ULocationSkillData::Execute()
 		FRotator::ZeroRotator,
 		SpawnParams
 	);
+	// ExlosionSkillActor면 데미지 초기화
+	if (AExplosionSkillActor* Explosion = Cast<AExplosionSkillActor>(Effect))
+	{
+		float ActualDamage = Damage;
+		UStatComponent* StatComp = SpawnParams.Instigator->FindComponentByClass<UStatComponent>();
+		if (IsValid(StatComp))
+		{
+			ActualDamage += StatComp->GetCurrentStat(EStat::AttackDamage);
+			Explosion->Initialize(ActualDamage);
+		}
 
+	}
+	
 	UE_LOG(LogTemp, Warning, TEXT("Spawned Effect: %s at %s"),
 		*GetNameSafe(Effect), *SkillLocation.ToString());
 
@@ -48,25 +96,29 @@ void ULocationSkillData::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlo
 	if (IsValid(Instigator) == false)
 		return;
 
+	FVector SpawnLocation = Actor->GetActorLocation();
+	SpawnLocation.Z -= 85.f;  // 발밑으로 보정
+
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = Actor;
 
 	ASkillIndicatorActor* Indicator = Actor->GetWorld()->SpawnActor<ASkillIndicatorActor>(
 		IndicatorClass,
-		Actor->GetActorLocation(),
+		SpawnLocation,
 		FRotator::ZeroRotator,
 		SpawnParams
 	);
 
 	if (IsValid(Indicator) == false)
-		return;
 
+		return;
 	Indicator->Initialize(Instigator, Range);
 	SpawnedIndicator = Indicator;
 }
 
-void ULocationSkillData::OnExit() 
+void ULocationSkillData::OnExit()
 {
+	bIsExecuted = false;
 	if (IsValid(SpawnedIndicator) == false)
 		return;
 
@@ -81,5 +133,15 @@ void ULocationSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, co
 	if (Name == TEXT("DealDamage"))
 	{
 		Execute();
+	}
+	else if (Name == TEXT("Cancel"))
+	{
+		ACharacter* Character = Cast<ACharacter>(Instigator);
+		if (IsValid(Character) == false)
+			return;
+		UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+		if (IsValid(AnimInstance) == false)
+			return;
+		AnimInstance->Montage_Stop(0.2f, SkillMontage);
 	}
 }

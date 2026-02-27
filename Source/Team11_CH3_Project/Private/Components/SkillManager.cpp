@@ -204,8 +204,8 @@ void USkillManager::ActiveSkill(AActor* Owner, const FVector& TargetLocation, US
 	{
 		return;	
 	}
-	
-	
+
+
 	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
 	UAnimInstance* AnimInstance = SkeletalMeshComponent->GetAnimInstance();
 	float CastSpeed = 1.0f;
