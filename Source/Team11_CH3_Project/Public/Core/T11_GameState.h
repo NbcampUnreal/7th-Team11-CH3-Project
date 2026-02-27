@@ -12,7 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLevelStart, int32, MaxWaveCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWaveStart, int32, CurrentWaveCount, int32, MaxWaveCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMonsterSpawn, int32, CurrentMonsterCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMonsterKilled, int32, CurrentMonsterCount);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLevelFinished);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLevelFinished, FString, TargetLevel);
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API AT11_GameState : public AGameState
@@ -57,6 +57,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TMap<FString, UDataTable*> MapDataConfigs;
+
+	UPROPERTY(EditAnywhere)
+	TMap<FString, UDataTable*> BossMapDataConfig;
 
 	TSoftObjectPtr<UDataTable> WaveData;
 

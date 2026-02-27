@@ -427,9 +427,18 @@ void AMainPlayerController::UpdateHP(float CurrentHP, float MaxHP)
 	}
 }
 
-void AMainPlayerController::UpdateLevelFinished()
+void AMainPlayerController::UpdateLevelFinished(FString TargetLevel)
 {
 	HUDWidgetInstance->RemoveFromParent();
+	if (this->PlayerCameraManager)
+	{
+		this->PlayerCameraManager->StartCameraFade(0.f, 1.f, 1.0f, FLinearColor::Black, false, true);
+
+		FTimerHandle TimerHandle;
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, TargetLevel]() {
+			UGameplayStatics::OpenLevel(GetWorld(), FName(*TargetLevel));
+			}, 1.0f, false);
+	}
 }
 
 void AMainPlayerController::SetHUD()

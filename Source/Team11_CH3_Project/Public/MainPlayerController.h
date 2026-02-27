@@ -135,7 +135,7 @@ public:
 	UFUNCTION()
 	void UpdateHP(float CurrentHP, float MaxHP);
 	UFUNCTION()
-	void UpdateLevelFinished();
+	void UpdateLevelFinished(FString TargetLevel);
 
 	void SetHUD();
 

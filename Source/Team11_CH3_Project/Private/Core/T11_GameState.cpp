@@ -33,22 +33,44 @@ void AT11_GameState::StartLevel()
     FString MapName;
     if (GI->CurrentDifficulty == 0) MapName = CurrentWorld->GetName() + "_Easy";
     else if (GI->CurrentDifficulty == 1) MapName = CurrentWorld->GetName() + "_Hard";
-
-    if (CurrentWorld && MapDataConfigs.Contains(MapName))
+    else if (GI->CurrentDifficulty == 2) MapName = CurrentWorld->GetName();
+    if (CurrentStageIndex < 5)
     {
-        WaveData = MapDataConfigs[MapName];
-        
-        if (!WaveData)
+        if (CurrentWorld && MapDataConfigs.Contains(MapName))
         {
-            return;
-        }
-        MaxWave = WaveData->GetRowMap().Num();
-        UE_LOG(LogTemp, Warning, TEXT("Level Start"));
+            WaveData = MapDataConfigs[MapName];
+        
+            if (!WaveData)
+            {
+                return;
+            }
+            MaxWave = WaveData->GetRowMap().Num();
+            UE_LOG(LogTemp, Warning, TEXT("Level Start"));
 
-        FTimerHandle TempHandle;
-        GetWorldTimerManager().SetTimer(TempHandle, this, &AT11_GameState::LvlStartedBroadCast, 0.2f, false);
+            FTimerHandle TempHandle;
+            GetWorldTimerManager().SetTimer(TempHandle, this, &AT11_GameState::LvlStartedBroadCast, 0.2f, false);
        
-        StartNextWave();
+            StartNextWave();
+        }
+    }
+    else
+    {
+        if (CurrentWorld && BossMapDataConfig.Contains(MapName))
+        {
+            WaveData = BossMapDataConfig[MapName];
+
+            if (!WaveData)
+            {
+                return;
+            }
+            MaxWave = WaveData->GetRowMap().Num();
+            UE_LOG(LogTemp, Warning, TEXT("Level Start"));
+
+            FTimerHandle TempHandle;
+            GetWorldTimerManager().SetTimer(TempHandle, this, &AT11_GameState::LvlStartedBroadCast, 0.2f, false);
+
+            StartNextWave();
+        }
     }
 }
 
@@ -143,8 +165,19 @@ void AT11_GameState::ActivatePortals()
         APortal* PortalClass = Cast<APortal>(Portal);
         if (PortalClass)
         {
-            SetPortalLevel(PortalClass);
-            PortalClass->SetPortalActive(true);
+            UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
+            if (IsValid(GI) == false) return;
+
+            if (GI->CurrentStageIndex < 5 && !PortalClass->ActorHasTag(TEXT("Boss")))
+            {
+                SetPortalLevel(PortalClass);
+                PortalClass->SetPortalActive(true);
+            }
+            else if (GI->CurrentStageIndex >= 5 && PortalClass->ActorHasTag(TEXT("Boss")))
+            {
+                PortalClass->SetTargetLevel("L_BossStage_Test");
+                PortalClass->SetPortalActive(true);
+            }
         }
     }
 }
@@ -182,17 +215,8 @@ void AT11_GameState::UsePortal(FString Difficulty, FString TargetLevel)
 
     if (Difficulty == "Easy") GI->CurrentDifficulty = 0;
     else if (Difficulty == "Hard") GI->CurrentDifficulty = 1;
-    LevelFinished.Broadcast();
-    APlayerController* PC = GetWorld()->GetFirstPlayerController();
-    if (PC->PlayerCameraManager)
-    {
-        PC->PlayerCameraManager->StartCameraFade(0.f, 1.f, 1.0f, FLinearColor::Black, false, true);
-
-        FTimerHandle TimerHandle;
-        GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, TargetLevel]() {
-            UGameplayStatics::OpenLevel(GetWorld(), FName(*TargetLevel));
-            }, 1.0f, false);
-    }
+    else if (Difficulty == "Boss") GI->CurrentDifficulty = 2;
+    LevelFinished.Broadcast(TargetLevel);
 }
 
 void AT11_GameState::CreateSpawnTimer(FString TimerName, float Interval, int32 TotalCount, ASpawnVolume* SpawnVolume)
