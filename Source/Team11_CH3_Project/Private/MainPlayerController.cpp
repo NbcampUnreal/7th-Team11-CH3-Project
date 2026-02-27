@@ -18,6 +18,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
+#include "Components/CanvasPanel.h"
 
 AMainPlayerController::AMainPlayerController()
 {
@@ -34,7 +35,7 @@ void AMainPlayerController::BeginPlay()
 	}
 
 	// 마우스 커서 설정
-	bShowMouseCursor = false;
+	//bShowMouseCursor = false;
 	bEnableClickEvents = false;
 	bEnableMouseOverEvents = false;
 
@@ -45,12 +46,15 @@ void AMainPlayerController::BeginPlay()
 	if (HUDWidgetClass)
 	{
 		HUDWidgetInstance = CreateWidget<UUserWidget>(this, HUDWidgetClass);
-		if (HUDWidgetInstance)
-		{
-			HUDWidgetInstance->AddToViewport();
-		}
+	}
+	if (LoadingWidgetClass)
+	{
+		LoadingWidgetInstance = CreateWidget<UUserWidget>(this, LoadingWidgetClass);
 	}
 
+	this->PlayerCameraManager->StartCameraFade(1.f, 0.f, 2.0f, FLinearColor::Black, false, false);
+
+	LoadingToHUD();
 	SetHUD();
 }
 
@@ -295,6 +299,58 @@ UUserWidget* AMainPlayerController::GetHUDWidget() const
 	return HUDWidgetInstance;
 }
 
+void AMainPlayerController::LoadingToHUD()
+{
+	MainCanvas = Cast<UCanvasPanel>(LoadingWidgetInstance->GetWidgetFromName(TEXT("MainCanvas")));
+	if (MainCanvas)
+	{
+		CurrentOpacity = 0.0f;
+		bFadingIn = true;
+		GetWorld()->GetTimerManager().SetTimer(FadeTimerHandle, this, &AMainPlayerController::UpdateFade, 0.02f, true);
+	}
+	LoadingWidgetInstance->AddToViewport();
+	if (UTextBlock* StageNameText = Cast<UTextBlock>(LoadingWidgetInstance->GetWidgetFromName(TEXT("StageName"))))
+	{
+		FString CurrentWorldName = GetWorld()->GetName().RightChop(2);
+		StageNameText->SetText(FText::FromString(CurrentWorldName));
+	}
+}
+
+void AMainPlayerController::UpdateFade()
+{
+	if (bFadingIn)
+	{
+		CurrentOpacity += 0.02f;
+		if (MainCanvas)
+		{
+			MainCanvas->SetRenderOpacity(CurrentOpacity);
+		}
+		if (CurrentOpacity >= 1.5f)
+		{
+			bFadingIn = false;
+		}
+	}
+	else
+	{
+		CurrentOpacity -= 0.02f;
+		if (MainCanvas)
+		{
+			MainCanvas->SetRenderOpacity(CurrentOpacity);
+		}
+		if (CurrentOpacity <= 0.0f)
+		{
+			LoadingWidgetInstance->RemoveFromParent();
+			HUDWidgetInstance->AddToViewport();
+			GetWorld()->GetTimerManager().ClearTimer(FadeTimerHandle);
+		}
+	}
+}
+
+UUserWidget* AMainPlayerController::GetLoadingWidget() const
+{
+	return LoadingWidgetInstance;
+}
+
 void AMainPlayerController::UpdateMonsterCount(int32 MonsterCount)
 {
 	if (UUserWidget* HUDWidget = HUDWidgetInstance)
@@ -312,7 +368,7 @@ void AMainPlayerController::UpdateStageInfo(int32 MaxWave)
 	{
 		if (UTextBlock* StageNameText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("StageName"))))
 		{
-			FString CurrentWorldName = GetWorld()->GetName();
+			FString CurrentWorldName = GetWorld()->GetName().RightChop(2);
 			StageNameText->SetText(FText::FromString(CurrentWorldName));
 		}
 		for (int32 WaveIndex = MaxWave + 1; WaveIndex <= 5; WaveIndex++)
@@ -322,6 +378,10 @@ void AMainPlayerController::UpdateStageInfo(int32 MaxWave)
 				WaveImage->SetVisibility(ESlateVisibility::Collapsed);
 			}
 		}
+	}
+	if (UUserWidget* LoadingWidget = LoadingWidgetInstance)
+	{
+		//LoadingWidget->PlayAnimation(LoadingWidget->FadeOutBGAnim);
 	}
 }
 
@@ -367,6 +427,11 @@ void AMainPlayerController::UpdateHP(float CurrentHP, float MaxHP)
 	}
 }
 
+void AMainPlayerController::UpdateLevelFinished()
+{
+	HUDWidgetInstance->RemoveFromParent();
+}
+
 void AMainPlayerController::SetHUD()
 {
 	AT11_GameState* GameState = GetWorld()->GetGameState<AT11_GameState>();
@@ -377,6 +442,7 @@ void AMainPlayerController::SetHUD()
 		GameState->WaveStarted.AddDynamic(this, &AMainPlayerController::UpdateWaveInfo);
 		GameState->MonsterSpawned.AddDynamic(this, &AMainPlayerController::UpdateMonsterCount);
 		GameState->MonsterKilled.AddDynamic(this, &AMainPlayerController::UpdateMonsterCount);
+		GameState->LevelFinished.AddDynamic(this, &AMainPlayerController::UpdateLevelFinished);
 	}
 	if (APlayerCharacter* PlayerCharacter =
 		Cast<APlayerCharacter>(GetPawn()))
