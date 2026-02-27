@@ -283,6 +283,16 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	const FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
 	CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
+	
+	if (SkillComponent)
+	{
+		if (UActiveSkillSlot* ActiveSkillSlot = SkillComponent->GetActiveSkillSlot())
+		{	
+			FVector TargetLocation;
+			GetSkillTargetLocation(TargetLocation);
+			ActiveSkillSlot->SetTargetLocation(TargetLocation);
+		}
+	}
 	/*
 	float TargetArm = bIsAiming ? AimArmLength : DefaultArmLength;
 	FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;

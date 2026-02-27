@@ -10,6 +10,7 @@
 
 class UInputMappingContext;
 class UInputAction;
+class UCanvasPanel;
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API AMainPlayerController : public APlayerController, public IGenericTeamAgentInterface
@@ -107,6 +108,24 @@ public:
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Loading")
+	UUserWidget* LoadingWidgetInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loading")
+	TSubclassOf<UUserWidget> LoadingWidgetClass;
+
+	FTimerHandle FadeTimerHandle;
+	float CurrentOpacity = 1.0f;
+	bool bFadingIn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Loading")
+	UCanvasPanel* MainCanvas;
+	void LoadingToHUD();
+	UFUNCTION(Category = "Loading")
+	void UpdateFade();
+	UFUNCTION(BlueprintPure, Category = "Loading")
+	UUserWidget* GetLoadingWidget() const;
+
 	UFUNCTION()
 	void UpdateMonsterCount(int32 MonsterCount);
 	UFUNCTION()
@@ -115,6 +134,8 @@ public:
 	void UpdateWaveInfo(int32 WaveIndex, int32 MaxWave);
 	UFUNCTION()
 	void UpdateHP(float CurrentHP, float MaxHP);
+	UFUNCTION()
+	void UpdateLevelFinished();
 
 	void SetHUD();
 

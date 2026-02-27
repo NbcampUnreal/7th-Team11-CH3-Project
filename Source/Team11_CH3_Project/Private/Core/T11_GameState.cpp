@@ -175,6 +175,26 @@ void AT11_GameState::SetPortalLevel(APortal* Portal)
     Portal->SetTargetLevel(LvlArray[RandomIndex]);
 }
 
+void AT11_GameState::UsePortal(FString Difficulty, FString TargetLevel)
+{
+    UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
+    if (IsValid(GI) == false) return;
+
+    if (Difficulty == "Easy") GI->CurrentDifficulty = 0;
+    else if (Difficulty == "Hard") GI->CurrentDifficulty = 1;
+    LevelFinished.Broadcast();
+    APlayerController* PC = GetWorld()->GetFirstPlayerController();
+    if (PC->PlayerCameraManager)
+    {
+        PC->PlayerCameraManager->StartCameraFade(0.f, 1.f, 1.0f, FLinearColor::Black, false, true);
+
+        FTimerHandle TimerHandle;
+        GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, TargetLevel]() {
+            UGameplayStatics::OpenLevel(GetWorld(), FName(*TargetLevel));
+            }, 1.0f, false);
+    }
+}
+
 void AT11_GameState::CreateSpawnTimer(FString TimerName, float Interval, int32 TotalCount, ASpawnVolume* SpawnVolume)
 {
     FSpawnState& NewState = SpawnStates.FindOrAdd(TimerName);

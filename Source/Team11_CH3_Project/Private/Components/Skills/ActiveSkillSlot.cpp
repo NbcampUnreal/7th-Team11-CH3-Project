@@ -19,7 +19,7 @@ void UActiveSkillSlot::OnStartSkill(AActor* InOwner, const FVector& InTargetLoca
 	Owner = InOwner;
 	TargetLocation = InTargetLocation;
 	CurrentActiveSkillSlot = SkillSlot;
-	CurrentActiveSkillSlot->GetEquippedSkill()->Enter(InOwner,TargetLocation);
+	CurrentActiveSkillSlot->GetEquippedSkill()->Enter(InOwner, TargetLocation);
 	// Aiming 아닌경우 쿨타임 여기서
 	if (CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillType() != ESkillType::Aiming)
 	{
@@ -92,6 +92,16 @@ void UActiveSkillSlot::Notify(FName NotifyName)
 float UActiveSkillSlot::GetElapsedTime() const
 {
 	return ElapsedTime;
+}
+
+void UActiveSkillSlot::SetTargetLocation(const FVector& InTargetLocation)
+{
+	TargetLocation = InTargetLocation;
+}
+
+FVector UActiveSkillSlot::GetTargetLocation() const
+{
+	return TargetLocation;
 }
 
 bool UActiveSkillSlot::GetIsEnd()

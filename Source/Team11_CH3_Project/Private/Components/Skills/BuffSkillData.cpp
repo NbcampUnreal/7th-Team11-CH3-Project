@@ -31,11 +31,11 @@ void UBuffSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, cons
 	UE_LOG(LogTemp, Warning, TEXT("Buff : %s"), *Instigator->GetName());
 }
 
-void UBuffSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name)
+void UBuffSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation, FName Name)
 {
-	Super::Notify(Instigator, WeaponActor, Origin, Direction, Name);
+	Super::Notify(Instigator, WeaponActor, Origin, TargetLocation, Name);
 	if (Name == TEXT("DealDamage"))
 	{
-		Activate(Instigator, WeaponActor, Origin, Direction);
+		Activate(Instigator, WeaponActor, Origin, TargetLocation);
 	}
 }
