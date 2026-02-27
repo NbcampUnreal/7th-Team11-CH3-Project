@@ -5,6 +5,7 @@
 UInventoryComponent::UInventoryComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	bWantsInitializeComponent = true;
 }
 
 void UInventoryComponent::InitializeComponent()
@@ -35,7 +36,7 @@ bool UInventoryComponent::AddItem(UItemInstance* ItemInstance, int32 Amount)
 			Index = Index = Indexes[ItemInstance->GetItemName()];
 			ItemInstance->ConditionalBeginDestroy();
 			InventorySlots[Index]->ItemInstance->AddCount(Amount);
-			OnInventorySlotChanged.Broadcast(InventorySlots[Index], Index);
+			OnInventorySlotChanged.Broadcast(InventorySlots[Index], EItemContainerType::Inventory, Index);
 			return true;
 		}
 	}
@@ -55,7 +56,7 @@ bool UInventoryComponent::AddItem(UItemInstance* ItemInstance, int32 Amount)
 
 	InventorySlots[Index]->ItemInstance = ItemInstance;
 	Indexes.Add(ItemInstance->GetItemName(), Index);
-	OnInventorySlotChanged.Broadcast(InventorySlots[Index], Index);
+	OnInventorySlotChanged.Broadcast(InventorySlots[Index], EItemContainerType::Inventory, Index);
 	return true;
 }
 
@@ -77,6 +78,6 @@ bool UInventoryComponent::RemoveItem(int32 Index, int32 Amount)
 		InventorySlots[Index]->ItemInstance->Clear();
 		InventorySlots[Index]->ItemInstance = nullptr;
 	}
-	OnInventorySlotChanged.Broadcast(InventorySlots[Index], Index);
+	OnInventorySlotChanged.Broadcast(InventorySlots[Index], EItemContainerType::Inventory, Index);
 	return true;
 }

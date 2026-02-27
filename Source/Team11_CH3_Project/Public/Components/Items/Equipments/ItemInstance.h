@@ -10,12 +10,13 @@ enum class EItemType : uint8;
 /**
  * 
  */
-UCLASS()
+UCLASS(BlueprintType, Blueprintable)
 class TEAM11_CH3_PROJECT_API UItemInstance : public UObject
 {
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
 	void Init(FDataTableRowHandle InHandle, int32 InCount);
 	FName GetItemName() const;
 	EItemType GetItemType() const;

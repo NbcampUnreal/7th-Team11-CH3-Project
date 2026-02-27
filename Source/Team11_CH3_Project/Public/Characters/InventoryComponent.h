@@ -4,6 +4,7 @@
 #include "Components/ActorComponent.h"
 #include "Components/Items/Equipments/EquipmentItemData.h"
 #include "Components/Items/Equipments/ItemInstance.h"
+#include "Types/ItemContainerType.h"
 #include "InventoryComponent.generated.h"
 
 
@@ -12,8 +13,8 @@ class UEquipmentSlot;
 class UItemInstance;
 
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnInventorySlotChanged, const UItemSlot*, SlotData, int32, SlotIndex)
-;
+
+
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TEAM11_CH3_PROJECT_API UInventoryComponent : public UActorComponent
@@ -23,10 +24,12 @@ class TEAM11_CH3_PROJECT_API UInventoryComponent : public UActorComponent
 public:
 	UInventoryComponent();
 	virtual void InitializeComponent() override;
+	UFUNCTION(BlueprintCallable)
 	bool AddItem(UItemInstance* ItemInstance, int32 Amount = 1);
+	UFUNCTION(BlueprintCallable)
 	bool RemoveItem(int32 Index, int32 Amount);
-	UPROPERTY()
-	FOnInventorySlotChanged OnInventorySlotChanged;
+	UPROPERTY(BlueprintAssignable)
+	FOnItemSlotChanged OnInventorySlotChanged;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
