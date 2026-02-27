@@ -301,7 +301,6 @@ UUserWidget* AMainPlayerController::GetHUDWidget() const
 
 void AMainPlayerController::LoadingToHUD()
 {
-	LoadingWidgetInstance->AddToViewport();
 	MainCanvas = Cast<UCanvasPanel>(LoadingWidgetInstance->GetWidgetFromName(TEXT("MainCanvas")));
 	if (MainCanvas)
 	{
@@ -309,6 +308,7 @@ void AMainPlayerController::LoadingToHUD()
 		bFadingIn = true;
 		GetWorld()->GetTimerManager().SetTimer(FadeTimerHandle, this, &AMainPlayerController::UpdateFade, 0.02f, true);
 	}
+	LoadingWidgetInstance->AddToViewport();
 	if (UTextBlock* StageNameText = Cast<UTextBlock>(LoadingWidgetInstance->GetWidgetFromName(TEXT("StageName"))))
 	{
 		FString CurrentWorldName = GetWorld()->GetName().RightChop(2);
@@ -430,7 +430,6 @@ void AMainPlayerController::UpdateHP(float CurrentHP, float MaxHP)
 void AMainPlayerController::UpdateLevelFinished()
 {
 	HUDWidgetInstance->RemoveFromParent();
-	LoadingWidgetInstance->AddToViewport();
 }
 
 void AMainPlayerController::SetHUD()
