@@ -15,7 +15,7 @@ void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
 		Clear();
 		return;
 	}
-	if ( !InSlot->ItemInstance->IsValid())
+	if (!InSlot->ItemInstance || !InSlot->ItemInstance->IsValid())
 	{
 		Clear();
 		return;

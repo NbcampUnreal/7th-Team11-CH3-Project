@@ -20,11 +20,14 @@ class TEAM11_CH3_PROJECT_API UInventoryWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	virtual void NativeConstruct() override;
 	UFUNCTION(BlueprintCallable)
-	void HandleItemSlotChanged (const UItemSlot* SlotData, EItemContainerType ItemContainerType, int32 SlotIndex);
+	void Init(int32 InventorySize);
 	UFUNCTION(BlueprintCallable)
-	void ToggleEquipmentDetailWidget();
+	void HandleInventoryItemSlotChanged(const UItemSlot* SlotData, int32 SlotIndex);
+	UFUNCTION(BlueprintCallable)
+	void HandleEquipmentItemSlotChanged(const UItemSlot* SlotData, EItemContainerType ItemContainerType,
+	                                    int32 SlotIndex);
+
 protected:
 
 	UPROPERTY(meta = (BindWidget))
