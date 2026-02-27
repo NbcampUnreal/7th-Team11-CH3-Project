@@ -12,6 +12,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLevelStart, int32, MaxWaveCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWaveStart, int32, CurrentWaveCount, int32, MaxWaveCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMonsterSpawn, int32, CurrentMonsterCount);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMonsterKilled, int32, CurrentMonsterCount);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FLevelFinished);
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API AT11_GameState : public AGameState
@@ -39,6 +40,7 @@ public:
 
 	void ActivatePortals();
 	void SetPortalLevel(APortal* Portal);
+	void UsePortal(FString Difficulty, FString TargetLevel);
 
 	void CreateSpawnTimer(FString TimerName, float Interval, int32 TotalCount, ASpawnVolume* SpawnVolume);
 	// 아이템 드랍 위치 매개변수 추가
@@ -66,6 +68,8 @@ public:
 	FMonsterSpawn MonsterSpawned;
 	UPROPERTY(BlueprintAssignable)
 	FMonsterKilled MonsterKilled;
+	UPROPERTY(BlueprintAssignable)
+	FLevelFinished LevelFinished;
 
 	void LvlStartedBroadCast();
 	void WaveStartedBroadCast();
