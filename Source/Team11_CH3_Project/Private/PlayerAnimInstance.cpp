@@ -89,7 +89,8 @@ void UPlayerAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
     if (OwnerCharacter->GetInventoryComponent())
     {
-        bHasWeapon = OwnerCharacter->GetInventoryComponent()->HasWeaponEquipped();
+        //TODO CheckIt
+        bHasWeapon = false;//OwnerCharacter->GetInventoryComponent()->HasWeaponEquipped();
     }
 
     UpdateLean(DeltaSeconds);

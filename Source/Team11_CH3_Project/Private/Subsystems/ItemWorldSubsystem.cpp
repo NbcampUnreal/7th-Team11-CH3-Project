@@ -13,6 +13,11 @@ void UItemWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	PotionTable   = LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DataTable/DT_Potion"));
 	SkillGemTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DataTable/DT_SkillGem"));
 }
+//TODO Caching
+FItemDataBase* UItemWorldSubsystem::FindItem(FDataTableRowHandle DataTableRowHandle)
+{
+	return DataTableRowHandle.GetRow<FItemDataBase>(TEXT("FindItem"));
+}
 
 FWeaponItemData* UItemWorldSubsystem::FindWeapon(FName RowName)
 {

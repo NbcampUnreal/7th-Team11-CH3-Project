@@ -20,7 +20,7 @@ class TEAM11_CH3_PROJECT_API UItemWorldSubsystem : public UWorldSubsystem
 
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
-
+	FItemDataBase* FindItem(FDataTableRowHandle DataTableRowHandle);
 	FWeaponItemData* FindWeapon(FName RowName);
 	FArmorItemData* FindArmor(FName RowName);
 	FPotionItemData* FindPotion(FName RowName);

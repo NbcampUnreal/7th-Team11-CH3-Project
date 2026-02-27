@@ -23,7 +23,7 @@ void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor
 	// 투사체 스폰
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = Instigator;
-
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = Cast<APawn>(Instigator);
 	UWorld* W = Instigator->GetWorld();
 	ABaseProjectile* Projectile = W->SpawnActor<ABaseProjectile>(
