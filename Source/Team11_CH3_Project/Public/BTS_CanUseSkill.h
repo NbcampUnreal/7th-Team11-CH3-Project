@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTService.h"
-#include "BTS_CheckRange.generated.h"
+#include "BTS_CanUseSkill.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TEAM11_CH3_PROJECT_API UBTS_CheckRange : public UBTService
+class TEAM11_CH3_PROJECT_API UBTS_CanUseSkill : public UBTService
 {
 	GENERATED_BODY()
 public:
-	UBTS_CheckRange();
+	UBTS_CanUseSkill();
 protected:
 	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="BlackBoard")
-	FBlackboardKeySelector IsInRangeKey;
+	FBlackboardKeySelector CanUseSkill;
 };

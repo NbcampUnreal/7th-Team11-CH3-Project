@@ -29,7 +29,7 @@ public:
 	void StartCooldown();
 	bool IsSkillOnCooldown()const;
 	float GetCooldownRemaining() const;
-	float GetScore(AActor* Actor, AActor* Target) const;
+	float GetScore(const AActor* Actor, const AActor* Target) const;
 	USkillManager* GetSkillComponent()const;
 private:
 	UPROPERTY()

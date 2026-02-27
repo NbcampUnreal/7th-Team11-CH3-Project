@@ -32,7 +32,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TArray<int32> FindReadySlotIndexes() const;
 	UFUNCTION(BlueprintCallable)
-	int32 GetBestSkill(AActor* Actor, AActor* Target) const;
+	int32 GetBestSkill(const AActor* Actor, const AActor* Target) const;
 
 	// 스킬 실행
 	UFUNCTION(BlueprintCallable)

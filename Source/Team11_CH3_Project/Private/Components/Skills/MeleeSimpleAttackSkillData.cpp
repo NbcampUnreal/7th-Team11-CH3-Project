@@ -9,7 +9,7 @@
 #include "Components/StatComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-void UMeleeSimpleAttackSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const
+void UMeleeSimpleAttackSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
 {
 	// StatComp 불러오기
 	if (!IsValid(Instigator) || !IsValid(WeaponActor))
@@ -18,10 +18,6 @@ void UMeleeSimpleAttackSkillData::Activate(APawn* Instigator, AWeaponActor* Weap
 	}
 	UStatComponent* StatComp = Instigator->FindComponentByClass<UStatComponent>();
 	
-	// 손 -> 타겟 방향 계산
-	FRotator SpawnRotation = Direction.Rotation();
-	// 투사체 스폰
-	UWorld* W = Instigator->GetWorld();
 
 	// Damage & ProjectileSpeed 계산
 	float BaseDamage = Damage;
@@ -87,7 +83,7 @@ void UMeleeSimpleAttackSkillData::Activate(APawn* Instigator, AWeaponActor* Weap
 	
 }
 
-float UMeleeSimpleAttackSkillData::GetScore(AActor* Actor, AActor* Target) const
+float UMeleeSimpleAttackSkillData::GetScore(const AActor* Actor, const AActor* Target) const
 {
 	if (FVector::DistSquared(Actor->GetActorLocation(), Target->GetActorLocation()) < Range*Range)
 	{
@@ -97,11 +93,11 @@ float UMeleeSimpleAttackSkillData::GetScore(AActor* Actor, AActor* Target) const
 }
 
 void UMeleeSimpleAttackSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
-	const FVector& Direction, FName Name)
+	const FVector& TargetLocation, FName Name)
 {
-	Super::Notify(Instigator, WeaponActor, Origin, Direction, Name);
+	Super::Notify(Instigator, WeaponActor, Origin, TargetLocation, Name);
 	if (Name == TEXT("DealDamage"))
 	{
-		Activate(Instigator,WeaponActor,Origin,Direction);
+		Activate(Instigator,WeaponActor,Origin,TargetLocation);
 	}
 }

@@ -28,6 +28,7 @@ public:
 	void OnAttackEnded();
 	void OnDieMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
 	virtual bool TryAttack(AActor* Target);
+	virtual bool CanUseSkill(AActor* Target)const;
 	void PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLocation);
 	
 	void DealDamage();

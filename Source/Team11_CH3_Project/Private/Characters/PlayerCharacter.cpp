@@ -264,9 +264,9 @@ void APlayerCharacter::BeginPlay()
 		InitialStat.DEF = 10.f;
 		InitialStat.MoveSpeed = 0.f;
 		InitialStat.AttackDamage = 20.f;
-		InitialStat.CastSpeed = 1.f;
+		InitialStat.CastSpeed = 1.0f;
 		InitialStat.ProjectileSpeed = 500.f;
-		InitialStat.CriticalChance = 10.f;
+		InitialStat.CriticalChance = 10.0f;
 		InitialStat.CriticalDamage = 1.5f;
 		StatComponent->InitStat(InitialStat);
 

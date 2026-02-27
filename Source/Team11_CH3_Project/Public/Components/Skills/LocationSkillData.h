@@ -17,11 +17,13 @@ class TEAM11_CH3_PROJECT_API ULocationSkillData : public USkillDataAsset
 	GENERATED_BODY()
 	
 public:
-	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const override;
-	virtual void Enter()  override;
+	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation)  override;
+	virtual void Enter(AActor* Actor, const FVector& TargetLocation)  override;
 	virtual void Execute()  override;
-	virtual void Tick(float DeltaSeconds, AActor* Actor)  override;
+	virtual void Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* ActiveSkillSlot)  override;
 	virtual void OnExit()  override;
+
+	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name) override;
 
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Location")

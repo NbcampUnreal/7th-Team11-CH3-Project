@@ -2,7 +2,7 @@
 
 
 #include "Components/SkillManager.h"
-
+#include "Components/StatComponent.h"
 #include "Characters/PlayerCharacter.h"
 #include "Characters/Monster/MonsterBase.h"
 #include "Components/Skills/ActiveSkillSlot.h"
@@ -76,21 +76,30 @@ TArray<int32> USkillManager::FindReadySlotIndexes() const
 	return Ret;
 }
 
-int32 USkillManager::GetBestSkill(AActor* Actor, AActor* Target) const
+int32 USkillManager::GetBestSkill(const AActor* Actor, const AActor* Target) const
 {
 	TArray<int32> ReadySkillIndexes = FindReadySlotIndexes();
 	float MaxScore = -1;
-	int32 Ret=-1;
+
+	TArray<int32> BestSkillIdx;
 	for (int32 i = 0; i < ReadySkillIndexes.Num(); i++)
 	{
 		float Score = SkillSlots[i]->GetScore(Actor,Target);
 		if (MaxScore < Score)
 		{
 			MaxScore = Score;
-			Ret = i;
+			BestSkillIdx.Empty();
+			BestSkillIdx.Add(i);
+		}else if (MaxScore == Score)
+		{
+			BestSkillIdx.Add(i);
 		}
 	}
-	return Ret;
+	if (MaxScore < 0.0f)
+	{
+		return -1;
+	}
+	return BestSkillIdx[FMath::RandRange(0,BestSkillIdx.Num()-1)];
 }
 
 void USkillManager::StartSkillCooldown(int32 Index)
@@ -199,11 +208,22 @@ void USkillManager::ActiveSkill(AActor* Owner, const FVector& TargetLocation, US
 	
 	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
 	UAnimInstance* AnimInstance = SkeletalMeshComponent->GetAnimInstance();
+	float CastSpeed = 1.0f;
+	StatComp = GetOwner()->FindComponentByClass<UStatComponent>();
+	
+	if (StatComp.IsValid() == false)
+		return;
+	CastSpeed += StatComp->GetCurrentStat(EStat::CastSpeed);  
+
 	if (!IsValid(AnimInstance))
 	{
 		return;
 	}
-	AnimInstance->Montage_Play(SkillMontage);
+	float MontageCheck = AnimInstance->Montage_Play(SkillMontage,CastSpeed);
+	if (MontageCheck <= 0.0f)
+	{
+		return;
+	}
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &USkillManager::OnAttackMontageEnded);
 	SkeletalMeshComponent->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
@@ -230,6 +250,7 @@ void USkillManager::ExitActiveSkill()
 	ActiveSkillSlot->OnExit();
 	if (AActor* Owner = GetOwner())
 	{
+		//TODO Delegate
 		if (AMonsterBase* MonsterBase = Cast<AMonsterBase>(Owner))
 		{
 			MonsterBase->OnAttackEnded();
@@ -252,21 +273,8 @@ bool USkillManager::IsSkillActive() const
 
 void USkillManager::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
 {
-	if (USkillSlot* SkillSlot = GetActiveSkillSlot()->GetSkillSlot())
+	if (ActiveSkillSlot)
 	{
-		if (USkillDataAsset* SkillDataAsset = SkillSlot->GetEquippedSkill())
-		{
-			switch (SkillDataAsset->GetSkillType())
-			{
-			case ESkillType::Immediately:
-				ActiveSkillSlot->SetIsEnd(true);
-				break;
-			case ESkillType::Aiming:
-				break;
-			case ESkillType::Duration:
-				break;
-			default: ;
-			}
-		}
+		ActiveSkillSlot->SetIsEnd(true);
 	}
 }

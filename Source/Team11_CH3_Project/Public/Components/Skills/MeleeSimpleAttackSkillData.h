@@ -16,7 +16,7 @@ class TEAM11_CH3_PROJECT_API UMeleeSimpleAttackSkillData : public USkillDataAsse
 
 public:
 	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
-	                      const FVector& Direction) const override;
-	virtual float GetScore(AActor* Actor, AActor* Target) const override;
-	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name)  override;
+	                      const FVector& TargetLocation)  override;
+	virtual float GetScore(const AActor* Actor, const AActor* Target) const override;
+	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation, FName Name)  override;
 };

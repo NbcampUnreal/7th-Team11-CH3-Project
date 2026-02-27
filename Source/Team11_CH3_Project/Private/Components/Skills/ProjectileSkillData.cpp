@@ -5,7 +5,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/Skills/BaseProjectile.h"
 
-void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction) const
+void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation)
 {
 	// 캐릭터 불러오기 수정 전 주석의 코드는 BasicAttack(깊이 2)과 다른 Skill들(깊이 3)과의 계층 깊이가 달라
 	// 동일하게 적용했더니 Fireball의 경우엔 nullptr을 가르켰음
@@ -17,7 +17,7 @@ void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor
 		return;
 	}
 	UStatComponent* StatComp = Instigator->FindComponentByClass<UStatComponent>();
-	
+	FVector Direction = TargetLocation - Origin;
 	// 손 -> 타겟 방향 계산
 	FRotator SpawnRotation = Direction.Rotation();
 	// 투사체 스폰
@@ -52,7 +52,7 @@ void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor
 	}
 }
 
-float UProjectileSkillData::GetScore(AActor* Actor, AActor* Target) const
+float UProjectileSkillData::GetScore(const AActor* Actor, const AActor* Target) const
 {
 	FHitResult Hit;
 	FCollisionQueryParams CollisionParams;
@@ -77,12 +77,12 @@ float UProjectileSkillData::GetScore(AActor* Actor, AActor* Target) const
 
 
 void UProjectileSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
-	const FVector& Direction, FName Name)
+	const FVector& TargetLocation, FName Name)
 {
-	Super::Notify(Instigator, WeaponActor, Origin, Direction, Name);
+	Super::Notify(Instigator, WeaponActor, Origin, TargetLocation, Name);
 	if (Name == TEXT("DealDamage"))
 	{
-		Activate(Instigator,WeaponActor,Origin,Direction);
+		Activate(Instigator,WeaponActor,Origin,TargetLocation);
 	}
 	
 }
