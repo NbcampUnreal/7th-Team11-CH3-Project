@@ -46,18 +46,14 @@ void ASkillIndicatorActor::UpdateLocation()
 {
     if (OwnerInstigator.IsValid() == false)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[Indicator] OwnerInstigator Invalid"));
         return;
     }
     UCameraComponent* Camera = OwnerInstigator->FindComponentByClass<UCameraComponent>();
     if (IsValid(Camera) == false)
     {
-        UE_LOG(LogTemp, Warning, TEXT("[Indicator] Camera Not Found"));
         return;
     }
 
-    UE_LOG(LogTemp, Log, TEXT("[Indicator] MaxRange: %.1f, CamFwd: %s"),
-        MaxRange, *Camera->GetForwardVector().ToString());
 
     FVector CameraLocation = Camera->GetComponentLocation();
     FVector CameraForward = Camera->GetForwardVector();
@@ -78,7 +74,6 @@ void ASkillIndicatorActor::UpdateLocation()
     {
         // 바닥 충돌 위치
         IndicatorLocation = HitResult.Location;
-        UE_LOG(LogTemp, Log, TEXT("[Indicator] Direct Hit: %s"), *IndicatorLocation.ToString());
     }
     else
     {
@@ -109,7 +104,6 @@ void ASkillIndicatorActor::UpdateLocation()
             UE_LOG(LogTemp, Warning, TEXT("[Indicator] No Ground Found"));
             return;
         }
-        UE_LOG(LogTemp, Log, TEXT("[Indicator] Ground Hit: %s"), *IndicatorLocation.ToString());
     }
 
     SetActorLocation(IndicatorLocation + FVector(0.f, 0.f, 5.f));

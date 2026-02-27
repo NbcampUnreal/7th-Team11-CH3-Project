@@ -4,6 +4,7 @@
 #include "Components/Skills/LocationSkillData.h"
 #include "Components/Skills/SkillIndicatorActor.h"
 #include "Components/Skills/ExplosionSkillActor.h" 
+#include "Components/Skills/ParticleDamageActor.h" 
 #include "Components/StatComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "GameFramework/Character.h"
@@ -123,6 +124,15 @@ void ULocationSkillData::SpawnSkill()
 			Explosion->Initialize(ActualDamage);
 		}
 
+	}
+
+	if (AParticleDamageActor* ParticleActor = Cast<AParticleDamageActor>(Effect))
+	{
+		float ActualDamage = Damage;
+		UStatComponent* StatComp = SpawnParams.Instigator->FindComponentByClass<UStatComponent>();
+		if (IsValid(StatComp))
+			ActualDamage += StatComp->GetCurrentStat(EStat::AttackDamage);
+		ParticleActor->Initialize(ActualDamage);
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Spawned Effect: %s at %s"),

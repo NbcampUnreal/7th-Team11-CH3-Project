@@ -1,78 +1,87 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Components/Skills/ExplosionSkillActor.h"
-#include "Components/SphereComponent.h"
-#include "Components/StatComponent.h"
+#include "Components/Skills/ParticleDamageActor.h"
 #include "NiagaraComponent.h"
-#include "NiagaraSystem.h"
-#include "GenericTeamAgentInterface.h"
+#include "Components/StatComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "GenericTeamAgentInterface.h"
 #include "Engine/OverlapResult.h"
 
 // Sets default values
-AExplosionSkillActor::AExplosionSkillActor()
+AParticleDamageActor::AParticleDamageActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CollisionComponent"));
-	CollisionComponent->SetSphereRadius(300.f);
-	CollisionComponent->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
-	RootComponent = CollisionComponent;
-
 	NiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("NiagaraComponent"));
-	NiagaraComponent->SetupAttachment(RootComponent);
+	RootComponent = NiagaraComponent;
 }
 
-void AExplosionSkillActor::Initialize(float InDamage)
+void AParticleDamageActor::Initialize(float InDamage)
 {
 	Damage = InDamage;
-	DealAreaDamage();
 }
 
 // Called when the game starts or when spawned
-void AExplosionSkillActor::BeginPlay()
+void AParticleDamageActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	CollisionComponent->SetSphereRadius(DamageRadius);
 	SetLifeSpan(LifeTime);
+
+	if (IsValid(NiagaraComponent) == false)
+		return;
+	NiagaraComponent->SetVariableObject(FName("CallbackHandler"), this);
 }
 
-void AExplosionSkillActor::DealAreaDamage()
+void AParticleDamageActor::ReceiveParticleData_Implementation(
+	const TArray<FBasicParticleData>& Data, 
+	UNiagaraSystem* OwningSystem, 
+	const FVector& SimulationPositionOffset)
 {
-	// 데미지 주체 가져오기
+	UE_LOG(LogTemp, Warning, TEXT("ReceiveParticleData called, count: %d"), Data.Num());
+
+	for (const FBasicParticleData& Particle : Data)
+	{
+		// 파티클에 충돌한 위치 데이터 -> DeaDamageAtLocation으로 전달
+		FVector ImpactLocation = Particle.Position + SimulationPositionOffset;
+		DealDamageAtLocation(ImpactLocation);
+	}
+}
+
+void AParticleDamageActor::DealDamageAtLocation(const FVector& ImpactLocation)
+{
 	APawn* InstigatorPawn = GetInstigator();
+
 	if (IsValid(InstigatorPawn) == false)
 		return;
 
 	AController* InstigatorController = InstigatorPawn->GetController();
+
 	// 데미지 계산
 	float FinalDamage = Damage;
 	UStatComponent* StatComp = InstigatorPawn->FindComponentByClass<UStatComponent>();
 	if (IsValid(StatComp) == false)
 		return;
-	// 크리티컬 데미지 계산
+	
 	float CritChance = StatComp->GetCurrentStat(EStat::CriticalChance);
-	float CritMultiplier = StatComp->GetCurrentStat(EStat::CriticalDamage);
+	float CritMultiPlier = StatComp->GetCurrentStat(EStat::CriticalDamage);
 	if (FMath::FRandRange(0.f, 100.f) < CritChance)
 	{
-		FinalDamage *= CritMultiplier;
+		FinalDamage *= CritMultiPlier;
 	}
-	// OverlapMultiByChannel이용해서 겹치는 모든 액터 데미지
+
 	TArray<FOverlapResult> Overlaps;
 	FCollisionQueryParams QueryParams;
-
 	GetWorld()->OverlapMultiByChannel(
 		Overlaps,
-		GetActorLocation(),
+		ImpactLocation,
 		FQuat::Identity,
 		ECC_Pawn,
 		FCollisionShape::MakeSphere(DamageRadius),
 		QueryParams
 	);
-	// 오버랩된 모든 액터 ApplyDamage
+
 	TSet<AActor*> DamagedActors;
 	for (const FOverlapResult& Overlap : Overlaps)
 	{
@@ -95,7 +104,10 @@ void AExplosionSkillActor::DealAreaDamage()
 			this,
 			UDamageType::StaticClass()
 		);
+		UE_LOG(LogTemp, Warning, TEXT("ApplyDamage to: %s"), *GetNameSafe(HitActor));
 	}
+
+
 }
 
 
