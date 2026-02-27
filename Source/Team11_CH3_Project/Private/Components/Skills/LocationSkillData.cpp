@@ -41,8 +41,7 @@ void ULocationSkillData::Execute()
 
 	if (IsValid(SpawnedIndicator) == false)
 		return;
-	APawn* Instigator = Cast<APawn>(SpawnedIndicator->GetOwner());
-	ACharacter* Character = Cast<ACharacter>(Instigator);
+	ACharacter* Character = Cast<ACharacter>(SpawnedIndicator->GetOwner());
 	if (IsValid(Character) == false)
 		return;
 	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
@@ -50,41 +49,6 @@ void ULocationSkillData::Execute()
 		return;
 
 	AnimInstance->Montage_JumpToSection("EndCasting", SkillMontage);
-
-	FVector SkillLocation = SpawnedIndicator->GetIndicatorLocation();
-	SkillLocation.Z += 5;
-	if (IsValid(SkillEffectClass) == false)
-		return;
-
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	SpawnParams.Owner = SpawnedIndicator->GetOwner();
-	SpawnParams.Instigator = Cast<APawn>(SpawnedIndicator->GetOwner());
-
-	AActor* Effect = SpawnedIndicator->GetWorld()->SpawnActor<AActor>(
-		SkillEffectClass,
-		SkillLocation,
-		FRotator::ZeroRotator,
-		SpawnParams
-	);
-	// ExlosionSkillActor면 데미지 초기화
-	if (AExplosionSkillActor* Explosion = Cast<AExplosionSkillActor>(Effect))
-	{
-		float ActualDamage = Damage;
-		UStatComponent* StatComp = SpawnParams.Instigator->FindComponentByClass<UStatComponent>();
-		if (IsValid(StatComp))
-		{
-			ActualDamage += StatComp->GetCurrentStat(EStat::AttackDamage);
-			Explosion->Initialize(ActualDamage);
-		}
-
-	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("Spawned Effect: %s at %s"),
-		*GetNameSafe(Effect), *SkillLocation.ToString());
-
-	SpawnedIndicator->Destroy();
-	SpawnedIndicator = nullptr;
 }
 
 void ULocationSkillData::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* ActiveSkillSlot) 
@@ -127,12 +91,53 @@ void ULocationSkillData::OnExit()
 	
 }
 
+void ULocationSkillData::SpawnSkill()
+{
+	if (IsValid(SpawnedIndicator) == false)
+		return;
+
+	FVector SkillLocation = SpawnedIndicator->GetIndicatorLocation();
+	SkillLocation.Z += 5;
+	if (IsValid(SkillEffectClass) == false)
+		return;
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	SpawnParams.Owner = SpawnedIndicator->GetOwner();
+	SpawnParams.Instigator = Cast<APawn>(SpawnedIndicator->GetOwner());
+
+	AActor* Effect = SpawnedIndicator->GetWorld()->SpawnActor<AActor>(
+		SkillEffectClass,
+		SkillLocation,
+		FRotator::ZeroRotator,
+		SpawnParams
+	);
+	// ExlosionSkillActor면 데미지 초기화
+	if (AExplosionSkillActor* Explosion = Cast<AExplosionSkillActor>(Effect))
+	{
+		float ActualDamage = Damage;
+		UStatComponent* StatComp = SpawnParams.Instigator->FindComponentByClass<UStatComponent>();
+		if (IsValid(StatComp))
+		{
+			ActualDamage += StatComp->GetCurrentStat(EStat::AttackDamage);
+			Explosion->Initialize(ActualDamage);
+		}
+
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Spawned Effect: %s at %s"),
+		*GetNameSafe(Effect), *SkillLocation.ToString());
+
+	SpawnedIndicator->Destroy();
+	SpawnedIndicator = nullptr;
+}
+
 void ULocationSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name)
 {
 	Super::Notify(Instigator, WeaponActor, Origin, Direction, Name);
 	if (Name == TEXT("DealDamage"))
 	{
-		Execute();
+		SpawnSkill();
 	}
 	else if (Name == TEXT("Cancel"))
 	{
