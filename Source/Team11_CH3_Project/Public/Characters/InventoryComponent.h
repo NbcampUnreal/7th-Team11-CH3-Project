@@ -38,5 +38,5 @@ protected:
 	TMap<FName,int32> Indexes;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Inventory")
-	int32 InventorySize = 25;
+	int32 InventorySize = 20;
 };

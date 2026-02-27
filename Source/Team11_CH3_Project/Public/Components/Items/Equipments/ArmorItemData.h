@@ -13,6 +13,5 @@ USTRUCT(BlueprintType)
 struct  TEAM11_CH3_PROJECT_API FArmorItemData : public FEquipmentItemData
 {
 	GENERATED_BODY()
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Armor")
-	EEquipmentType EquipmentType;
+
 };

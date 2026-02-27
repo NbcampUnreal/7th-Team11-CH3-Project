@@ -4,6 +4,9 @@
 #include "UI/InventoryWidget.h"
 
 #include "Components/UniformGridPanel.h"
+#include "Components/Items/ItemSlot.h"
+#include "Subsystems/ItemWorldSubsystem.h"
+#include "Components/Items/ItemDataBase.h"
 #include "UI/ItemSlotWidget.h"
 
 void UInventoryWidget::NativeConstruct()
@@ -13,17 +16,17 @@ void UInventoryWidget::NativeConstruct()
 	{
 		return;
 	}
-	
+
 	if (InventoryGrid)
 	{
 		InventoryGrid->ClearChildren();
 		// 슬롯 동적 생성 (예: 컴포넌트의 슬롯 개수만큼)
 		int32 SlotCount = 25;
-        
+
 		for (int32 i = 0; i < SlotCount; i++)
 		{
-			UItemSlotWidget* NewSlot = CreateWidget<UItemSlotWidget>(this,ItemSlotWidgetClass);
-			int32 Row = i / 5; 
+			UItemSlotWidget* NewSlot = CreateWidget<UItemSlotWidget>(this, ItemSlotWidgetClass);
+			int32 Row = i / 5;
 			int32 Column = i % 5;
 			InventoryGrid->AddChildToUniformGrid(NewSlot, Row, Column);
 			Inventory.Add(NewSlot);
@@ -33,19 +36,50 @@ void UInventoryWidget::NativeConstruct()
 }
 
 
-
 void UInventoryWidget::HandleItemSlotChanged(const UItemSlot* SlotData, EItemContainerType ItemContainerType,
                                              int32 SlotIndex)
 {
-	switch (ItemContainerType) {
+	FEquipmentItemData* EquipmentItemData = nullptr;
+	switch (ItemContainerType)
+	{
 	case EItemContainerType::Inventory:
-		Inventory[SlotIndex]->UpdateSlot(SlotData);
+		if (Inventory.IsValidIndex(SlotIndex))
+		{
+			Inventory[SlotIndex]->UpdateSlot(SlotData);
+		}
 		break;
 	case EItemContainerType::Equipment:
+		//TODO Optimization
+		EquipmentItemData = GetWorld()->GetSubsystem<UItemWorldSubsystem>()->FindEquipment(
+			SlotData->ItemInstance->GetItemDataHandle());
+		if (EquipmentItemData)
+		{
+			switch (EquipmentItemData->EquipmentType)
+			{
+			case EEquipmentType::Weapon:
+				WeaponSlot->UpdateSlot(SlotData);
+				break;
+			case EEquipmentType::Helmet:
+				HeadSlot->UpdateSlot(SlotData);
+				break;
+			case EEquipmentType::Chest:
+				ChestSlot->UpdateSlot(SlotData);
+				break;
+			case EEquipmentType::Gloves:
+				HandSlot->UpdateSlot(SlotData);
+				break;
+			case EEquipmentType::Legs:
+				LegsSlot->UpdateSlot(SlotData);
+				break;
+			case EEquipmentType::Boots:
+				FeetSlot->UpdateSlot(SlotData);
+				break;
+			}
+		}
 		break;
 	case EItemContainerType::Parts:
 		break;
-	}	
+	}
 }
 
 void UInventoryWidget::ToggleEquipmentDetailWidget()

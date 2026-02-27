@@ -19,6 +19,12 @@ FItemDataBase* UItemWorldSubsystem::FindItem(FDataTableRowHandle DataTableRowHan
 	return DataTableRowHandle.GetRow<FItemDataBase>(TEXT("FindItem"));
 }
 
+FEquipmentItemData* UItemWorldSubsystem::FindEquipment(FDataTableRowHandle DataTableRowHandle)
+{
+	return DataTableRowHandle.GetRow<FEquipmentItemData>(TEXT("FindItem"));
+}
+
+
 FWeaponItemData* UItemWorldSubsystem::FindWeapon(FName RowName)
 {
 	

@@ -14,7 +14,8 @@ USTRUCT(BlueprintType)
 struct  TEAM11_CH3_PROJECT_API FEquipmentItemData : public FItemDataBase
 {
 	GENERATED_BODY()
-	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Equipment")
+	EEquipmentType EquipmentType;
 	// 장착 시 적용할 스탯 보정 WeaponItemData의 Damage도 여기에 통합가능(의논 필요)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Equipment")
 	TMap<EStat, float> StatBonuses;

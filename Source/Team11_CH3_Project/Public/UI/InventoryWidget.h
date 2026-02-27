@@ -7,6 +7,7 @@
 #include "Types/ItemContainerType.h"
 #include "InventoryWidget.generated.h"
 
+class UGridPanel;
 class UUniformGridPanel;
 class UEquipmentDetailWidget;
 class UItemSlot;
@@ -25,10 +26,20 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ToggleEquipmentDetailWidget();
 protected:
+
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UUniformGridPanel> EquipmentGrid;
-	UPROPERTY(VisibleAnywhere,BlueprintReadWrite,Category="InventoryWidget")
-	TArray<TObjectPtr<UItemSlotWidget>> Equipments;
+	TObjectPtr<UItemSlotWidget> HeadSlot;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UItemSlotWidget> ChestSlot;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UItemSlotWidget> LegsSlot;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UItemSlotWidget> WeaponSlot;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UItemSlotWidget> HandSlot;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UItemSlotWidget> FeetSlot;
+	
 	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UUniformGridPanel> InventoryGrid;
