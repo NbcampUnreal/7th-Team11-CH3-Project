@@ -3,38 +3,29 @@
 
 #include "Components/Items/Equipments/ItemInstance.h"
 
-#include "Components/Items/ItemDataBase.h"
-#include "Subsystems/ItemWorldSubsystem.h"
+#include "Components/Items/ItemDataAsset.h"
 
-void UItemInstance::Init(FDataTableRowHandle InHandle, int32 InCount)
+void UItemInstance::Init(UItemDataAsset* InItemDataAsset, int32 InCount)
 {
-	ItemDataHandle = InHandle;
+	ItemDataAsset = InItemDataAsset;
 	Count = InCount;
-	//TODo Item Subsystem
-	UItemWorldSubsystem* ItemWorldSubsystem = GetWorld()->GetSubsystem<UItemWorldSubsystem>();
-	if (ItemWorldSubsystem == nullptr)
-	{
-		return;
-	}
-
-	FItemDataBase* ItemData = ItemWorldSubsystem->FindItem(ItemDataHandle);
-	ItemType = ItemData->ItemType;
 }
 
-FName UItemInstance::GetItemName() const
+FText UItemInstance::GetItemName() const
 {
-	return ItemDataHandle.RowName;
+	return ItemDataAsset->GetItemName();
 }
 
 EItemType UItemInstance::GetItemType() const
 {
-	return ItemType;
+	return ItemDataAsset->GetItemType();
 }
 
-FDataTableRowHandle UItemInstance::GetItemDataHandle() const
+UItemDataAsset* UItemInstance::GetItemDataAsset() const
 {
-	return ItemDataHandle;
+	return ItemDataAsset.Get();
 }
+
 
 int32 UItemInstance::GetCount() const
 {
@@ -43,18 +34,26 @@ int32 UItemInstance::GetCount() const
 
 void UItemInstance::AddCount(int32 InCount)
 {
+	if (ItemDataAsset->GetMaxStackCount() < Count+InCount)
+	{
+		return;
+	}
+	if (Count+InCount < 0)
+	{
+		return;
+	}
 	Count += InCount;
 }
 
 bool UItemInstance::IsValid() const
 {
 	if (Count == 0) return false;
-	if (ItemDataHandle.IsNull()) return false;
+	if (!ItemDataAsset) return false;
 	return true;
 }
 
 void UItemInstance::Clear()
 {
-	ItemDataHandle = FDataTableRowHandle();
+	ItemDataAsset = nullptr;
 	Count = 0;
 }

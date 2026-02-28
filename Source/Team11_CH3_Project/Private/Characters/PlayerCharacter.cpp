@@ -13,6 +13,7 @@
 #include "Components/BuffManager.h"
 #include "Components/SkillManager.h"
 #include "Components/ItemManager.h"
+#include "Components/Items/Equipments/EquipmentInstance.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Core/T11_GameInstance.h"
 
@@ -100,7 +101,14 @@ void APlayerCharacter::GetSkillTargetLocation(FVector& TargetLocation)
 		FCollisionQueryParams Params;
 		Params.AddIgnoredActor(this);
 		Params.bTraceComplex = false;
-		Params.AddIgnoredActor(WeaponActor);
+		if (ItemManager)
+		{
+			if (AWeaponActor* Weapon = ItemManager->GetCurrentWeapon())
+			{
+				Params.AddIgnoredActor(Weapon);
+			}
+		}
+
 		FHitResult HitResult;
 		if (PlayerController->GetHitResultAtScreenPosition(ScreenCenter, ECC_Camera, Params, HitResult))
 		{
@@ -173,11 +181,7 @@ void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Warning, TEXT("CoolTime Remaining : %0.1f"), SkillComponent->GetCooldownRemaining(1));
 		return;
 	}
-	if (!IsValid(WeaponActor))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Weapon Empty!"));
-		return;
-	}
+
 
 
 	// if (SkillComponent->CurrentActiveSkill) 체크로 지금 활성화된 스킬이 있으면 return 
@@ -204,11 +208,6 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
 	if (SkillComponent->IsSkillOnCooldown(2))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("CoolTime Remaining : %0.1f"), SkillComponent->GetCooldownRemaining(2));
-		return;
-	}
-	if (!IsValid(WeaponActor))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Weapon Empty!"));
 		return;
 	}
 
@@ -269,9 +268,13 @@ void APlayerCharacter::BeginPlay()
 		InitialStat.CriticalChance = 10.0f;
 		InitialStat.CriticalDamage = 1.5f;
 		StatComponent->InitStat(InitialStat);
-
 		// 기본 장비 장착(시작은 기본 무기만)
-		ItemManager->UseItem(TEXT("StaffWeapon"), EItemType::Equipment, 0);
+#pragma region TESTCODE
+		
+		UEquipmentInstance* EquipmentInstance = NewObject<UEquipmentInstance>(this);
+		EquipmentInstance->Init(TESTWEAPONDATAASSET, 1);
+		ItemManager->EquipWeapon(EquipmentInstance);
+#pragma endregion
 	}
 
 	UpdateMovementSpeed();
@@ -307,7 +310,11 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 AWeaponActor* APlayerCharacter::GetWeaponActor() const
 {
-	return WeaponActor;
+	if (ItemManager)
+	{
+		return ItemManager->GetCurrentWeapon();
+	}
+	return nullptr;
 }
 
 
@@ -623,16 +630,6 @@ void APlayerCharacter::Die()
 	}
 }
 
-void APlayerCharacter::SetWeaponActor(AWeaponActor* NewWeapon)
-{
-	if (WeaponActor)
-	{
-		WeaponActor->Destroy();
-	}
-
-	WeaponActor = NewWeapon;
-	SkillComponent->EquipSkillGem(0, NewWeapon->GetDefaultSkillData());
-}
 
 // dodge, death anim
 /*

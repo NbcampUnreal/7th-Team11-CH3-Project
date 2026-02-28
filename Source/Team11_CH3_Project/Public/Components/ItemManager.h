@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Components/Items/ItemDataBase.h"
-#include "Components/Items/PotionItemData.h"
-#include "Components/Items/SkillGemItemData.h"
-#include "Components/Items/Equipments/WeaponItemData.h"
-#include "Components/Items/Equipments/ArmorItemData.h"
+#include "Types/ItemTypes.h"
 #include "ItemManager.generated.h"
 
+
+class UEquipmentInstance;
+class UWeaponItemDataAsset;
+class AWeaponActor;
+class UEquipmentItemDataAsset;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TEAM11_CH3_PROJECT_API UItemManager : public UActorComponent
@@ -21,48 +22,37 @@ public:
 	// Sets default values for this component's properties
 	UItemManager();
 
-	// 아이템 사용(타입별 분기)
-	UFUNCTION(BlueprintCallable, Category = "Item")
-	void UseItem(FName RowName, EItemType ItemType, int32 SlotIndex = -1);
-
 	// 장비 해제
 	UFUNCTION(BlueprintCallable, Category = "Item")
-	void UnequipWeapon();
+	void Equip(UEquipmentInstance* Data);
 	UFUNCTION(BlueprintCallable, Category = "Item")
-	void UnequipArmor(EEquipmentType SlotType);
+	void Unequip(EEquipmentType SlotType);
+	void EquipWeapon(UEquipmentInstance* WeaponItemInstance);
 
 	// GameInstance에서 장비 데이터 받아오는 함수
-	UFUNCTION(BlueprintCallable, Category = "Item")
-	void RestoreEquipment(const FWeaponItemData& WeaponData, const TMap<EEquipmentType, FArmorItemData>& ArmorData);
-
+	void RestoreEquipment(TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> EquipmentData);
 	// Getter
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	AWeaponActor* GetCurrentWeapon() const { return CurrentWeapon; }
-	const FWeaponItemData& GetCachedWeaponData() const { return CachedWeaponData; }
-	const TMap<EEquipmentType, FArmorItemData>& GetEquippedArmors() const { return EquippedArmors; }
+	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>>& GetEquipments() { return Equipments; }
+	void Clear();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 private:
-	// ItemType에 따른 사용 로직
-	void UsePotion(FPotionItemData* Data);
-	void UseSkillGem(FSkillGemItemData* Data, int32 SlotIndex);
-	void EquipWeapon(FWeaponItemData* Data);
-	void EquipArmor(FArmorItemData* Data);
 	// 아이템 장착 해제 시 스탯 수정
-	void ApplyStatBonuses(FName ItemRowName, TMap<EStat, float>& StatBonuses);
-	void RemoveStatBonuses(FName ItemID);
+
+	void UnequipWeapon();
 
 	// 장착중인 무기
 	UPROPERTY(EditDefaultsOnly, Category = "Item|Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<AWeaponActor> CurrentWeapon;
 	// 장착 중인 무기 데이터
-	UPROPERTY()
-	FWeaponItemData CachedWeaponData;
 	// 부위별 장착 방어구 추적
 	UPROPERTY(EditDefaultsOnly, Category = "Item|Equipment", meta = (AllowPrivateAccess = "true"))
-	TMap<EEquipmentType, FArmorItemData> EquippedArmors;
+	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> Equipments;
 	// 버프 ID
 	TMap<FName, TArray<int32>> EquipmentBuffIDs;
 };

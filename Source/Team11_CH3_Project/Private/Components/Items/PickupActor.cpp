@@ -2,6 +2,8 @@
 
 
 #include "Components/Items/PickupActor.h"
+
+#include "Characters/InventoryComponent.h"
 #include "Components/ItemManager.h"
 #include "Components/SphereComponent.h"
 
@@ -17,12 +19,20 @@ APickupActor::APickupActor()
 	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &APickupActor::OnOverlapBegin);
 }
 
+void APickupActor::Init(UItemDataAsset* InItemDataAsset, int32 InCount)
+{
+	ItemDataAsset = InItemDataAsset;
+	ItemCount = InCount;
+}
+
 void APickupActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	auto* ItemManager = OtherActor->FindComponentByClass<UItemManager>();
-	if (IsValid(ItemManager))
+	UInventoryComponent* InventoryComponent = OtherActor->FindComponentByClass<UInventoryComponent>();
+	if (IsValid(InventoryComponent))
 	{
-		ItemManager->UseItem(ItemID, ItemType, Index);
+		InventoryComponent->AddItem(ItemDataAsset,ItemCount);
 		Destroy();
+		
 	}
+
 }

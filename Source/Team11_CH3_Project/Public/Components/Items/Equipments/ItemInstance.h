@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "ItemInstance.generated.h"
 
+class UItemDataAsset;
 enum class EItemType : uint8;
 /**
  * 
@@ -17,19 +18,18 @@ class TEAM11_CH3_PROJECT_API UItemInstance : public UObject
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void Init(FDataTableRowHandle InHandle, int32 InCount);
-	FName GetItemName() const;
+	void Init(UItemDataAsset* InItemDataAsset, int32 InCount);
+	FText GetItemName() const;
 	EItemType GetItemType() const;
-	FDataTableRowHandle GetItemDataHandle() const;
+	UItemDataAsset* GetItemDataAsset() const;
 	int32 GetCount() const;
 	void AddCount(int32 InCount);
 	bool IsValid() const;
 	void Clear();
 
 protected:
-	EItemType ItemType;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	FDataTableRowHandle ItemDataHandle;
+	TObjectPtr<UItemDataAsset> ItemDataAsset;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int32 Count = 0;
 };

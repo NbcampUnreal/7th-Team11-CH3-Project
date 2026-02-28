@@ -14,8 +14,7 @@ class TEAM11_CH3_PROJECT_API AGreatSwordWeaponActor : public AWeaponActor
 public:
 	// Sets default values for this actor's properties
 	AGreatSwordWeaponActor();
-	virtual void Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh) override;
-
+	virtual void Init(UWeaponItemDataAsset* WeaponItemDataAsset, USkeletalMeshComponent* SkeletalMesh) override;
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon")
 	TObjectPtr<UStaticMeshComponent> StaticMeshComponent;

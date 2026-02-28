@@ -11,7 +11,8 @@ enum class EItemType : uint8
     Potion,
     SkillGem,
     Equipment,
-    Material
+    Material,
+    Usable
 };
 
 UENUM(BlueprintType)

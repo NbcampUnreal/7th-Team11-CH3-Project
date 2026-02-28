@@ -9,10 +9,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Components/StatComponent.h"
-#include "Components/Items/Equipments/WeaponItemData.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class UItemDataAsset;
 class USkillSlot;
 class AWeaponActor;
 class USkillManager;
@@ -49,8 +49,9 @@ class TEAM11_CH3_PROJECT_API APlayerCharacter : public ABaseCharacter
 
 public:
 #pragma region TESTCODE
-	FWeaponItemData WeaponItemData;
-#pragma region
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Test|Weapon")
+	TObjectPtr<UItemDataAsset> TESTWEAPONDATAASSET;
+#pragma endregion
 	APlayerCharacter();
 
 protected:
@@ -211,15 +212,10 @@ public:
 	                         class AController* EventInstigator, AActor* DamageCauser) override;
 	virtual void Die() override;
 
-	void SetWeaponActor(AWeaponActor* NewWeapon);
 
 	void ExecuteDodge();
 
 	// void AttachWeapon(TSubclassOf<AActor> WeaponClass);
-
-protected:
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<AWeaponActor> WeaponActor;
 
 protected:
 	// 델리게이트 사용목적 UFUNCTION() 

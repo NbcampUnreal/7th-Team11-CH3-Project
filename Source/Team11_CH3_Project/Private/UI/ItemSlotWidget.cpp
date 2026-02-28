@@ -5,6 +5,7 @@
 
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "Components/Items/ItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
 #include "Subsystems/ItemWorldSubsystem.h"
 
@@ -20,28 +21,26 @@ void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
 		Clear();
 		return;
 	}
-	if (UItemWorldSubsystem* ItemWorldSubsystem = GetWorld()->GetSubsystem<UItemWorldSubsystem>())
+	;
+	if (UItemDataAsset* ItemData = InSlot->ItemInstance->GetItemDataAsset())
 	{
-		if (FItemDataBase* ItemData = ItemWorldSubsystem->FindItem(InSlot->ItemInstance->GetItemDataHandle()))
+		if (Thumbnail)
 		{
-			if (Thumbnail)
-			{
-				Thumbnail->SetBrushFromTexture(ItemData->Thumbnail.LoadSynchronous());
-				Thumbnail->SetVisibility(ESlateVisibility::Visible);
-			}
-			if (Count)
-			{
-				Count->SetText(FText::AsNumber(InSlot->ItemInstance->GetCount()));
-				Count->SetVisibility(ESlateVisibility::Visible);
-			}
+			Thumbnail->SetBrushFromTexture(ItemData->GetThumbnail());
+			Thumbnail->SetVisibility(ESlateVisibility::Visible);
 		}
-		else
+		if (Count)
 		{
-			Clear();
+			Count->SetText(FText::AsNumber(InSlot->ItemInstance->GetCount()));
+			Count->SetVisibility(ESlateVisibility::Visible);
 		}
 	}
-	
+	else
+	{
+		Clear();
+	}
 }
+	
 
 FReply UItemSlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {

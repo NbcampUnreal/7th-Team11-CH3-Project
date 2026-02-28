@@ -3,15 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/SkillManager.h"
-#include "Components/Items/Equipments/WeaponItemData.h"
 #include "GameFramework/Actor.h"
 #include "Types/StatTypes.h"
 #include "Components/Skills/SkillDataAsset.h"
-#include "Components/Skills/SkillSlot.h"
 #include "WeaponActor.generated.h"
 
 
+class UWeaponItemDataAsset;
 class USkillSlot;
 
 UCLASS(Blueprintable, BlueprintType)
@@ -21,7 +19,7 @@ class TEAM11_CH3_PROJECT_API AWeaponActor : public AActor
 
 public:
 	AWeaponActor();
-	virtual void Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh);
+	virtual void Init(UWeaponItemDataAsset* WeaponItem, USkeletalMeshComponent* SkeletalMesh);
 	float GetAttackRange() const;
 	UFUNCTION(BlueprintPure)
 	UAnimSequence* GetGripAnimation() const;
@@ -35,5 +33,5 @@ protected:
 	TSoftObjectPtr<UAnimSequence> GripAnimation;
 
 private:
-	FWeaponItemData WeaponItemData;
+	TWeakObjectPtr<UWeaponItemDataAsset> WeaponItemData;
 };

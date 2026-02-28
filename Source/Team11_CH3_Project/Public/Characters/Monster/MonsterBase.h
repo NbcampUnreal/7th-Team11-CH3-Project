@@ -11,6 +11,8 @@
 #include "MonsterBase.generated.h"
 
 
+class UEquipmentInstance;
+class UItemManager;
 class USkillManager;
 class AWeaponActor;
 class UStatComponent;
@@ -22,7 +24,7 @@ class TEAM11_CH3_PROJECT_API AMonsterBase : public ACharacter
 
 public:
 	AMonsterBase();
-	void EquipWeapon(FWeaponItemData* WeaponItemData);
+	void EquipWeapon(UEquipmentInstance* WeaponItemData);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void OnAttackEnded();
@@ -51,10 +53,13 @@ protected:
 	TObjectPtr<USkillManager> SkillComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<AWeaponActor> WeaponActor;
+	TObjectPtr<UItemManager> EquipmentComponent;	
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> MonsterDieAnimMontage;
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TObjectPtr<UEquipmentInstance> WeaponItemDataInstance;
 	int32 ScoreValue = 0;
 	
 public:

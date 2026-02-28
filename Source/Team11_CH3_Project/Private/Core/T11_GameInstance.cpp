@@ -18,9 +18,8 @@ void UT11_GameInstance::SavePlayerData(UStatComponent* StatComp, UItemManager* I
 	// 아이템 데이터 저장
 	if (IsValid(ItemManager) == false)
 		return;
-	SavedWeaponData = ItemManager->GetCachedWeaponData();
-	SavedEquippedArmor = ItemManager->GetEquippedArmors();
-	UE_LOG(LogTemp, Warning, TEXT("[GameInstance] 장비 저장 완료 - 무기: %s, 방어구: %d개"), *SavedWeaponData.ItemID.ToString(), SavedEquippedArmor.Num());
+	SavedEquipments = ItemManager->GetEquipments();
+	UE_LOG(LogTemp, Warning, TEXT("[GameInstance] 장비 저장 완료 - %d개"), SavedEquipments.Num());
 
 	// 스킬 데이터 저장
 	if (IsValid(SkillManager) == false)
@@ -54,8 +53,8 @@ void UT11_GameInstance::RestorePlayerData(UStatComponent* StatComp, UItemManager
 	// 아이템 복구
 	if (IsValid(ItemManager) == false)
 		return;
-	ItemManager->RestoreEquipment(SavedWeaponData, SavedEquippedArmor);
-	UE_LOG(LogTemp, Warning, TEXT("[GameInstance] 장비 복구 완료 - 무기: %s, 방어구: %d개"), *SavedWeaponData.ItemID.ToString(), SavedEquippedArmor.Num());
+	ItemManager->RestoreEquipment(SavedEquipments);
+	UE_LOG(LogTemp, Warning, TEXT("[GameInstance] 장비 복구 완료 - %d개"), SavedEquipments.Num());
 	// 스킬 복구
 	if (IsValid(SkillManager) == false)
 		return;

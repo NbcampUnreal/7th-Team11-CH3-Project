@@ -3,6 +3,8 @@
 
 #include "WeaponActor.h"
 
+#include "Components/Items/WeaponItemDataAsset.h"
+
 
 // Sets default values
 AWeaponActor::AWeaponActor()
@@ -12,21 +14,21 @@ AWeaponActor::AWeaponActor()
 }
 
 
-void AWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh)
+void AWeaponActor::Init(UWeaponItemDataAsset* WeaponItem, USkeletalMeshComponent* SkeletalMesh)
 {
 	if (!WeaponItem)
 	{
 		return;
 	}
-	WeaponItemData = *WeaponItem;
-	DefaultSkill = WeaponItem->DefaultSkill.LoadSynchronous();
+	WeaponItemData = WeaponItem;
+	DefaultSkill = WeaponItem->GetDefaultSkill();
 	GripAnimation.LoadSynchronous();
 }
 
 
 float AWeaponActor::GetAttackRange() const
 {
-	return WeaponItemData.AttackRange;
+	return WeaponItemData->GetAttackRange();
 }
 
 UAnimSequence* AWeaponActor::GetGripAnimation() const
@@ -37,7 +39,7 @@ UAnimSequence* AWeaponActor::GetGripAnimation() const
 
 EWeaponType AWeaponActor::GetWeaponType() const
 {
-	return WeaponItemData.WeaponType;
+	return WeaponItemData->GetWeaponType();
 }
 
 USkillDataAsset* AWeaponActor::GetDefaultSkillData() const
