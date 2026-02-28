@@ -2,12 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Components/Items/Equipments/EquipmentItemData.h"
-#include "Components/Items/Equipments/ItemInstance.h"
 #include "Types/ItemContainerType.h"
 #include "InventoryComponent.generated.h"
 
 
+class UItemDataAsset;
 class UItemSlot;
 class UEquipmentSlot;
 class UItemInstance;
@@ -25,7 +24,7 @@ public:
 	UInventoryComponent();
 	virtual void InitializeComponent() override;
 	UFUNCTION(BlueprintCallable)
-	bool AddItem(UItemInstance* ItemInstance, int32 Amount = 1);
+	bool AddItem(UItemDataAsset* ItemDataAsset, int32 Count);
 	UFUNCTION(BlueprintCallable)
 	bool RemoveItem(int32 Index, int32 Amount);
 	UPROPERTY(BlueprintAssignable)

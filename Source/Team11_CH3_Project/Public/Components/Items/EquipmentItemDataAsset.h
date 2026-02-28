@@ -3,20 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ItemDataAsset.h"
 #include "Types/StatTypes.h"
-#include "Components/Items/ItemDataBase.h"
-#include "EquipmentItemData.generated.h"
+#include "EquipmentItemDataAsset.generated.h"
 
 /**
  * 
  */
-USTRUCT(BlueprintType)
-struct  TEAM11_CH3_PROJECT_API FEquipmentItemData : public FItemDataBase
+UCLASS()
+class TEAM11_CH3_PROJECT_API UEquipmentItemDataAsset : public UItemDataAsset
 {
 	GENERATED_BODY()
+public:
+	EEquipmentType GetEquipmentType()const{return EquipmentType;}
+	TMap<EStat,float> GetStatBonuses() const{return StatBonuses;}
+	
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Equipment")
 	EEquipmentType EquipmentType;
-	// 장착 시 적용할 스탯 보정 WeaponItemData의 Damage도 여기에 통합가능(의논 필요)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Equipment")
 	TMap<EStat, float> StatBonuses;
 };

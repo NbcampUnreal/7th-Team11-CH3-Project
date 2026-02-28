@@ -2,8 +2,6 @@
 
 
 #include "Subsystems/ItemDropSubsystem.h"
-#include "Components/Items/DropItemData.h"
-#include "Components/Items/PickupActor.h"
 #include "Core/T11_GameInstance.h"
 
 void UItemDropSubsystem::Initialize(FSubsystemCollectionBase& Collection)
@@ -34,49 +32,47 @@ void UItemDropSubsystem::TryDropItem(FVector DropLocation)
 	UDataTable* DropTable = DropTables.FindRef({ GI->CurrentStageIndex, GI->CurrentDifficulty });
 	if (IsValid(DropTable) == false)
 		return;
-
-	TArray<FDropItemData*> AllRows;
-	static const FString Context(TEXT("DropTable"));
-	DropTable->GetAllRows(Context, AllRows);
-	if (AllRows.IsEmpty())
-		return;
-
-	float TotalChance = 0.f;
-	for (FDropItemData* Row : AllRows)
-	{
-		TotalChance += Row->DropChance;
-	}
-
-	float Rand = FMath::FRandRange(0.f, TotalChance);
-	float Accumulated = 0.f;
-	FDropItemData* SelectedItem = nullptr;
-	for (FDropItemData* Row : AllRows)
-	{
-		Accumulated += Row->DropChance;
-		if (Rand <= Accumulated)
-		{
-			SelectedItem = Row;
-			break;
-		}
-	}
-
-	if (SelectedItem == nullptr)
-		return;
-	if (SelectedItem->PickupActorClass.IsNull())
-		return;
-
-	APickupActor* Pickup = GetWorld()->SpawnActor<APickupActor>(
-		SelectedItem->PickupActorClass.LoadSynchronous(),
-		DropLocation,
-		FRotator::ZeroRotator
-	);
-
-	if (IsValid(Pickup) == false)
-		return;
-
-	Pickup->ItemType = SelectedItem->ItemType;
-	Pickup->ItemID = SelectedItem->ItemID;
-	Pickup->Thumbnail = SelectedItem->Thumbnail;
+	//
+	// TArray<FDropItemData*> AllRows;
+	// static const FString Context(TEXT("DropTable"));
+	// DropTable->GetAllRows(Context, AllRows);
+	// if (AllRows.IsEmpty())
+	// 	return;
+	//
+	// float TotalChance = 0.f;
+	// for (FDropItemData* Row : AllRows)
+	// {
+	// 	TotalChance += Row->DropChance;
+	// }
+	//
+	// float Rand = FMath::FRandRange(0.f, TotalChance);
+	// float Accumulated = 0.f;
+	// FDropItemData* SelectedItem = nullptr;
+	// for (FDropItemData* Row : AllRows)
+	// {
+	// 	Accumulated += Row->DropChance;
+	// 	if (Rand <= Accumulated)
+	// 	{
+	// 		SelectedItem = Row;
+	// 		break;
+	// 	}
+	// }
+	//
+	// if (SelectedItem == nullptr)
+	// 	return;
+	// if (SelectedItem->PickupActorClass.IsNull())
+	// 	return;
+	//
+	// APickupActor* Pickup = GetWorld()->SpawnActor<APickupActor>(
+	// 	SelectedItem->PickupActorClass.LoadSynchronous(),
+	// 	DropLocation,
+	// 	FRotator::ZeroRotator
+	// );
+	//
+	// if (IsValid(Pickup) == false)
+	// 	return;
+	//
+	// Pickup->Init()
 
 	UE_LOG(LogTemp, Log, TEXT("아이템 드랍"));
 }

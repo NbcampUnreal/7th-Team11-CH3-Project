@@ -14,34 +14,4 @@ void UItemWorldSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 	SkillGemTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DataTable/DT_SkillGem"));
 }
 //TODO Caching
-FItemDataBase* UItemWorldSubsystem::FindItem(FDataTableRowHandle DataTableRowHandle)
-{
-	return DataTableRowHandle.GetRow<FItemDataBase>(TEXT("FindItem"));
-}
 
-FEquipmentItemData* UItemWorldSubsystem::FindEquipment(FDataTableRowHandle DataTableRowHandle)
-{
-	return DataTableRowHandle.GetRow<FEquipmentItemData>(TEXT("FindItem"));
-}
-
-
-FWeaponItemData* UItemWorldSubsystem::FindWeapon(FName RowName)
-{
-	
-	return WeaponTable ? WeaponTable->FindRow<FWeaponItemData>(RowName, TEXT("FindWeapon")) : nullptr;
-}
-
-FArmorItemData* UItemWorldSubsystem::FindArmor(FName RowName)
-{
-	return ArmorTable ? ArmorTable->FindRow<FArmorItemData>(RowName, TEXT("FindArmor")) : nullptr;
-}
-
-FPotionItemData* UItemWorldSubsystem::FindPotion(FName RowName)
-{
-	return PotionTable ? PotionTable->FindRow<FPotionItemData>(RowName, TEXT("FindPotion")) : nullptr;
-}
-
-FSkillGemItemData* UItemWorldSubsystem::FindSkillGem(FName RowName)
-{
-	return SkillGemTable ? SkillGemTable->FindRow<FSkillGemItemData>(RowName, TEXT("FindSkillGem")) : nullptr;
-}

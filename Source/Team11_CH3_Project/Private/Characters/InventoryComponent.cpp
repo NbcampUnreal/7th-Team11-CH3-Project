@@ -1,6 +1,8 @@
 #include "Characters/InventoryComponent.h"
 
+#include "Components/Items/ItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
+#include "Subsystems/ItemWorldSubsystem.h"
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -19,23 +21,26 @@ void UInventoryComponent::InitializeComponent()
 	}
 }
 
-bool UInventoryComponent::AddItem(UItemInstance* ItemInstance, int32 Amount)
+bool UInventoryComponent::AddItem(UItemDataAsset* ItemDataAsset, int32 Count)
 {
-	if (!IsValid(ItemInstance))
+	if (!IsValid(ItemDataAsset))
 	{
 		return false;
 	}
+	UItemWorldSubsystem* ItemWorldSubsystem = GetWorld()->GetSubsystem<UItemWorldSubsystem>();
+	UItemInstance* ItemInstance = NewObject<UItemInstance>(this);
+	ItemInstance->Init(ItemDataAsset, Count);
 	EItemType ItemType = ItemInstance->GetItemType();
 	int32 Index = -1;
 	
 	//중첩
 	if (ItemType == EItemType::Material || ItemType == EItemType::Potion)
 	{
-		if (Indexes.Contains(ItemInstance->GetItemName()))
+		if (Indexes.Contains(ItemDataAsset->GetItemID()))
 		{
-			Index = Index = Indexes[ItemInstance->GetItemName()];
+			Index = Index = Indexes[ItemDataAsset->GetItemID()];
 			ItemInstance->ConditionalBeginDestroy();
-			InventorySlots[Index]->ItemInstance->AddCount(Amount);
+			InventorySlots[Index]->ItemInstance->AddCount(ItemInstance->GetCount());
 			OnInventorySlotChanged.Broadcast(InventorySlots[Index], EItemContainerType::Inventory, Index);
 			return true;
 		}
@@ -55,7 +60,7 @@ bool UInventoryComponent::AddItem(UItemInstance* ItemInstance, int32 Amount)
 	}
 
 	InventorySlots[Index]->ItemInstance = ItemInstance;
-	Indexes.Add(ItemInstance->GetItemName(), Index);
+	Indexes.Add(ItemDataAsset->GetItemID(), Index);
 	OnInventorySlotChanged.Broadcast(InventorySlots[Index], EItemContainerType::Inventory, Index);
 	return true;
 }
@@ -70,7 +75,7 @@ bool UInventoryComponent::RemoveItem(int32 Index, int32 Amount)
 	InventorySlots[Index]->ItemInstance->AddCount(-Amount);
 	if (InventorySlots[Index]->ItemInstance->GetCount() <= 0)
 	{
-		FName ItemName = InventorySlots[Index]->ItemInstance->GetItemName();
+		FName ItemName = InventorySlots[Index]->ItemInstance->GetItemDataAsset()->GetItemID();
 		if (Indexes.Contains(ItemName) && Indexes[ItemName] == Index)
 		{
 			Indexes.Remove(ItemName);

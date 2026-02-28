@@ -15,14 +15,15 @@ AStaffWeaponActor::AStaffWeaponActor()
 	StaticMeshComponent->SetCollisionProfileName(FName("OverlapAll"));
 }
 
-void AStaffWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh)
+
+void AStaffWeaponActor::Init(UWeaponItemDataAsset* WeaponItem, USkeletalMeshComponent* SkeletalMesh)
 {
 	Super::Init(WeaponItem, SkeletalMesh);
 	FAttachmentTransformRules AttachRules(
-		EAttachmentRule::SnapToTarget,
-		EAttachmentRule::SnapToTarget,
-		EAttachmentRule::KeepWorld,
-		true
-	);
+	EAttachmentRule::SnapToTarget,
+	EAttachmentRule::SnapToTarget,
+	EAttachmentRule::KeepWorld,
+	true
+);
 	StaticMeshComponent->AttachToComponent(SkeletalMesh, AttachRules,TEXT("handslot_r"));
 }

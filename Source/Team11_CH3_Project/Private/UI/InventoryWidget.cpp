@@ -4,9 +4,10 @@
 #include "UI/InventoryWidget.h"
 
 #include "Components/UniformGridPanel.h"
+#include "Components/Items/EquipmentItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
+#include "Components/Items/Equipments/EquipmentInstance.h"
 #include "Subsystems/ItemWorldSubsystem.h"
-#include "Components/Items/ItemDataBase.h"
 #include "UI/ItemSlotWidget.h"
 
 void UInventoryWidget::Init(int32 InventorySize)
@@ -44,11 +45,11 @@ void UInventoryWidget::HandleInventoryItemSlotChanged(const UItemSlot* SlotData,
 void UInventoryWidget::HandleEquipmentItemSlotChanged(const UItemSlot* SlotData, EItemContainerType ItemContainerType, int32 SlotIndex)
 {
 	//TODO Optimization
-	FEquipmentItemData* EquipmentItemData = GetWorld()->GetSubsystem<UItemWorldSubsystem>()->FindEquipment(
-		SlotData->ItemInstance->GetItemDataHandle());
+	UEquipmentItemDataAsset*  EquipmentItemData = Cast<UEquipmentItemDataAsset> (SlotData->ItemInstance->GetItemDataAsset());
+		
 	if (EquipmentItemData)
 	{
-		switch (EquipmentItemData->EquipmentType)
+		switch (EquipmentItemData->GetEquipmentType())
 		{
 		case EEquipmentType::Weapon:
 			WeaponSlot->UpdateSlot(SlotData);

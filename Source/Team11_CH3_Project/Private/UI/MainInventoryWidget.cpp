@@ -3,7 +3,6 @@
 
 #include "UI/MainInventoryWidget.h"
 
-#include "Components/Items/Equipments/EquipmentItemData.h"
 #include "UI/EquipmentDetailWidget.h"
 #include "UI/InventoryWidget.h"
 
@@ -20,7 +19,6 @@ void UMainInventoryWidget::ToggleEquipmentDetailWidget()
 void UMainInventoryWidget::HandleItemSlotChanged(const UItemSlot* SlotData, EItemContainerType ItemContainerType,
                                                  int32 SlotIndex)
 {
-	FEquipmentItemData* EquipmentItemData = nullptr;
 	switch (ItemContainerType)
 	{
 	//장비와 인벤토리를 관리하는 위젯

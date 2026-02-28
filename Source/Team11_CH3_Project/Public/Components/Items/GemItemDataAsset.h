@@ -3,18 +3,20 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/Items/ItemDataBase.h"
+#include "ItemDataAsset.h"
 #include "Components/Skills/SkillDataAsset.h"
-#include "SkillGemItemData.generated.h"
+#include "GemItemDataAsset.generated.h"
 
 /**
  * 
  */
-USTRUCT(BlueprintType)
-struct TEAM11_CH3_PROJECT_API FSkillGemItemData : public FItemDataBase
+UCLASS()
+class TEAM11_CH3_PROJECT_API UGemItemDataAsset : public UItemDataAsset
 {
 	GENERATED_BODY()
-	
+public:
+	USkillDataAsset* GetSkillData()const{return SkillData.LoadSynchronous();}
+protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|SkillGem")
 	TSoftObjectPtr<USkillDataAsset> SkillData;
 };

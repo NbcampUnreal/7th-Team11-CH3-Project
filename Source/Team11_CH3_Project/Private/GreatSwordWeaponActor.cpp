@@ -15,14 +15,15 @@ AGreatSwordWeaponActor::AGreatSwordWeaponActor()
 	StaticMeshComponent->SetCollisionProfileName(FName("OverlapAll"));
 }
 
-void AGreatSwordWeaponActor::Init(const FWeaponItemData* WeaponItem, USkeletalMeshComponent* SkeletalMesh)
+
+void AGreatSwordWeaponActor::Init(UWeaponItemDataAsset* WeaponItemDataAsset, USkeletalMeshComponent* SkeletalMesh)
 {
-	Super::Init(WeaponItem, SkeletalMesh);
+	Super::Init(WeaponItemDataAsset, SkeletalMesh);
 	FAttachmentTransformRules AttachRules(
-		EAttachmentRule::SnapToTarget,
-		EAttachmentRule::SnapToTarget,
-		EAttachmentRule::KeepWorld,
-		true
-	);
+	EAttachmentRule::SnapToTarget,
+	EAttachmentRule::SnapToTarget,
+	EAttachmentRule::KeepWorld,
+	true
+);
 	StaticMeshComponent->AttachToComponent(SkeletalMesh, AttachRules,TEXT("handslot_r"));
 }

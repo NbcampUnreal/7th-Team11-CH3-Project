@@ -7,6 +7,8 @@
 #include "Types/ItemTypes.h"
 #include "PickupActor.generated.h"
 
+class UItemDataAsset;
+
 UCLASS()
 class TEAM11_CH3_PROJECT_API APickupActor : public AActor
 {
@@ -15,16 +17,10 @@ class TEAM11_CH3_PROJECT_API APickupActor : public AActor
 public:	
 	// Sets default values for this actor's properties
 	APickupActor();
+	UFUNCTION(BlueprintCallable)
+	void Init(UItemDataAsset* InItemDataAsset, int32 InCount);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	EItemType ItemType;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	FName ItemID;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	int32 Index;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	TSoftObjectPtr<UTexture2D> Thumbnail;
-
+//TODO Mesh
 protected:
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
@@ -33,4 +29,8 @@ protected:
 	//#include "Components/SphereComponent.h"
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OverlapSphere")
 	TObjectPtr<class USphereComponent> OverlapSphere;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UItemDataAsset> ItemDataAsset;
+	int32 ItemCount;
 };
