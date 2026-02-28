@@ -89,7 +89,7 @@ void UItemManager::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 		Weapon->Init(WeaponItemDataAsset, Mesh);
 
 		CurrentWeapon = Weapon;
-		Equipments[EEquipmentType::Weapon] = WeaponItemInstance;
+		Equipments.Add(EEquipmentType::Weapon,WeaponItemInstance);
 		// PlayerCharacter의 WeaponActor 갱신
 		if (APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner()))
 		{			
