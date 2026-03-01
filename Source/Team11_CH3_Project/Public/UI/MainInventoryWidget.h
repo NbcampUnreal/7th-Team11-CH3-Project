@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "MainInventoryWidget.generated.h"
 
+class UItemOverlayWidget;
 class UEquipmentDetailWidget;
 class UInventoryWidget;
 /**
@@ -22,10 +23,13 @@ public:
 	void ToggleEquipmentDetailWidget();
 	UFUNCTION(BlueprintCallable)
 	void HandleItemSlotChanged (const UItemSlot* SlotData, EItemContainerType ItemContainerType, int32 SlotIndex);
-
+	UFUNCTION(BlueprintCallable)
+	UItemOverlayWidget* GetItemOverlayWidget(){return ItemOverlayWidget;}
 protected:
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UInventoryWidget> InventoryWidget;
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UEquipmentDetailWidget> EquipmentDetailWidget;
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	TObjectPtr<UItemOverlayWidget> ItemOverlayWidget;
 };

@@ -8,6 +8,7 @@
 #include "UObject/Object.h"
 #include "EquipmentInstance.generated.h"
 
+class UItemSlot;
 class UPartsItemDataAsset;
 class UEquipmentItemDataAsset;
 /**
@@ -20,16 +21,16 @@ class TEAM11_CH3_PROJECT_API UEquipmentInstance : public UItemInstance
 
 public:
 	void Init(UEquipmentItemDataAsset* InItemDataAsset, int32 InMaxGemCount=3) ;
-	void EquipGem(UPartsItemDataAsset* PartsItemDataAsset, int32 Index);
+	void EquipGem(UItemInstance* PartsItemDataAsset, int32 Index);
 	void UnEquipGem(int32 Index);
 	
-	const TArray<TObjectPtr<UPartsItemDataAsset>>& GetPartsSlots() const { return Sockets; }
+	const TArray<TObjectPtr<UItemSlot>>& GetPartsSlots() const { return Sockets; }
 	EEquipmentType GetEquipmentTyme() const { return EquipmentType; }
 	
 	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TArray<TObjectPtr<UPartsItemDataAsset>> Sockets;
+	TArray<TObjectPtr<UItemSlot>> Sockets;
 	
 private:
 	int32 MaxGemCount;

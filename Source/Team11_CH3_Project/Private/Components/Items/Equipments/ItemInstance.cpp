@@ -13,17 +13,27 @@ void UItemInstance::Init(UItemDataAsset* InItemDataAsset, int32 InCount)
 
 FText UItemInstance::GetItemName() const
 {
-	return ItemDataAsset->GetItemName();
+	if (ItemDataAsset)
+	{
+		return ItemDataAsset->GetItemName();
+	}
+	return FText::GetEmpty();
 }
 
 EItemType UItemInstance::GetItemType() const
 {
-	return ItemDataAsset->GetItemType();
+	if (ItemDataAsset){
+		return ItemDataAsset->GetItemType();
+	}
+	return EItemType::Max;
 }
 
 UItemDataAsset* UItemInstance::GetItemDataAsset() const
 {
-	return ItemDataAsset.Get();
+	if (ItemDataAsset){
+		return ItemDataAsset.Get();
+	}
+	return nullptr;
 }
 
 
@@ -34,6 +44,10 @@ int32 UItemInstance::GetCount() const
 
 void UItemInstance::AddCount(int32 InCount)
 {
+	if (!ItemDataAsset)
+	{
+		return;
+	}
 	if (ItemDataAsset->GetMaxStackCount() < Count+InCount)
 	{
 		return;

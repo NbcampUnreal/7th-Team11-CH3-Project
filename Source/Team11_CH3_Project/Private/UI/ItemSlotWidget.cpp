@@ -7,10 +7,18 @@
 #include "Components/TextBlock.h"
 #include "Components/Items/ItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
-#include "Subsystems/ItemWorldSubsystem.h"
+#include "UI/ItemOverlayWidget.h"
+#include "UI/MainInventoryWidget.h"
+
+void UItemSlotWidget::Init(UMainInventoryWidget* InMainInventoryWidget)
+{
+	MainInventoryWidget = InMainInventoryWidget;
+	UpdateSlot(nullptr);
+}
 
 void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
 {
+
 	if (!IsValid(InSlot) )
 	{
 		Clear();
@@ -21,7 +29,7 @@ void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
 		Clear();
 		return;
 	}
-	;
+	ItemInstance = InSlot->ItemInstance;
 	if (UItemDataAsset* ItemData = InSlot->ItemInstance->GetItemDataAsset())
 	{
 		if (Thumbnail)
@@ -40,7 +48,34 @@ void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
 		Clear();
 	}
 }
+
+void UItemSlotWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+	if (MainInventoryWidget.IsValid())
+	{
+		UItemOverlayWidget* ItemOverlayWidget = MainInventoryWidget->GetItemOverlayWidget();
+		if (ItemOverlayWidget && ItemInstance.IsValid())
+		{
+			FVector2D ScreenPosition = InMouseEvent.GetScreenSpacePosition();
+			ItemOverlayWidget->UpdateOverlayWidget(ScreenPosition, ItemInstance.Get());
+		}
+
+	}
 	
+}
+
+void UItemSlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseLeave(InMouseEvent);
+	if (MainInventoryWidget.IsValid())
+	{
+		if (UItemOverlayWidget* ItemOverlayWidget = MainInventoryWidget->GetItemOverlayWidget())
+		{
+			ItemOverlayWidget->ClearOverlayWidget();
+		}
+	}
+}
 
 
 void UItemSlotWidget::Clear()
@@ -52,4 +87,5 @@ void UItemSlotWidget::Clear()
 	if (Count){ 
 		Count->SetVisibility(ESlateVisibility::Collapsed);
 	}
+	ItemInstance = nullptr;
 }

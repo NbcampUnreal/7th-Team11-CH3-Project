@@ -19,6 +19,8 @@ void UInventoryComponent::InitializeComponent()
 		UItemSlot* InventorySlot = NewObject<UItemSlot>(this);
 		InventorySlots[i] = (InventorySlot);
 	}
+	
+	
 }
 
 bool UInventoryComponent::AddItem(UItemDataAsset* ItemDataAsset, int32 Count)
@@ -34,7 +36,7 @@ bool UInventoryComponent::AddItem(UItemDataAsset* ItemDataAsset, int32 Count)
 	int32 Index = -1;
 	
 	//중첩
-	if (ItemType == EItemType::Material || ItemType == EItemType::Potion)
+	if (ItemType == EItemType::Material || ItemType == EItemType::Usable)
 	{
 		if (Indexes.Contains(ItemDataAsset->GetItemID()))
 		{

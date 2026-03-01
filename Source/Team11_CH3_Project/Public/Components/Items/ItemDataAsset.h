@@ -18,6 +18,7 @@ public:
 	UTexture2D* GetThumbnail()const{return Thumbnail.LoadSynchronous();}
 	FName GetItemID()const{return ItemID;}
 	FText GetItemName()const{return ItemName;}
+	FText GetItemDesc()const{return Desc;}
 	EItemType GetItemType()const{return ItemType;}
 	int32 GetMaxStackCount()const{return MaxStackCount;}
 protected:
@@ -29,6 +30,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FText ItemName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	FText Desc;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	EItemType ItemType;

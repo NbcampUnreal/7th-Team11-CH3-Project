@@ -7,6 +7,7 @@
 #include "Types/ItemContainerType.h"
 #include "InventoryWidget.generated.h"
 
+class UMainInventoryWidget;
 class UGridPanel;
 class UUniformGridPanel;
 class UEquipmentDetailWidget;
@@ -22,7 +23,7 @@ class TEAM11_CH3_PROJECT_API UInventoryWidget : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void Init(int32 InventorySize);
+	void Init(UMainInventoryWidget* InMainInventoryWidget, int32 InventorySize);
 	UFUNCTION(BlueprintCallable)
 	void HandleInventoryItemSlotChanged(const UItemSlot* SlotData, int32 SlotIndex);
 	UFUNCTION(BlueprintCallable)
@@ -58,4 +59,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InventoryWidget")
 	TSubclassOf<UInteractableItemSlotWidget> ItemSlotWidgetClass;
+private:
+	TWeakObjectPtr<UMainInventoryWidget> MainInventoryWidget;
 };

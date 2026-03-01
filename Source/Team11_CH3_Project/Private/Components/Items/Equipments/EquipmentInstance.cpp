@@ -4,6 +4,7 @@
 #include "Components/Items/Equipments/EquipmentInstance.h"
 
 #include "Components/Items/EquipmentItemDataAsset.h"
+#include "Components/Items/ItemSlot.h"
 
 void UEquipmentInstance::Init(UEquipmentItemDataAsset* InItemDataAsset, int32 InMaxGemCount)
 {
@@ -16,13 +17,20 @@ void UEquipmentInstance::Init(UEquipmentItemDataAsset* InItemDataAsset, int32 In
 	Sockets.Empty();
 	MaxGemCount = InMaxGemCount;
 	Sockets.SetNum(MaxGemCount);
+	for (int32 Index = 0; Index < Sockets.Num(); Index++)
+	{
+		UItemSlot* ItemSlot = NewObject<UItemSlot>(this);
+		Sockets[Index] = ItemSlot;
+		Sockets[Index]->ItemInstance = nullptr;
+		Sockets[Index]->ItemType = EItemType::Parts;
+	}
 }
 
-void UEquipmentInstance::EquipGem(UPartsItemDataAsset* GemItemDataAsset, int32 Index)
+void UEquipmentInstance::EquipGem(UItemInstance* GemItemDataAsset, int32 Index)
 {
 	if (Sockets.IsValidIndex(Index))
 	{
-		Sockets[Index] = GemItemDataAsset;
+		Sockets[Index]->ItemInstance = GemItemDataAsset;
 	}
 	//TODO Recalculate Stat
 }

@@ -4,34 +4,39 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "Components/Items/ItemSlot.h"
-#include "EquipmentDetailWidget.generated.h"
+#include "ItemOverlayWidget.generated.h"
 
+class UEquipmentInstance;
 class UStatRowWidget;
+class UItemInstance;
 class UMainInventoryWidget;
-class UVerticalBox;
-class UInteractableItemSlotWidget;
 class UHorizontalBox;
-class UScrollBox;
-class UTextBlock;
 class UItemSlotWidget;
-class UImage;
+class UVerticalBox;
+class UTextBlock;
 /**
  * 
  */
 UCLASS()
-class TEAM11_CH3_PROJECT_API UEquipmentDetailWidget : public UUserWidget
+class TEAM11_CH3_PROJECT_API UItemOverlayWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
 	void Init(UMainInventoryWidget* InMainInventoryWidget);
-	void HandlePartsSlotChanged(const UEquipmentSlot* SlotData, int32 Index);
+	void UpdateOverlayWidget(FVector2D ScreenPosition, UItemInstance* ItemInstance);
+	void ClearOverlayWidget();
+private:
+	void UpdateStatBox(UEquipmentInstance* EquipmentInstance);
+	void UpdateSocketBox(UEquipmentInstance* EquipmentInstance);
+	void CollapseStatBox();
+	void CollapseSocketBox();
 protected:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UItemSlotWidget> EquipmentThumbnail;
-	
-	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> ItemName;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> ItemType;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> DESC_Text;
 	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UVerticalBox> StatBox;
@@ -39,17 +44,15 @@ protected:
 	
 	
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> DESC_Title;	
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UTextBlock> DESC_Text;
+	TObjectPtr<UVerticalBox> PartsBox;
 	
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UHorizontalBox> GemBox;
+	TObjectPtr<UHorizontalBox> SocketBox;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="InventoryWidget")
-	TArray<TObjectPtr<UInteractableItemSlotWidget>> GemSlots;
+	TArray<TObjectPtr<UItemSlotWidget>> Sockets;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InventoryWidget")
-	TSubclassOf<UInteractableItemSlotWidget> ItemSlotWidgetClass;
+	TSubclassOf<UItemSlotWidget> ItemSlotWidgetClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InventoryWidget")
 	TSubclassOf<UStatRowWidget> StatRowWidgetClass;
 private:
