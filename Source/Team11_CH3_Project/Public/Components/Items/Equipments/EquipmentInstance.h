@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "ItemInstance.h"
+#include "Types/ItemTypes.h"
 #include "UObject/Object.h"
 #include "EquipmentInstance.generated.h"
 
+class UPartsItemDataAsset;
+class UEquipmentItemDataAsset;
 /**
  * 
  */
@@ -14,8 +17,22 @@ UCLASS()
 class TEAM11_CH3_PROJECT_API UEquipmentInstance : public UItemInstance
 {
 	GENERATED_BODY()
+
+public:
+	void Init(UEquipmentItemDataAsset* InItemDataAsset, int32 InMaxGemCount=3) ;
+	void EquipGem(UPartsItemDataAsset* PartsItemDataAsset, int32 Index);
+	void UnEquipGem(int32 Index);
+	
+	const TArray<TObjectPtr<UPartsItemDataAsset>>& GetPartsSlots() const { return Sockets; }
+	EEquipmentType GetEquipmentTyme() const { return EquipmentType; }
+	
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TArray<FDataTableRowHandle> GemSlots;
+	TArray<TObjectPtr<UPartsItemDataAsset>> Sockets;
 	
+private:
+	int32 MaxGemCount;
+	EEquipmentType EquipmentType;
+	//TODO StatContiner
 };

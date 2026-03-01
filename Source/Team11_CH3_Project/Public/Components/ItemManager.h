@@ -8,6 +8,8 @@
 #include "ItemManager.generated.h"
 
 
+class UGemItemDataAsset;
+class UEquipmentSlot;
 class UEquipmentInstance;
 class UWeaponItemDataAsset;
 class AWeaponActor;
@@ -21,7 +23,7 @@ class TEAM11_CH3_PROJECT_API UItemManager : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UItemManager();
-
+	virtual void InitializeComponent() override;
 	// 장비 해제
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	void Equip(UEquipmentInstance* Data);
@@ -29,12 +31,17 @@ public:
 	void Unequip(EEquipmentType SlotType);
 	void EquipWeapon(UEquipmentInstance* WeaponItemInstance);
 
+	UFUNCTION(BlueprintCallable, Category = "Item|Gem")
+	void EquipSkillGem(UEquipmentInstance* SkillGemInstance, int32 Index);
+	UFUNCTION(BlueprintCallable, Category = "Item|Gem")
+	void UnEquipSillGem(int32 Index);
+	
 	// GameInstance에서 장비 데이터 받아오는 함수
 	void RestoreEquipment(TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> EquipmentData);
 	// Getter
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	AWeaponActor* GetCurrentWeapon() const { return CurrentWeapon; }
-	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>>& GetEquipments() { return Equipments; }
+	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> GetEquipments() ;
 	void Clear();
 
 protected:
@@ -49,10 +56,15 @@ private:
 	// 장착중인 무기
 	UPROPERTY(EditDefaultsOnly, Category = "Item|Weapon", meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<AWeaponActor> CurrentWeapon;
-	// 장착 중인 무기 데이터
-	// 부위별 장착 방어구 추적
+	// 장착 중인 장비 데이터
 	UPROPERTY(EditDefaultsOnly, Category = "Item|Equipment", meta = (AllowPrivateAccess = "true"))
-	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> Equipments;
+	TMap<EEquipmentType,TObjectPtr<UEquipmentSlot>> EquipmentSlots;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Item|Equipment", meta = (AllowPrivateAccess = "true"))
+	TArray<TObjectPtr<UEquipmentSlot>> GemSlots;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
+	int32 MaxSKillGemCount = 3;
 	// 버프 ID
 	TMap<FName, TArray<int32>> EquipmentBuffIDs;
 };

@@ -24,7 +24,7 @@ void ASpawnVolume::SpawnRandomMonster(int32 StageIndex)
 
 	if (FSpawnMonsterData* SelectedRow = GetRandomMonster())
 	{
-		FMonsterData MonsterDataRow = *SelectedRow->MonsterData.GetRow<FMonsterData>(TEXT("MonsterData"));
+ 		FMonsterData MonsterDataRow = *SelectedRow->MonsterData.GetRow<FMonsterData>(TEXT("MonsterData"));
 		float LogScale = FMath::Loge((StageIndex+1) * 2.0f + 1.0f) + 1.0f;
 		MonsterDataRow.StatData.MaxHP *= LogScale;
 		MonsterDataRow.StatData.DEF *= LogScale;

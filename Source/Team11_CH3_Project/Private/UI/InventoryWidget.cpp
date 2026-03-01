@@ -7,12 +7,10 @@
 #include "Components/Items/EquipmentItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
 #include "Components/Items/Equipments/EquipmentInstance.h"
-#include "Subsystems/ItemWorldSubsystem.h"
-#include "UI/ItemSlotWidget.h"
+#include "UI/InteractableItemSlotWidget.h"
 
 void UInventoryWidget::Init(int32 InventorySize)
 {
-	Super::NativeConstruct();
 	if (Inventory.Num() > 0)
 	{
 		return;
@@ -23,7 +21,7 @@ void UInventoryWidget::Init(int32 InventorySize)
 		InventoryGrid->ClearChildren();
 		for (int32 i = 0; i < InventorySize; i++)
 		{
-			UItemSlotWidget* NewSlot = CreateWidget<UItemSlotWidget>(this, ItemSlotWidgetClass);
+			UInteractableItemSlotWidget* NewSlot = CreateWidget<UInteractableItemSlotWidget>(this, ItemSlotWidgetClass);
 			int32 Row = i / 5;
 			int32 Column = i % 5;
 			InventoryGrid->AddChildToUniformGrid(NewSlot, Row, Column);
@@ -42,7 +40,7 @@ void UInventoryWidget::HandleInventoryItemSlotChanged(const UItemSlot* SlotData,
 	}
 }
 
-void UInventoryWidget::HandleEquipmentItemSlotChanged(const UItemSlot* SlotData, EItemContainerType ItemContainerType, int32 SlotIndex)
+void UInventoryWidget::HandleEquipmentItemSlotChanged(const UItemSlot* SlotData, int32 SlotIndex)
 {
 	//TODO Optimization
 	UEquipmentItemDataAsset*  EquipmentItemData = Cast<UEquipmentItemDataAsset> (SlotData->ItemInstance->GetItemDataAsset());
@@ -68,6 +66,8 @@ void UInventoryWidget::HandleEquipmentItemSlotChanged(const UItemSlot* SlotData,
 			break;
 		case EEquipmentType::Boots:
 			FeetSlot->UpdateSlot(SlotData);
+			break;
+		case EEquipmentType::SkillGem:
 			break;
 		}
 	}

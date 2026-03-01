@@ -26,10 +26,13 @@ void UMainInventoryWidget::HandleItemSlotChanged(const UItemSlot* SlotData, EIte
 		InventoryWidget->HandleInventoryItemSlotChanged(SlotData,SlotIndex);
 		break;
 	case EItemContainerType::Equipment:
-		InventoryWidget->HandleInventoryItemSlotChanged(SlotData,SlotIndex);
+		InventoryWidget->HandleEquipmentItemSlotChanged(SlotData,SlotIndex);
 		break;
-	//젬 슬롯 업데이트
 	case EItemContainerType::Parts:
+		if (const UEquipmentSlot* EquipmentSlot = Cast<UEquipmentSlot>(SlotData))
+		{
+			EquipmentDetailWidget->HandlePartsSlotChanged(EquipmentSlot,SlotIndex);
+		}
 		break;
 	}
 }
