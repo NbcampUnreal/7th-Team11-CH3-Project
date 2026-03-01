@@ -1,4 +1,4 @@
-﻿#include "Characters/PlayerCharacter.h"
+#include "Characters/PlayerCharacter.h"
 #include "Characters/InventoryComponent.h"
 #include "MainPlayerController.h"
 #include "Camera/CameraComponent.h"
@@ -271,7 +271,7 @@ void APlayerCharacter::BeginPlay()
 		// 기본 장비 장착(시작은 기본 무기만)
 #pragma region TESTCODE
 		
-		UEquipmentInstance* EquipmentInstance = NewObject<UEquipmentInstance>(this);
+		UEquipmentInstance* EquipmentInstance = NewObject<UEquipmentInstance>(GetGameInstance());
 		EquipmentInstance->Init(TESTWEAPONDATAASSET, 1);
 		ItemManager->EquipWeapon(EquipmentInstance);
 #pragma endregion

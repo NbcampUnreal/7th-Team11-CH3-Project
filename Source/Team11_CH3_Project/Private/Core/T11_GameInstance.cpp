@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Core/T11_GameInstance.h"
@@ -12,7 +12,7 @@ void UT11_GameInstance::SavePlayerData(UStatComponent* StatComp, UItemManager* I
 	// 스탯 저장
 	if (IsValid(StatComp) == false)
 		return;
-	SavedStatData = StatComp->CurrentStat;
+	SavedStatData = StatComp->BaseStat;
 	UE_LOG(LogTemp, Warning, TEXT("[GameInstance] 스탯 저장 완료"));
 
 	// 아이템 데이터 저장
@@ -20,6 +20,12 @@ void UT11_GameInstance::SavePlayerData(UStatComponent* StatComp, UItemManager* I
 		return;
 	SavedEquipments = ItemManager->GetEquipments();
 	UE_LOG(LogTemp, Warning, TEXT("[GameInstance] 장비 저장 완료 - %d개"), SavedEquipments.Num());
+
+	// 현재 HP 저장
+	if (IsValid(StatComp) == false)
+		return;
+	SavedHPData = StatComp->GetCurrentHP();
+	UE_LOG(LogTemp, Warning, TEXT("[GameInstance] 현재 HP 저장 완료"));
 
 	// 스킬 데이터 저장
 	if (IsValid(SkillManager) == false)
@@ -55,6 +61,10 @@ void UT11_GameInstance::RestorePlayerData(UStatComponent* StatComp, UItemManager
 		return;
 	ItemManager->RestoreEquipment(SavedEquipments);
 	UE_LOG(LogTemp, Warning, TEXT("[GameInstance] 장비 복구 완료 - %d개"), SavedEquipments.Num());
+	// HP 복구
+	if (IsValid(StatComp) == false)
+		return;
+	StatComp->SetCurrentHP(SavedHPData);
 	// 스킬 복구
 	if (IsValid(SkillManager) == false)
 		return;

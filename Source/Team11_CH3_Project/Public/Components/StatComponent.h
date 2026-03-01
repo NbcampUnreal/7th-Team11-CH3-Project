@@ -85,10 +85,10 @@ public:
 	UPROPERTY()
 	FStatData CurrentStat;
 
-private:
 	UPROPERTY()
 	FStatData BaseStat;
 
+private:
 	UPROPERTY()
 	float CurrentHP;
 };

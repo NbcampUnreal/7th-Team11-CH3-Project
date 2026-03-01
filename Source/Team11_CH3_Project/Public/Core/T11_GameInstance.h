@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -38,6 +38,8 @@ public:
 	int32 CurrentDifficulty = 0; // 0 == Normal, 1 == Hard Enum으로 설정하는 방향
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stat")
 	FStatData SavedStatData;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stat")
+	float SavedHPData;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Armor")
 	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> SavedEquipments;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Skill")

@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -37,14 +37,14 @@ public:
 	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>>& GetEquipments() { return Equipments; }
 	void Clear();
 
+	// 아이템 장착 해제 시 스탯 수정
+	void UnequipWeapon();
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 private:
-	// 아이템 장착 해제 시 스탯 수정
 
-	void UnequipWeapon();
 
 	// 장착중인 무기
 	UPROPERTY(EditDefaultsOnly, Category = "Item|Weapon", meta = (AllowPrivateAccess = "true"))

@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Characters/Monster/MonsterBase.h"
@@ -83,7 +83,7 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	}
 	if (WeaponItemDataInstance)
 	{
-		WeaponItemDataInstance->BeginDestroy();
+		//WeaponItemDataInstance->BeginDestroy();
 		WeaponItemDataInstance = nullptr;
 	}
 	WeaponItemDataInstance = NewObject<UEquipmentInstance>(this);
@@ -117,7 +117,8 @@ void AMonsterBase::Clear()
 
 	EquipmentComponent->Clear();
 	SkillComponent->Clear();
-	WeaponItemDataInstance->BeginDestroy();
+	//WeaponItemDataInstance->BeginDestroy();
+	EquipmentComponent->UnequipWeapon();
 	WeaponItemDataInstance = nullptr;
 }
 
