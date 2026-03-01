@@ -7,7 +7,8 @@
 #include "UI/InventoryWidget.h"
 #include "UI/ItemOverlayWidget.h"
 
-void UMainInventoryWidget::Init(int32 InventorySize)
+void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInventoryComponent,
+	UItemManager* InEquipmentComponent)
 {
 	if (InventoryWidget)
 		InventoryWidget->Init(this, InventorySize);
@@ -15,11 +16,23 @@ void UMainInventoryWidget::Init(int32 InventorySize)
 		EquipmentDetailWidget->Init(this);
 	if (ItemOverlayWidget)
 		ItemOverlayWidget->Init(this);
+	InventoryComponent = InInventoryComponent;
+	EquipmentComponent = InEquipmentComponent;
 }
 
-void UMainInventoryWidget::ToggleEquipmentDetailWidget()
+void UMainInventoryWidget::UpdateEquipmentDetailWidget(const UEquipmentInstance* EquipmentSlot)
 {
+	EquipmentDetailWidget->SetVisibility(ESlateVisibility::Visible);
+	//TODO 	
+	//EquipmentDetailWidget->UpdateOverlayWidget(UEquipmentInstance* ItemInstance);
 }
+
+void UMainInventoryWidget::SetVisibility(ESlateVisibility InVisibility)
+{
+	Super::SetVisibility(InVisibility);
+	EquipmentDetailWidget->SetVisibility(ESlateVisibility::Collapsed);
+}
+
 
 void UMainInventoryWidget::HandleItemSlotChanged(const UItemSlot* SlotData, EItemContainerType ItemContainerType,
                                                  int32 SlotIndex)
@@ -33,11 +46,17 @@ void UMainInventoryWidget::HandleItemSlotChanged(const UItemSlot* SlotData, EIte
 	case EItemContainerType::Equipment:
 		InventoryWidget->HandleEquipmentItemSlotChanged(SlotData, SlotIndex);
 		break;
-	case EItemContainerType::Parts:
+	case EItemContainerType::PartsSockets:
 		if (const UEquipmentSlot* EquipmentSlot = Cast<UEquipmentSlot>(SlotData))
 		{
 			EquipmentDetailWidget->HandlePartsSlotChanged(EquipmentSlot, SlotIndex);
 		}
+		break;
+	case EItemContainerType::SkillGem:
+		//TODO
+		InventoryWidget->HandleSkillGemItemSlotChanged(SlotData, SlotIndex);
+		break;
+	case EItemContainerType::Max:
 		break;
 	}
 }

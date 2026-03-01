@@ -10,7 +10,7 @@ void UEquipmentInstance::Init(UEquipmentItemDataAsset* InItemDataAsset, int32 In
 {
 	Super::Init(InItemDataAsset, 1);
 	UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(InItemDataAsset);
-	if (!EquipmentItemDataAsset)
+	if (EquipmentItemDataAsset)
 	{
 		EquipmentType = EquipmentItemDataAsset->GetEquipmentType();
 	}
@@ -26,20 +26,53 @@ void UEquipmentInstance::Init(UEquipmentItemDataAsset* InItemDataAsset, int32 In
 	}
 }
 
-void UEquipmentInstance::EquipGem(UItemInstance* GemItemDataAsset, int32 Index)
+UItemInstance* UEquipmentInstance::GetItem(int32 Index)
 {
-	if (Sockets.IsValidIndex(Index))
+	if (!Sockets.IsValidIndex(Index))
 	{
-		Sockets[Index]->ItemInstance = GemItemDataAsset;
+		return nullptr;
 	}
-	//TODO Recalculate Stat
+	return Sockets[Index]->ItemInstance;
 }
 
-void UEquipmentInstance::UnEquipGem(int32 Index)
+bool UEquipmentInstance::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 {
-	if (Sockets.IsValidIndex(Index))
+	if (!Sockets.IsValidIndex(Index))
 	{
-		Sockets[Index] = nullptr;
+		return false;
 	}
-	//TODO Recalculate Stat
+	Sockets[Index]->ItemInstance = ItemInstance;
+	//TODO Recalculate Stat And BroadCast
+	
+	return true;
+}
+
+bool UEquipmentInstance::CanReceiveItem(UItemInstance* ItemInstance, int32 TargetIndex)
+{
+	if (ItemInstance->GetItemType() == EItemType::Parts)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool UEquipmentInstance::SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int32 OtherIndex)
+{
+	if (OtherContainer == nullptr)
+	{
+		return false;
+	}
+	UItemInstance* OtherItemInstance = OtherContainer->GetItem(OtherIndex);
+	UItemInstance* MyItemInstance = GetItem(MyIndex);
+	if (!CanReceiveItem(OtherItemInstance, MyIndex))
+	{
+		return false;
+	}
+	if (!OtherContainer->CanReceiveItem(MyItemInstance, OtherIndex))
+	{
+		return false;
+	}
+	SetItemAt(OtherItemInstance, MyIndex);
+	OtherContainer->SetItemAt(MyItemInstance, OtherIndex);
+	return true;
 }

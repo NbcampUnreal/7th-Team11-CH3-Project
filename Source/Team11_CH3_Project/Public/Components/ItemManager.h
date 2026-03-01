@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ItemContainer.h"
 #include "Components/ActorComponent.h"
 #include "Types/ItemTypes.h"
 #include "ItemManager.generated.h"
@@ -16,7 +17,7 @@ class AWeaponActor;
 class UEquipmentItemDataAsset;
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TEAM11_CH3_PROJECT_API UItemManager : public UActorComponent
+class TEAM11_CH3_PROJECT_API UItemManager : public UActorComponent, public IItemContainer
 {
 	GENERATED_BODY()
 
@@ -25,30 +26,24 @@ public:
 	UItemManager();
 	virtual void InitializeComponent() override;
 	// 장비 해제
-	UFUNCTION(BlueprintCallable, Category = "Item")
-	void Equip(UEquipmentInstance* Data);
-	UFUNCTION(BlueprintCallable, Category = "Item")
-	void Unequip(EEquipmentType SlotType);
-	void EquipWeapon(UEquipmentInstance* WeaponItemInstance);
 
-	UFUNCTION(BlueprintCallable, Category = "Item|Gem")
-	void EquipSkillGem(UEquipmentInstance* SkillGemInstance, int32 Index);
-	UFUNCTION(BlueprintCallable, Category = "Item|Gem")
-	void UnEquipSillGem(int32 Index);
+	void EquipWeapon(UEquipmentInstance* WeaponItemInstance);
+	
+	virtual UItemInstance* GetItem(int32 Index) override;
+	virtual bool SetItemAt(UItemInstance* ItemInstance, int32 Index) override;
+	virtual bool CanReceiveItem(UItemInstance* ItemInstance, int32 Index) override;
+	virtual bool SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int32 OtherIndex) override;
 	
 	// GameInstance에서 장비 데이터 받아오는 함수
-	void RestoreEquipment(TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> EquipmentData);
+	void RestoreEquipment(TArray<TObjectPtr<UEquipmentInstance>>  EquipmentData);
 	// Getter
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	AWeaponActor* GetCurrentWeapon() const { return CurrentWeapon; }
-	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> GetEquipments() ;
+	TArray<TObjectPtr<UEquipmentInstance>> GetEquipments() ;
 	void Clear();
 
 	// 아이템 장착 해제 시 스탯 수정
 	void UnequipWeapon();
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
 
 private:
 
@@ -58,7 +53,7 @@ private:
 	TObjectPtr<AWeaponActor> CurrentWeapon;
 	// 장착 중인 장비 데이터
 	UPROPERTY(EditDefaultsOnly, Category = "Item|Equipment", meta = (AllowPrivateAccess = "true"))
-	TMap<EEquipmentType,TObjectPtr<UEquipmentSlot>> EquipmentSlots;
+	TArray<TObjectPtr<UEquipmentSlot>> EquipmentSlots;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Item|Equipment", meta = (AllowPrivateAccess = "true"))
 	TArray<TObjectPtr<UEquipmentSlot>> GemSlots;

@@ -41,7 +41,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stat")
 	float SavedHPData;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Armor")
-	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> SavedEquipments;
+	TArray<TObjectPtr<UEquipmentInstance>> SavedEquipments;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Skill")
 	TArray<TSoftObjectPtr<USkillDataAsset>> SavedSkillSlots;
 	// 점수 데이터 총 점수 스테이지 점수

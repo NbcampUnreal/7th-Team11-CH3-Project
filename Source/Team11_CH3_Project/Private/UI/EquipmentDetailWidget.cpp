@@ -22,7 +22,7 @@ void UEquipmentDetailWidget::Init(UMainInventoryWidget* InMainInventoryWidget)
 
 	if (EquipmentThumbnail)
 	{
-		EquipmentThumbnail->Init(InMainInventoryWidget);
+		EquipmentThumbnail->Init(InMainInventoryWidget, 0, EItemContainerType::Max);
 	}
 	
 	if (!ItemSlotWidgetClass)
@@ -37,7 +37,7 @@ void UEquipmentDetailWidget::Init(UMainInventoryWidget* InMainInventoryWidget)
 			UInteractableItemSlotWidget* NewSlot = CreateWidget<UInteractableItemSlotWidget>(this, ItemSlotWidgetClass);
 			GemBox->AddChildToHorizontalBox(NewSlot);
 			GemSlots.Add(NewSlot);
-			NewSlot->Init(InMainInventoryWidget);
+			NewSlot->Init(InMainInventoryWidget, i, EItemContainerType::PartsSockets);
 		}
 	}
 	StatRows.Empty();

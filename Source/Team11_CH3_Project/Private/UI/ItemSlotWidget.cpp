@@ -10,10 +10,16 @@
 #include "UI/ItemOverlayWidget.h"
 #include "UI/MainInventoryWidget.h"
 
-void UItemSlotWidget::Init(UMainInventoryWidget* InMainInventoryWidget)
+
+
+void UItemSlotWidget::Init(UMainInventoryWidget* InMainInventoryWidget, int32 InIndex,
+	EItemContainerType InItemContainerType, EEquipmentType InEquipmentType)
 {
 	MainInventoryWidget = InMainInventoryWidget;
 	UpdateSlot(nullptr);
+	ItemContainerType = InItemContainerType;
+	EquipmentType = InEquipmentType;
+	Index = InIndex;
 }
 
 void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
@@ -39,7 +45,7 @@ void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
 		}
 		if (Count)
 		{
-			Count->SetText(FText::AsNumber(InSlot->ItemInstance->GetCount()));
+			Count->SetText(FText::AsNumber(ItemInstance->GetCount()));
 			Count->SetVisibility(ESlateVisibility::Visible);
 		}
 	}

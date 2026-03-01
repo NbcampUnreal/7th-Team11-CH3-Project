@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Types/ItemContainerType.h"
+#include "Types/ItemTypes.h"
 #include "ItemSlotWidget.generated.h"
 
 class UItemInstance;
@@ -19,7 +21,7 @@ class TEAM11_CH3_PROJECT_API UItemSlotWidget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	void Init(UMainInventoryWidget* InMainInventoryWidget);
+	virtual void Init(UMainInventoryWidget* InMainInventoryWidget, int32 InIndex, EItemContainerType InItemContainerType, EEquipmentType InEquipmentType = EEquipmentType::Max );
 	void UpdateSlot(const UItemSlot* InSlot);
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
@@ -31,7 +33,11 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Count;
-private:
+	
 	TWeakObjectPtr<UMainInventoryWidget> MainInventoryWidget;
 	TWeakObjectPtr<UItemInstance> ItemInstance;
+	
+	EItemContainerType ItemContainerType;
+	EEquipmentType EquipmentType = EEquipmentType::Max;
+	int32 Index;
 };

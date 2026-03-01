@@ -24,5 +24,6 @@ enum class EEquipmentType : uint8
     Gloves,
     Legs,
     Boots,
-    SkillGem
+    SkillGem,
+    Max
 };

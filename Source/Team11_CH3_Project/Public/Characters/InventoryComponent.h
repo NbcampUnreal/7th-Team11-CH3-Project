@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ItemContainer.h"
 #include "Components/ActorComponent.h"
 #include "Types/ItemContainerType.h"
 #include "InventoryComponent.generated.h"
@@ -16,7 +17,7 @@ class UItemInstance;
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class TEAM11_CH3_PROJECT_API UInventoryComponent : public UActorComponent
+class TEAM11_CH3_PROJECT_API UInventoryComponent : public UActorComponent, public IItemContainer
 {
 	GENERATED_BODY()
 
@@ -30,12 +31,17 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnItemSlotChanged OnInventorySlotChanged;
 
+	virtual UItemInstance* GetItem(int32 TargetIndex) override;
+	virtual bool SetItemAt(UItemInstance* ItemInstance, int32 Index) override;
+	virtual bool CanReceiveItem(UItemInstance* ItemInstance, int32 TargetIndex) override;
+	virtual bool SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int32 OtherIndex) override;
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
 	TArray<TObjectPtr<UItemSlot>> InventorySlots;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Inventory")
-	TMap<FName,int32> Indexes;
-	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Inventory")
+	EItemContainerType ContainerType = EItemContainerType::Inventory;	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Inventory")
 	int32 InventorySize = 20;
+	
 };
