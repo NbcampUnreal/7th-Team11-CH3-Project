@@ -17,7 +17,8 @@ void UInventoryComponent::InitializeComponent()
 	for (int32 i = 0; i < InventorySize; i++)
 	{
 		UItemSlot* InventorySlot = NewObject<UItemSlot>(this);
-		InventorySlots[i] = (InventorySlot);
+		InventorySlot->Init(this, i);
+		InventorySlots[i] = InventorySlot;
 	}
 }
 
@@ -28,7 +29,14 @@ bool UInventoryComponent::AddItem(UItemDataAsset* ItemDataAsset, int32 Count)
 		return false;
 	}
 	UItemInstance* ItemInstance = NewObject<UItemInstance>(this, ItemDataAsset->GetInstanceClass());
-	ItemInstance->Init(ItemDataAsset, Count);
+	if (ItemDataAsset->GetInstanceClass() == UItemInstance::StaticClass())
+	{
+		ItemInstance->Init(ItemDataAsset, Count);
+	}else if (ItemDataAsset->GetInstanceClass() == UEquipmentInstance::StaticClass())
+	{
+		UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance);
+		EquipmentInstance->Init(ItemDataAsset, 3);
+	}
 	if (ItemInstance->IsValid() == false)
 	{
 		return false;
@@ -41,7 +49,7 @@ bool UInventoryComponent::AddItem(UItemDataAsset* ItemDataAsset, int32 Count)
 	{
 		for (Index = 0; Index < InventorySlots.Num(); ++Index)
 		{
-			if (InventorySlots[Index]->ItemInstance && InventorySlots[Index]->ItemInstance->GetItemDataAsset()->
+			if (InventorySlots[Index]->GetItemInstance() && InventorySlots[Index]->GetItemInstance()->GetItemDataAsset()->
 			                                                                  GetItemID() == ItemInstance->
 				GetItemDataAsset()->GetItemID())
 			{
@@ -51,15 +59,15 @@ bool UInventoryComponent::AddItem(UItemDataAsset* ItemDataAsset, int32 Count)
 		if (InventorySlots.IsValidIndex(Index))
 		{
 			ItemInstance->ConditionalBeginDestroy();
-			InventorySlots[Index]->ItemInstance->AddCount(ItemInstance->GetCount());
-			OnInventorySlotChanged.Broadcast(InventorySlots[Index], ContainerType, Index);
+			InventorySlots[Index]->GetItemInstance()->AddCount(ItemInstance->GetCount());
+			OnInventorySlotChanged.Broadcast(InventorySlots[Index]);
 			return true;
 		}
 	}
 	//단일
 	for (Index = 0; Index < InventorySlots.Num(); Index++)
 	{
-		if (!IsValid(InventorySlots[Index]->ItemInstance) || InventorySlots[Index]->ItemInstance->IsValid() ==
+		if (!IsValid(InventorySlots[Index]->GetItemInstance()) || InventorySlots[Index]->GetItemInstance()->IsValid() ==
 			false)
 		{
 			break;
@@ -70,27 +78,31 @@ bool UInventoryComponent::AddItem(UItemDataAsset* ItemDataAsset, int32 Count)
 		return false;
 	}
 
-	InventorySlots[Index]->ItemInstance = ItemInstance;
-	OnInventorySlotChanged.Broadcast(InventorySlots[Index], ContainerType, Index);
+	InventorySlots[Index]->SetItemInstance(ItemInstance);
+	OnInventorySlotChanged.Broadcast(InventorySlots[Index]);
 	return true;
 }
 
 bool UInventoryComponent::RemoveItem(int32 Index, int32 Amount)
 {
-	if (!InventorySlots.IsValidIndex(Index) || !IsValid(InventorySlots[Index]->ItemInstance) || InventorySlots[Index]->
-		ItemInstance->IsValid() == false)
+	if (!InventorySlots.IsValidIndex(Index) || !IsValid(InventorySlots[Index]->GetItemInstance()) ||
+		InventorySlots[Index]->GetItemInstance()->IsValid() == false)
 	{
 		return false;
 	}
-	InventorySlots[Index]->ItemInstance->AddCount(-Amount);
-	if (InventorySlots[Index]->ItemInstance->GetCount() <= 0)
+	InventorySlots[Index]->GetItemInstance()->AddCount(-Amount);
+	if (InventorySlots[Index]->GetItemInstance()->GetCount() <= 0)
 	{
-		FName ItemName = InventorySlots[Index]->ItemInstance->GetItemDataAsset()->GetItemID();
-		InventorySlots[Index]->ItemInstance->Clear();
-		InventorySlots[Index]->ItemInstance = nullptr;
+		InventorySlots[Index]->GetItemInstance()->Clear();
+		InventorySlots[Index]->SetItemInstance(nullptr);
 	}
-	OnInventorySlotChanged.Broadcast(InventorySlots[Index], ContainerType, Index);
+	OnInventorySlotChanged.Broadcast(InventorySlots[Index]);
 	return true;
+}
+
+EItemContainerType UInventoryComponent::GetItemContainerType() const
+{
+	return ContainerType;
 }
 
 UItemInstance* UInventoryComponent::GetItem(int32 TargetIndex)
@@ -99,7 +111,7 @@ UItemInstance* UInventoryComponent::GetItem(int32 TargetIndex)
 	{
 		return nullptr;
 	}
-	return InventorySlots[TargetIndex]->ItemInstance;
+	return InventorySlots[TargetIndex]->GetItemInstance();
 }
 
 bool UInventoryComponent::SetItemAt(UItemInstance* ItemInstance, int32 Index)
@@ -108,9 +120,8 @@ bool UInventoryComponent::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 	{
 		return false;
 	}
-	InventorySlots[Index]->ItemInstance = ItemInstance;
-	InventorySlots[Index]->ItemType = ItemInstance->GetItemType();
-	OnInventorySlotChanged.Broadcast(InventorySlots[Index], ContainerType, Index);
+	InventorySlots[Index]->SetItemInstance(ItemInstance);
+	OnInventorySlotChanged.Broadcast(InventorySlots[Index]);
 	return true;
 }
 

@@ -34,7 +34,7 @@ public:
 	virtual void SetVisibility(ESlateVisibility InVisibility) override;	
 
 	UFUNCTION(BlueprintCallable)
-	void HandleItemSlotChanged (const UItemSlot* SlotData, EItemContainerType ItemContainerType, int32 SlotIndex);
+	void HandleItemSlotChanged (UItemSlot* SlotData);
 	
 	UFUNCTION(BlueprintCallable)
 	UItemOverlayWidget* GetItemOverlayWidget(){return ItemOverlayWidget;}

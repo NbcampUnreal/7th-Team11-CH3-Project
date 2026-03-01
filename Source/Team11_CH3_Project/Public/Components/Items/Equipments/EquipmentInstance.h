@@ -21,17 +21,16 @@ class TEAM11_CH3_PROJECT_API UEquipmentInstance : public UItemInstance, public I
 	GENERATED_BODY()
 
 public:
-	void Init(UEquipmentItemDataAsset* InItemDataAsset, int32 InMaxGemCount=3) ;
-	
+	void Init(UItemDataAsset* InItemDataAsset, int32 InMaxGemCount=3) ;
+	virtual EItemContainerType GetItemContainerType() const override;
 	virtual UItemInstance* GetItem(int32 Index) override;
 	virtual bool SetItemAt(UItemInstance* ItemInstance, int32 Index) override;
 	virtual bool CanReceiveItem(UItemInstance* ItemInstance, int32 TargetIndex) override;	
 	virtual bool SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int32 OtherIndex) override;
 	
 	const TArray<TObjectPtr<UItemSlot>>& GetPartsSlots() const { return Sockets; }
-	EEquipmentType GetEquipmentTyme() const { return EquipmentType; }
-	
-	
+	EEquipmentType GetEquipmentType() const { return EquipmentType; }
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TArray<TObjectPtr<UItemSlot>> Sockets;

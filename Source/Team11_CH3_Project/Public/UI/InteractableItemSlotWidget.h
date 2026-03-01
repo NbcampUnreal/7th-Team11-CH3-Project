@@ -14,7 +14,7 @@ class TEAM11_CH3_PROJECT_API UInteractableItemSlotWidget : public UItemSlotWidge
 {
 	GENERATED_BODY()
 public:
-	virtual void Init(UMainInventoryWidget* InMainInventoryWidget, int32 InIndex, EItemContainerType InItemContainerType, EEquipmentType InEquipmentType = EEquipmentType::Max) override;
+	virtual void Init(UMainInventoryWidget* InMainInventoryWidget, UItemSlot* InSlot) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation) override;

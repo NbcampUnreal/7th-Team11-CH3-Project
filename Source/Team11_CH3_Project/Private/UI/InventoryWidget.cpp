@@ -6,64 +6,69 @@
 #include "Components/UniformGridPanel.h"
 #include "Components/Items/EquipmentItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
-#include "Components/Items/Equipments/EquipmentInstance.h"
 #include "UI/InteractableItemSlotWidget.h"
 #include "UI/MainInventoryWidget.h"
 
-void UInventoryWidget::Init(UMainInventoryWidget* InMainInventoryWidget, int32 InventorySize)
+void UInventoryWidget::Init(UMainInventoryWidget* InMainInventoryWidget, UInventoryComponent* InventoryComponent, UItemManager* EquipmentComponent)
 {
 	MainInventoryWidget = InMainInventoryWidget;
 	if (Inventory.Num() > 0)
 	{
 		return;
 	}
-	if (SkillGemSlot1)
+	if (EquipmentComponent)
 	{
-		SkillGemSlot1->Init(InMainInventoryWidget, 1, EItemContainerType::SkillGem);
-	}
-	if (SkillGemSlot2)
-	{
-		SkillGemSlot2->Init(InMainInventoryWidget, 2, EItemContainerType::SkillGem);
-	}
-	if (InventoryGrid)
-	{
-		InventoryGrid->ClearChildren();
-		for (int32 i = 0; i < InventorySize; i++)
+		if (SkillGemSlot0)
 		{
-			UInteractableItemSlotWidget* NewSlot = CreateWidget<UInteractableItemSlotWidget>(this, ItemSlotWidgetClass);
+			SkillGemSlot0->Init(InMainInventoryWidget, EquipmentComponent->GetSkillGemSlot(0));
+		}
+		if (SkillGemSlot1)
+		{
+			SkillGemSlot1->Init(InMainInventoryWidget, EquipmentComponent->GetSkillGemSlot(1));
+		}
+
+		HeadSlot->Init(InMainInventoryWidget, EquipmentComponent->GetEquipmentSlot(EEquipmentType::Helmet));
+		ChestSlot->Init(InMainInventoryWidget,EquipmentComponent->GetEquipmentSlot(EEquipmentType::Chest));
+		LegsSlot->Init(InMainInventoryWidget,EquipmentComponent->GetEquipmentSlot(EEquipmentType::Legs));
+		WeaponSlot->Init(InMainInventoryWidget,EquipmentComponent->GetEquipmentSlot(EEquipmentType::Weapon));
+		HandSlot->Init(InMainInventoryWidget,EquipmentComponent->GetEquipmentSlot(EEquipmentType::Gloves));
+		FeetSlot->Init(InMainInventoryWidget,EquipmentComponent->GetEquipmentSlot(EEquipmentType::Boots));
+	}
+	if (InventoryComponent)
+	{
+		if (InventoryGrid)
+		{
+			InventoryGrid->ClearChildren();
+			TArray<TObjectPtr<UItemSlot>> InventorySlots = InventoryComponent->GetInventorySlots();
+			for (int32 i = 0; i < InventorySlots.Num(); i++)
+			{
+				UInteractableItemSlotWidget* NewSlot = CreateWidget<UInteractableItemSlotWidget>(this, ItemSlotWidgetClass);
 			
-			int32 Row = i / 5;
-			int32 Column = i % 5;
-			InventoryGrid->AddChildToUniformGrid(NewSlot, Row, Column);
-			Inventory.Add(NewSlot);
-			NewSlot->Init(InMainInventoryWidget, i, EItemContainerType::Inventory);
+				int32 Row = i / 5;
+				int32 Column = i % 5;
+				InventoryGrid->AddChildToUniformGrid(NewSlot, Row, Column);
+				NewSlot->Init(InMainInventoryWidget, InventorySlots[i]);
+				Inventory.Add(NewSlot);
+			}
 		}
 	}
-	HeadSlot->Init(InMainInventoryWidget,static_cast<int64> (EEquipmentType::Helmet),EItemContainerType::Equipment,EEquipmentType::Helmet);
-	ChestSlot->Init(InMainInventoryWidget,static_cast<int64> (EEquipmentType::Chest),EItemContainerType::Equipment,EEquipmentType::Chest);
-	LegsSlot->Init(InMainInventoryWidget,static_cast<int64> (EEquipmentType::Legs),EItemContainerType::Equipment,EEquipmentType::Legs);
-	WeaponSlot->Init(InMainInventoryWidget,static_cast<int64> (EEquipmentType::Weapon),EItemContainerType::Equipment,EEquipmentType::Weapon);
-	HandSlot->Init(InMainInventoryWidget,static_cast<int64> (EEquipmentType::Gloves),EItemContainerType::Equipment,EEquipmentType::Gloves);
-	FeetSlot->Init(InMainInventoryWidget,static_cast<int64> (EEquipmentType::Boots),EItemContainerType::Equipment,EEquipmentType::Boots);
-	
-
 	
 }
 
 
-void UInventoryWidget::HandleInventoryItemSlotChanged(const UItemSlot* SlotData, int32 SlotIndex)
+void UInventoryWidget::HandleInventoryItemSlotChanged(UItemSlot* SlotData)
 {
-	if (Inventory.IsValidIndex(SlotIndex))
+	if (Inventory.IsValidIndex(SlotData->GetIndex()))
 	{
-		Inventory[SlotIndex]->UpdateSlot(SlotData);
+		Inventory[SlotData->GetIndex()]->UpdateSlot(SlotData);
 	}
 }
 
-void UInventoryWidget::HandleEquipmentItemSlotChanged(const UItemSlot* SlotData, int32 SlotIndex)
+void UInventoryWidget::HandleEquipmentItemSlotChanged(UItemSlot* SlotData)
 {
 	//TODO Optimization
-	UEquipmentItemDataAsset*  EquipmentItemData = Cast<UEquipmentItemDataAsset> (SlotData->ItemInstance->GetItemDataAsset());
-	
+	UEquipmentItemDataAsset*  EquipmentItemData = Cast<UEquipmentItemDataAsset> (SlotData->GetItemInstance()->GetItemDataAsset());
+	int32 SlotIndex = SlotData->GetIndex();
 	if (EquipmentItemData)
 	{
 		switch (EquipmentItemData->GetEquipmentType())
@@ -92,15 +97,16 @@ void UInventoryWidget::HandleEquipmentItemSlotChanged(const UItemSlot* SlotData,
 	}
 }
 
-void UInventoryWidget::HandleSkillGemItemSlotChanged(const UItemSlot* ItemSlot, int32 Index)
+void UInventoryWidget::HandleSkillGemItemSlotChanged(UItemSlot* ItemSlot)
 {
 	UInteractableItemSlotWidget* TargetSlot = nullptr;
+	int32 Index = ItemSlot->GetIndex();
 	if (Index == 1)
 	{
-		TargetSlot = SkillGemSlot1;
+		TargetSlot = SkillGemSlot0;
 	}else if (Index == 2)
 	{
-		TargetSlot = SkillGemSlot2;
+		TargetSlot = SkillGemSlot1;
 	}
 	TargetSlot->UpdateSlot(ItemSlot);
 }

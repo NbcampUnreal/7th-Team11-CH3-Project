@@ -28,9 +28,14 @@ public:
 	bool AddItem(UItemDataAsset* ItemDataAsset, int32 Count);
 	UFUNCTION(BlueprintCallable)
 	bool RemoveItem(int32 Index, int32 Amount);
+
+	
+	TArray<TObjectPtr<UItemSlot>>& GetInventorySlots(){return InventorySlots;}
+	
 	UPROPERTY(BlueprintAssignable)
 	FOnItemSlotChanged OnInventorySlotChanged;
 
+	virtual EItemContainerType GetItemContainerType() const override;
 	virtual UItemInstance* GetItem(int32 TargetIndex) override;
 	virtual bool SetItemAt(UItemInstance* ItemInstance, int32 Index) override;
 	virtual bool CanReceiveItem(UItemInstance* ItemInstance, int32 TargetIndex) override;

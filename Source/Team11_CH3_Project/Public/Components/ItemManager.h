@@ -9,6 +9,7 @@
 #include "ItemManager.generated.h"
 
 
+class UItemSlot;
 class UGemItemDataAsset;
 class UEquipmentSlot;
 class UEquipmentInstance;
@@ -29,6 +30,7 @@ public:
 
 	void EquipWeapon(UEquipmentInstance* WeaponItemInstance);
 	
+	virtual EItemContainerType GetItemContainerType() const override;
 	virtual UItemInstance* GetItem(int32 Index) override;
 	virtual bool SetItemAt(UItemInstance* ItemInstance, int32 Index) override;
 	virtual bool CanReceiveItem(UItemInstance* ItemInstance, int32 Index) override;
@@ -44,7 +46,9 @@ public:
 
 	// 아이템 장착 해제 시 스탯 수정
 	void UnequipWeapon();
-
+	UEquipmentSlot* GetSkillGemSlot(int32 Index);
+	UEquipmentSlot* GetEquipmentSlot(EEquipmentType EquipmentType);
+	
 private:
 
 
@@ -59,7 +63,7 @@ private:
 	TArray<TObjectPtr<UEquipmentSlot>> GemSlots;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
-	int32 MaxSKillGemCount = 3;
+	int32 MaxSKillGemCount = 2;
 	// 버프 ID
 	TMap<FName, TArray<int32>> EquipmentBuffIDs;
 };

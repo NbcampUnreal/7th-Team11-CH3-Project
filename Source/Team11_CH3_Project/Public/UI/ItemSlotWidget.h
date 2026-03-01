@@ -20,24 +20,23 @@ UCLASS()
 class TEAM11_CH3_PROJECT_API UItemSlotWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
 public:
-	virtual void Init(UMainInventoryWidget* InMainInventoryWidget, int32 InIndex, EItemContainerType InItemContainerType, EEquipmentType InEquipmentType = EEquipmentType::Max );
-	void UpdateSlot(const UItemSlot* InSlot);
+	virtual void Init(UMainInventoryWidget* InMainInventoryWidget, UItemSlot* InSlot);
+	void UpdateSlot(UItemSlot* InSlot);
+	UItemSlot* GetItemSlot() const { return ItemSlot.Get(); }
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
-protected:
 
+protected:
 	void Clear();
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> Thumbnail;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Count;
-	
+
 	TWeakObjectPtr<UMainInventoryWidget> MainInventoryWidget;
-	TWeakObjectPtr<UItemInstance> ItemInstance;
-	
-	EItemContainerType ItemContainerType;
-	EEquipmentType EquipmentType = EEquipmentType::Max;
-	int32 Index;
+
+	TWeakObjectPtr<UItemSlot> ItemSlot;
 };

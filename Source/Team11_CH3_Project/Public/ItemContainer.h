@@ -25,6 +25,7 @@ class TEAM11_CH3_PROJECT_API IItemContainer
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
+	virtual EItemContainerType GetItemContainerType()const=0;
 	virtual UItemInstance* GetItem(int32 Index)=0;
 	virtual bool SetItemAt(UItemInstance* ItemInstance, int32 Index)=0;
 	virtual bool CanReceiveItem(UItemInstance* ItemInstance, int32 TargetIndex)=0;

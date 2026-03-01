@@ -6,11 +6,10 @@
 #include "Components/Items/EquipmentItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
 
-void UEquipmentInstance::Init(UEquipmentItemDataAsset* InItemDataAsset, int32 InMaxGemCount)
+void UEquipmentInstance::Init(UItemDataAsset* InItemDataAsset, int32 InMaxGemCount)
 {
 	Super::Init(InItemDataAsset, 1);
-	UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(InItemDataAsset);
-	if (EquipmentItemDataAsset)
+	if (UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(InItemDataAsset))
 	{
 		EquipmentType = EquipmentItemDataAsset->GetEquipmentType();
 	}
@@ -20,10 +19,14 @@ void UEquipmentInstance::Init(UEquipmentItemDataAsset* InItemDataAsset, int32 In
 	for (int32 Index = 0; Index < Sockets.Num(); Index++)
 	{
 		UItemSlot* ItemSlot = NewObject<UItemSlot>(this);
+		ItemSlot->Init(this, Index);
 		Sockets[Index] = ItemSlot;
-		Sockets[Index]->ItemInstance = nullptr;
-		Sockets[Index]->ItemType = EItemType::Parts;
 	}
+}
+
+EItemContainerType UEquipmentInstance::GetItemContainerType() const
+{
+	return EItemContainerType::PartsSockets;
 }
 
 UItemInstance* UEquipmentInstance::GetItem(int32 Index)
@@ -32,7 +35,7 @@ UItemInstance* UEquipmentInstance::GetItem(int32 Index)
 	{
 		return nullptr;
 	}
-	return Sockets[Index]->ItemInstance;
+	return Sockets[Index]->GetItemInstance();
 }
 
 bool UEquipmentInstance::SetItemAt(UItemInstance* ItemInstance, int32 Index)
@@ -41,7 +44,7 @@ bool UEquipmentInstance::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 	{
 		return false;
 	}
-	Sockets[Index]->ItemInstance = ItemInstance;
+	Sockets[Index]->SetItemInstance(ItemInstance);
 	//TODO Recalculate Stat And BroadCast
 	
 	return true;

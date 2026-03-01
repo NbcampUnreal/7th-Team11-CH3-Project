@@ -25,7 +25,8 @@ class TEAM11_CH3_PROJECT_API UEquipmentDetailWidget : public UUserWidget
 	GENERATED_BODY()
 public:
 	void Init(UMainInventoryWidget* InMainInventoryWidget);
-	void HandlePartsSlotChanged(const UEquipmentSlot* SlotData, int32 Index);
+	void Update(UItemSlot* ItemSlot);
+	void HandlePartsSlotChanged(UEquipmentSlot* SlotData);
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UItemSlotWidget> EquipmentThumbnail;

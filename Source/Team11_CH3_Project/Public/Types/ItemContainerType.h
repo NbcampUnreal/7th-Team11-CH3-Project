@@ -18,4 +18,4 @@ enum class EItemContainerType : uint8
 	SkillGem,
 	Max,
 };
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnItemSlotChanged, const UItemSlot*, SlotData, EItemContainerType, ItemContainerType, int32, SlotIndex);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemSlotChanged, UItemSlot*, SlotData);

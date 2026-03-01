@@ -15,51 +15,56 @@ void UEquipmentDetailWidget::Init(UMainInventoryWidget* InMainInventoryWidget)
 	//TODO
 	//장비 이미지, 설명, 젬슬롯관리
 	MainInventoryWidget = InMainInventoryWidget;
-	if (GemSlots.Num() > 0)
-	{
-		return;
-	}
 
-	if (EquipmentThumbnail)
-	{
-		EquipmentThumbnail->Init(InMainInventoryWidget, 0, EItemContainerType::Max);
-	}
-	
-	if (!ItemSlotWidgetClass)
-	{
-		return;
-	}
-	if (GemBox)
-	{
-		GemBox->ClearChildren();
-		for (int32 i = 0; i < 3; i++)
-		{
-			UInteractableItemSlotWidget* NewSlot = CreateWidget<UInteractableItemSlotWidget>(this, ItemSlotWidgetClass);
-			GemBox->AddChildToHorizontalBox(NewSlot);
-			GemSlots.Add(NewSlot);
-			NewSlot->Init(InMainInventoryWidget, i, EItemContainerType::PartsSockets);
-		}
-	}
-	StatRows.Empty();
-	StatBox->ClearChildren();
 }
 
-void UEquipmentDetailWidget::HandlePartsSlotChanged(const UEquipmentSlot* SlotData, int32 Index)
+void UEquipmentDetailWidget::Update(UItemSlot* ItemSlot)
+{
+	// if (GemSlots.Num() > 0)
+	// {
+	// 	return;
+	// }
+	//
+	// if (EquipmentThumbnail)
+	// {
+	// 	EquipmentThumbnail->Init(InMainInventoryWidget, 0, EItemContainerType::Max);
+	// }
+	//
+	// if (!ItemSlotWidgetClass)
+	// {
+	// 	return;
+	// }
+	// if (GemBox)
+	// {
+	// 	GemBox->ClearChildren();
+	// 	for (int32 i = 0; i < 3; i++)
+	// 	{
+	// 		UInteractableItemSlotWidget* NewSlot = CreateWidget<UInteractableItemSlotWidget>(this, ItemSlotWidgetClass);
+	// 		GemBox->AddChildToHorizontalBox(NewSlot);
+	// 		GemSlots.Add(NewSlot);
+	// 		NewSlot->Init(InMainInventoryWidget, i, EItemContainerType::PartsSockets);
+	// 	}
+	// }
+	// StatRows.Empty();
+	// StatBox->ClearChildren();
+}
+
+void UEquipmentDetailWidget::HandlePartsSlotChanged(UEquipmentSlot* SlotData)
 {
 	if (!IsValid(SlotData))
 	{
 		return;
 	}
-	if (SlotData->ItemType != EItemType::Equipment )
+	if (SlotData->GetItemType() != EItemType::Equipment )
 	{
 		return;
 	}
-	if (UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(SlotData->ItemInstance))
+	if (UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(SlotData->GetItemInstance()))
 	{
 		const TArray<TObjectPtr<UItemSlot>>& Parts = EquipmentInstance->GetPartsSlots();
-		if (Parts.IsValidIndex(Index))
+		if (Parts.IsValidIndex(SlotData->GetIndex()))
 		{
-			GemSlots[Index]->UpdateSlot(SlotData);
+			GemSlots[SlotData->GetIndex()]->UpdateSlot(SlotData);
 		}
 	}
 }

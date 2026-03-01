@@ -11,7 +11,7 @@ void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInve
 	UItemManager* InEquipmentComponent)
 {
 	if (InventoryWidget)
-		InventoryWidget->Init(this, InventorySize);
+		InventoryWidget->Init(this, InInventoryComponent,InEquipmentComponent);
 	if (EquipmentDetailWidget)
 		EquipmentDetailWidget->Init(this);
 	if (ItemOverlayWidget)
@@ -34,27 +34,26 @@ void UMainInventoryWidget::SetVisibility(ESlateVisibility InVisibility)
 }
 
 
-void UMainInventoryWidget::HandleItemSlotChanged(const UItemSlot* SlotData, EItemContainerType ItemContainerType,
-                                                 int32 SlotIndex)
+void UMainInventoryWidget::HandleItemSlotChanged(UItemSlot* SlotData)
 {
-	switch (ItemContainerType)
+	switch (SlotData->GetItemContainer()->GetItemContainerType())
 	{
 	//장비와 인벤토리를 관리하는 위젯
 	case EItemContainerType::Inventory:
-		InventoryWidget->HandleInventoryItemSlotChanged(SlotData, SlotIndex);
+		InventoryWidget->HandleInventoryItemSlotChanged(SlotData);
 		break;
 	case EItemContainerType::Equipment:
-		InventoryWidget->HandleEquipmentItemSlotChanged(SlotData, SlotIndex);
+		InventoryWidget->HandleEquipmentItemSlotChanged(SlotData);
 		break;
 	case EItemContainerType::PartsSockets:
-		if (const UEquipmentSlot* EquipmentSlot = Cast<UEquipmentSlot>(SlotData))
+		if (UEquipmentSlot* EquipmentSlot = Cast<UEquipmentSlot>(SlotData))
 		{
-			EquipmentDetailWidget->HandlePartsSlotChanged(EquipmentSlot, SlotIndex);
+			EquipmentDetailWidget->HandlePartsSlotChanged(EquipmentSlot);
 		}
 		break;
 	case EItemContainerType::SkillGem:
 		//TODO
-		InventoryWidget->HandleSkillGemItemSlotChanged(SlotData, SlotIndex);
+		InventoryWidget->HandleSkillGemItemSlotChanged(SlotData);
 		break;
 	case EItemContainerType::Max:
 		break;

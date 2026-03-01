@@ -21,7 +21,8 @@ UItemManager::UItemManager()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
-
+	bWantsInitializeComponent = true;
+	
 	// ...
 }
 
@@ -34,8 +35,7 @@ void UItemManager::InitializeComponent()
 		{
 			EEquipmentType Type = static_cast<EEquipmentType>(EnumPtr->GetValueByIndex(i));
 			UEquipmentSlot* EquipmentSlot = NewObject<UEquipmentSlot>(this);
-			EquipmentSlot->ItemType = EItemType::Equipment;
-			EquipmentSlot->EquipmentType = Type;
+			EquipmentSlot->Init(this, i, Type);
 			EquipmentSlots.Add(EquipmentSlot);
 		}
 	}
@@ -43,11 +43,8 @@ void UItemManager::InitializeComponent()
 	for (int32 i = 0; i < MaxSKillGemCount; ++i)
 	{
 		UEquipmentSlot* EquipmentSlot = NewObject<UEquipmentSlot>(this);
-
 		GemSlots[i] = EquipmentSlot;
-		GemSlots[i]->ItemType = EItemType::Equipment;
-		GemSlots[i]->EquipmentType = EEquipmentType::SkillGem;
-		GemSlots[i]->ItemInstance = nullptr;
+		GemSlots[i]->Init(this, i,EEquipmentType::SkillGem);
 	}
 }
 
@@ -56,7 +53,7 @@ TArray<TObjectPtr<UEquipmentInstance>> UItemManager::GetEquipments()
 	TArray<TObjectPtr<UEquipmentInstance>> Ret;
 	for (TObjectPtr<UEquipmentSlot>& EquipmentSlot : EquipmentSlots)
 	{
-		Ret.Add(Cast<UEquipmentInstance>(EquipmentSlot->ItemInstance));
+		Ret.Add(Cast<UEquipmentInstance>(EquipmentSlot->GetItemInstance()));
 	}
 	return Ret;
 }
@@ -66,11 +63,11 @@ void UItemManager::Clear()
 	UnequipWeapon();
 	for (int32 i = 0; i < EquipmentSlots.Num(); ++i)
 	{
-		EquipmentSlots[i]->ItemInstance = nullptr;
+		EquipmentSlots[i]->SetItemInstance(nullptr);
 	}
 	for (int32 i = 0; i < GemSlots.Num(); ++i)
 	{
-		GemSlots[i]->ItemInstance = nullptr;
+		GemSlots[i]->SetItemInstance(nullptr);
 	}
 }
 
@@ -111,6 +108,11 @@ void UItemManager::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 	}
 }
 
+EItemContainerType UItemManager::GetItemContainerType() const
+{
+	return EItemContainerType::Equipment;
+}
+
 
 UItemInstance* UItemManager::GetItem(int32 Index)
 {
@@ -123,7 +125,7 @@ UItemInstance* UItemManager::GetItem(int32 Index)
 	{
 		if (EquipmentSlots[Index])
 		{
-			return EquipmentSlots[Index]->ItemInstance;
+			return EquipmentSlots[Index]->GetItemInstance();
 		}
 		return nullptr;
 	}
@@ -132,7 +134,7 @@ UItemInstance* UItemManager::GetItem(int32 Index)
 		Index -= EquipmentSlots.Num();
 		if (GemSlots[Index])
 		{
-			return GemSlots[Index]->ItemInstance;
+			return GemSlots[Index]->GetItemInstance();
 		}
 		return nullptr;
 	}
@@ -154,10 +156,10 @@ bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 	if (Index < EquipmentSlots.Num())
 	{
 		if (EquipmentSlots[Index]->IsValid() &&
-			EquipmentSlots[Index]->EquipmentType == EquipmentInstance->GetEquipmentTyme())
+			EquipmentSlots[Index]->GetEquipmentType() == EquipmentInstance->GetEquipmentType())
 		{
 			//TODO STAT And BroadCast
-			EquipmentSlots[Index]->ItemInstance = EquipmentInstance;
+			EquipmentSlots[Index]->SetItemInstance(EquipmentInstance);
 		}
 		if (UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(
 			ItemInstance->GetItemDataAsset()))
@@ -176,7 +178,7 @@ bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 			return false;
 		}
 
-		GemSlots[Index]->ItemInstance = EquipmentInstance;
+		GemSlots[Index]->SetItemInstance(EquipmentInstance);
 		if (AActor* Owner = GetOwner())
 		{
 			if (USkillManager* SkillComponent = Owner->FindComponentByClass<USkillManager>())
@@ -207,7 +209,7 @@ bool UItemManager::CanReceiveItem(UItemInstance* ItemInstance, int32 Index)
 	}
 	if (Index < EquipmentSlots.Num())
 	{
-		if (EquipmentSlots[Index]->EquipmentType != EquipmentInstance->GetEquipmentTyme())
+		if (EquipmentSlots[Index]->GetEquipmentType() != EquipmentInstance->GetEquipmentType())
 		{
 			return false;
 		}
@@ -216,7 +218,7 @@ bool UItemManager::CanReceiveItem(UItemInstance* ItemInstance, int32 Index)
 	else if (Index < EquipmentSlots.Num() + GemSlots.Num())
 	{
 		Index -= EquipmentSlots.Num();
-		if (EquipmentInstance->GetEquipmentTyme() != EEquipmentType::SkillGem)
+		if (EquipmentInstance->GetEquipmentType() != EEquipmentType::SkillGem)
 		{
 			return false;
 		}
@@ -256,11 +258,30 @@ void UItemManager::UnequipWeapon()
 	CurrentWeapon = nullptr;
 }
 
+UEquipmentSlot* UItemManager::GetSkillGemSlot(int32 Index)
+{
+	if (GemSlots.IsValidIndex(Index))
+	{
+		return GemSlots[Index];
+	}
+	return nullptr;
+}
+
+UEquipmentSlot* UItemManager::GetEquipmentSlot(EEquipmentType EquipmentType)
+{
+	int64 Index = static_cast<int64>(EquipmentType);
+	if (EquipmentSlots.IsValidIndex(Index))
+	{
+		return EquipmentSlots[Index];
+	}
+	return nullptr;
+}
+
 
 void UItemManager::RestoreEquipment(TArray<TObjectPtr<UEquipmentInstance>> EquipmentData)
 {
 	for (TObjectPtr<UEquipmentInstance>& EquipmentInstance : EquipmentData)
 	{
-		SetItemAt(EquipmentInstance, static_cast<int64> (EquipmentInstance->GetEquipmentTyme()));
+		SetItemAt(EquipmentInstance, static_cast<int64>(EquipmentInstance->GetEquipmentType()));
 	}
 }
