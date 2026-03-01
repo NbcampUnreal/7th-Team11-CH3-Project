@@ -2,7 +2,7 @@
 
 
 #include "Components/Items/Equipments/EquipmentInstance.h"
-
+#include "Components/Items/PartsItemDataAsset.h"
 #include "Components/Items/EquipmentItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
 
@@ -10,7 +10,7 @@ void UEquipmentInstance::Init(UEquipmentItemDataAsset* InItemDataAsset, int32 In
 {
 	Super::Init(InItemDataAsset, 1);
 	UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(InItemDataAsset);
-	if (!EquipmentItemDataAsset)
+	if (EquipmentItemDataAsset)
 	{
 		EquipmentType = EquipmentItemDataAsset->GetEquipmentType();
 	}
@@ -26,20 +26,58 @@ void UEquipmentInstance::Init(UEquipmentItemDataAsset* InItemDataAsset, int32 In
 	}
 }
 
-void UEquipmentInstance::EquipGem(UItemInstance* GemItemDataAsset, int32 Index)
+void UEquipmentInstance::EquipParts(UItemInstance* GemItemDataAsset, int32 Index)
 {
 	if (Sockets.IsValidIndex(Index))
 	{
 		Sockets[Index]->ItemInstance = GemItemDataAsset;
+		CalculateStats();
 	}
-	//TODO Recalculate Stat
 }
 
-void UEquipmentInstance::UnEquipGem(int32 Index)
+void UEquipmentInstance::UnEquipParts(int32 Index)
 {
 	if (Sockets.IsValidIndex(Index))
 	{
-		Sockets[Index] = nullptr;
+		Sockets[Index]->ItemInstance = nullptr;
+		CalculateStats();
 	}
-	//TODO Recalculate Stat
+}
+
+void UEquipmentInstance::CalculateStats()
+{
+	CachedStats.Empty();
+	UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(ItemDataAsset);
+	if (EquipmentItemDataAsset == nullptr)
+		return;
+	for (auto& Pair : EquipmentItemDataAsset->GetStatBonuses())
+	{
+		CachedStats.FindOrAdd(Pair.Key) += Pair.Value;
+	}
+
+	for (UItemSlot* Slot : Sockets)
+	{
+		if (Slot->IsValid() == false)
+			continue;
+		UPartsItemDataAsset* Parts = Cast<UPartsItemDataAsset>(Slot->ItemInstance->GetItemDataAsset());
+		if (Parts == nullptr)
+			continue;
+
+		for (auto& Pair : Parts->GetStatBonuses())
+		{
+			CachedStats.FindOrAdd(Pair.Key) += Pair.Value;
+		}
+
+	}
+
+	if (bIsEquipped == false)
+		return;
+
+	OnStatsRecalculated.Broadcast(EquipmentType, this);
+}
+
+float UEquipmentInstance::GetStat(EStat Stat) const
+{
+	const float* Found = CachedStats.Find(Stat);
+	return Found ? *Found : 0.f;
 }

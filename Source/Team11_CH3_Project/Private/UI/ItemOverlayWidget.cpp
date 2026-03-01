@@ -78,7 +78,7 @@ void UItemOverlayWidget::UpdateOverlayWidget(FVector2D ScreenPosition, UItemInst
 	case EItemType::Equipment:
 		if (UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance))
 		{
-			if (EquipmentInstance->GetEquipmentTyme() == EEquipmentType::SkillGem)
+			if (EquipmentInstance->GetEquipmentType() == EEquipmentType::SkillGem)
 			{
 				UpdateStatBox(EquipmentInstance);
 				CollapseSocketBox();

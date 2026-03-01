@@ -16,7 +16,7 @@ class TEAM11_CH3_PROJECT_API UEquipmentItemDataAsset : public UItemDataAsset
 	GENERATED_BODY()
 public:
 	EEquipmentType GetEquipmentType()const{return EquipmentType;}
-	TMap<EStat,float> GetStatBonuses() const{return StatBonuses;}
+	const TMap<EStat,float>& GetStatBonuses() const{return StatBonuses;}
 	
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Equipment")

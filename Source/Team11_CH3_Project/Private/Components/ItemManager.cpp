@@ -53,9 +53,16 @@ void UItemManager::InitializeComponent()
 
 void UItemManager::Equip(UEquipmentInstance* Data)
 {
-	//TODO STAT
+
 	if (UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(Data->GetItemDataAsset()))
 	{
+		EEquipmentType Type = EquipmentItemDataAsset->GetEquipmentType();
+		// OnEquipmentStatChanged 바인딩 및 장비 장착 여부 수정 set 스탯 계산
+		Data->OnStatsRecalculated.AddDynamic(this, &UItemManager::OnEquipmentStatChanged);
+		Data->SetIsEquipped(true);
+		// 장착하고 스탯 계산 -> OnEquipmentStatChanged 호출
+		Data->CalculateStats();
+
 		if (EEquipmentType::Weapon == EquipmentItemDataAsset->GetEquipmentType())
 		{
 			EquipWeapon(Data);
@@ -65,7 +72,29 @@ void UItemManager::Equip(UEquipmentInstance* Data)
 
 void UItemManager::Unequip(EEquipmentType SlotType)
 {
-	//TODO STAT
+	UEquipmentSlot* Slot = EquipmentSlots.FindRef(SlotType);
+	if (IsValid(Slot) == false)
+		return;
+	UEquipmentInstance* Instance = Cast<UEquipmentInstance>(Slot->ItemInstance);
+	if (IsValid(Instance) == false)
+		return;
+	UBuffManager* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
+	if (IsValid(BuffManager) == false)
+		return;
+
+	// 버프 해제
+	if (TArray<int32>* IDs = EquipmentBuffIDs.Find(SlotType))
+	{
+		for (int32& ID : *IDs)
+		{
+			BuffManager->RemoveBuff(ID);
+		}
+		IDs->Empty();
+	}
+	// 바인딩 해제 및 장비 장착 여부 수정
+	Instance->OnStatsRecalculated.RemoveDynamic(this, &UItemManager::OnEquipmentStatChanged);
+	Instance->SetIsEquipped(false);
+	Slot->ItemInstance = nullptr;
 }
 
 
@@ -167,7 +196,7 @@ void UItemManager::EquipSkillGem(UEquipmentInstance* SkillGemInstance, int32 Ind
 	}
 }
 
-void UItemManager::UnEquipSillGem(int32 Index)
+void UItemManager::UnEquipSkillGem(int32 Index)
 {
 	if (!GemSlots.IsValidIndex(Index))
 	{
@@ -192,6 +221,31 @@ void UItemManager::UnequipWeapon()
 	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	CurrentWeapon->Destroy();
 	CurrentWeapon = nullptr;
+}
+
+void UItemManager::OnEquipmentStatChanged(EEquipmentType Type, UEquipmentInstance* Instance)
+{
+	UBuffManager* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
+	if (IsValid(BuffManager) == false)
+		return;
+
+	if (TArray<int32>* IDs = EquipmentBuffIDs.Find(Type))
+	{
+		for (int32 ID : *IDs)
+		{
+			BuffManager->RemoveBuff(ID);
+		}
+		IDs->Empty();
+	}
+
+	TArray<int32> NewIDs;
+	for (auto& Pair : Instance->GetCachedStats())
+	{
+		NewIDs.Add(BuffManager->AddBuff(Pair.Key, EBuffType::Add, Pair.Value, -1.f));
+	}
+
+	EquipmentBuffIDs.Add(Type, NewIDs);
+
 }
 
 

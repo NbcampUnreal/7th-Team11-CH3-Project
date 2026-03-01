@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -34,18 +34,21 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Item|Gem")
 	void EquipSkillGem(UEquipmentInstance* SkillGemInstance, int32 Index);
 	UFUNCTION(BlueprintCallable, Category = "Item|Gem")
-	void UnEquipSillGem(int32 Index);
+	void UnEquipSkillGem(int32 Index);
 	
 	// GameInstance에서 장비 데이터 받아오는 함수
 	void RestoreEquipment(TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> EquipmentData);
 	// Getter
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	AWeaponActor* GetCurrentWeapon() const { return CurrentWeapon; }
-	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> GetEquipments() ;
+	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> GetEquipments();
 	void Clear();
 
 	// 아이템 장착 해제 시 스탯 수정
 	void UnequipWeapon();
+	// 장비 Stat 변경시 사용
+	UFUNCTION()
+	void OnEquipmentStatChanged(EEquipmentType Type, UEquipmentInstance* Instance);
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -66,5 +69,5 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
 	int32 MaxSKillGemCount = 3;
 	// 버프 ID
-	TMap<FName, TArray<int32>> EquipmentBuffIDs;
+	TMap<EEquipmentType, TArray<int32>> EquipmentBuffIDs;
 };
