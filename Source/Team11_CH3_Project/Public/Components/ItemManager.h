@@ -32,6 +32,9 @@ public:
 	
 	virtual EItemContainerType GetItemContainerType() const override;
 	virtual UItemInstance* GetItem(int32 Index) override;
+	void UnequipAt(int32 Index);
+	void EquipTo(int32 Index, UEquipmentInstance* EquipmentInstance);
+	void EquipGemTo(int32 Index, UEquipmentInstance* EquipmentInstance);
 	virtual bool SetItemAt(UItemInstance* ItemInstance, int32 Index) override;
 	virtual bool CanReceiveItem(UItemInstance* ItemInstance, int32 Index) override;
 	virtual bool SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int32 OtherIndex) override;

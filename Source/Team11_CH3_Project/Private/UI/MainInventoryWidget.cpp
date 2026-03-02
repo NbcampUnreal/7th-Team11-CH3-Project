@@ -18,6 +18,7 @@ void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInve
 		ItemOverlayWidget->Init(this);
 	InventoryComponent = InInventoryComponent;
 	EquipmentComponent = InEquipmentComponent;
+	InventoryComponent->OnInventorySlotChanged.AddDynamic(this, &UMainInventoryWidget::HandleItemSlotChanged);
 }
 
 void UMainInventoryWidget::UpdateEquipmentDetailWidget(const UEquipmentInstance* EquipmentSlot)
