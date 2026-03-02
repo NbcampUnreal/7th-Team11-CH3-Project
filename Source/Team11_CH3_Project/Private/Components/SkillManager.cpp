@@ -142,6 +142,17 @@ void USkillManager::EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData
 	UE_LOG(LogTemp, Warning, TEXT("EquipGem : %s"), *NewSkillData->GetName());
 }
 
+void USkillManager::UnEquipSkillGem(int32 SlotIndex)
+{
+	// 스킬 슬롯배열 체크
+	if (SkillSlots.IsValidIndex(SlotIndex) == false)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("%d In Valid SKill Slot"), SlotIndex);
+		return;
+	}
+	SkillSlots[SlotIndex]->ClearSlot();
+}
+
 void USkillManager::AddSKillGems(TArray<TSoftObjectPtr<USkillDataAsset>> Skills)
 {
 	for (TSoftObjectPtr<USkillDataAsset> SkillData : Skills)
@@ -204,8 +215,8 @@ void USkillManager::ActiveSkill(AActor* Owner, const FVector& TargetLocation, US
 	{
 		return;	
 	}
-	
-	
+
+
 	UAnimMontage* SkillMontage = SkillSlot->GetEquippedSkill()->GetSkillMontage();
 	UAnimInstance* AnimInstance = SkeletalMeshComponent->GetAnimInstance();
 	float CastSpeed = 1.0f;

@@ -47,6 +47,7 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 	{
 		bIsDashing = true;
 		ActiveSkillSlot->OnExecute();
+		Destination = ActiveSkillSlot->GetTargetLocation();
 		AnimInstance->Montage_JumpToSection(TEXT("Dashing"),SkillMontage);
 		return;
 	}

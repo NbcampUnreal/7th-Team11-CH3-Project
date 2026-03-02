@@ -1,15 +1,15 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
-#include "Components/Items/Equipments/WeaponItemData.h"
-#include "Components/Items/Equipments/ArmorItemData.h"
 #include "Components/StatComponent.h"
+#include "Types/ItemTypes.h"
 #include "T11_GameInstance.generated.h"
 
 
+class UEquipmentInstance;
 /**
  * 
  */
@@ -38,10 +38,10 @@ public:
 	int32 CurrentDifficulty = 0; // 0 == Normal, 1 == Hard Enum으로 설정하는 방향
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stat")
 	FStatData SavedStatData;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Weapon")
-	FWeaponItemData SavedWeaponData;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stat")
+	float SavedHPData;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Armor")
-	TMap<EEquipmentType, FArmorItemData> SavedEquippedArmor;
+	TArray<TObjectPtr<UEquipmentInstance>> SavedEquipments;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Skill")
 	TArray<TSoftObjectPtr<USkillDataAsset>> SavedSkillSlots;
 	// 점수 데이터 총 점수 스테이지 점수

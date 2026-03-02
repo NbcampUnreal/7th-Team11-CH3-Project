@@ -4,26 +4,40 @@
 #include "Components/Skills/ProjectileSkillData.h"
 #include "Camera/CameraComponent.h"
 #include "Components/Skills/BaseProjectile.h"
+#include "NiagaraFunctionLibrary.h"
 
 void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation)
 {
-	// 캐릭터 불러오기 수정 전 주석의 코드는 BasicAttack(깊이 2)과 다른 Skill들(깊이 3)과의 계층 깊이가 달라
-	// 동일하게 적용했더니 Fireball의 경우엔 nullptr을 가르켰음
-	//AActor* Owner = Cast<AActor>(GetOuter()->GetOuter());
-
 	// StatComp 불러오기
 	if (!IsValid(Instigator))
 	{
 		return;
 	}
+
 	UStatComponent* StatComp = Instigator->FindComponentByClass<UStatComponent>();
+
+	// 마법진 소환
+	UNiagaraSystem* MagicCircle = GetMagicCircleEffect();
+	if (IsValid(MagicCircle) == false)
+		return;
+
+	FVector SpawnLocation = Instigator->GetActorLocation();
+	SpawnLocation.Z -= 85.f;
+
+	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+		Instigator->GetWorld(),
+		MagicCircle,
+		SpawnLocation,
+		Instigator->GetActorRotation()
+	);
+
 	FVector Direction = TargetLocation - Origin;
 	// 손 -> 타겟 방향 계산
 	FRotator SpawnRotation = Direction.Rotation();
 	// 투사체 스폰
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = Instigator;
-
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	SpawnParams.Instigator = Cast<APawn>(Instigator);
 	UWorld* W = Instigator->GetWorld();
 	ABaseProjectile* Projectile = W->SpawnActor<ABaseProjectile>(

@@ -22,6 +22,8 @@ public:
 	virtual void Execute()  override;
 	virtual void Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* ActiveSkillSlot)  override;
 	virtual void OnExit()  override;
+	// 공격용 액터 스폰
+	void SpawnSkill();
 
 	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name) override;
 
@@ -37,4 +39,5 @@ private:
 
 	UPROPERTY()
 	mutable TObjectPtr<ASkillIndicatorActor> SpawnedIndicator;
+	bool bIsExecuted = false;
 };

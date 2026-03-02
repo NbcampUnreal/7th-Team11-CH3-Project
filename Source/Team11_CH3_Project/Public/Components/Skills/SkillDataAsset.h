@@ -6,7 +6,9 @@
 #include "ActiveSkillSlot.h"
 #include "Components/SkillManager.h"
 #include "Engine/DataAsset.h"
+#include "NiagaraSystem.h"
 #include "SkillDataAsset.generated.h"
+
 
 class AWeaponActor;
 class ABaseSkill;
@@ -41,6 +43,7 @@ public:
 	virtual void Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* ActiveSkillSlot) {}
 	virtual void OnExit() {}
 	ESkillType GetSkillType() const { return SkillType; }
+	UNiagaraSystem* GetMagicCircleEffect() const { return MagicCircleEffect; }
 	
 	float GetRange() const { return Range; }
 	float GetDuration()const{return Duration;}
@@ -71,4 +74,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	ESkillType SkillType;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TObjectPtr<UNiagaraSystem> MagicCircleEffect;
 };

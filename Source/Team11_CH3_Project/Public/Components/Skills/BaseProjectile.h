@@ -16,7 +16,7 @@ public:
 	ABaseProjectile();
 
 	// 초기화 (데미지, 속도 설정)
-	void Initialize(int32 IDamage, float InSpeed);
+	void Initialize(float IDamage, float InSpeed);
 
 protected:
 	// Called when the game starts or when spawned
@@ -44,5 +44,5 @@ protected:
 	TObjectPtr<class UStaticMeshComponent> MeshComponent;
 	// 데미지
 	UPROPERTY()
-	int32 Damage;
+	float Damage;
 };

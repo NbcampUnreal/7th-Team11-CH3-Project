@@ -8,10 +8,11 @@
 UENUM(BlueprintType)
 enum class EItemType : uint8
 {
-    Potion,
-    SkillGem,
     Equipment,
-    Material
+    Material,
+    Usable,
+    Parts,
+    Max
 };
 
 UENUM(BlueprintType)
@@ -22,5 +23,7 @@ enum class EEquipmentType : uint8
     Chest,
     Gloves,
     Legs,
-    Boots
+    Boots,
+    SkillGem,
+    Max
 };

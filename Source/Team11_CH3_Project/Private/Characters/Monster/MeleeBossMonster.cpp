@@ -6,6 +6,7 @@
 #include "WeaponActor.h"
 #include "Components/SkillManager.h"
 #include "NavigationSystem.h"
+#include "Components/ItemManager.h"
 
 // Sets default values
 AMeleeBossMonster::AMeleeBossMonster()
@@ -19,7 +20,7 @@ AMeleeBossMonster::AMeleeBossMonster()
 bool AMeleeBossMonster::TryAttack(AActor* Target)
 {
 	
-	if (!Target || !IsValid(WeaponActor) || SkillComponent->IsSkillActive())
+	if (!Target || SkillComponent->IsSkillActive())
 	{
 		return false;
 	}
@@ -29,7 +30,7 @@ bool AMeleeBossMonster::TryAttack(AActor* Target)
 	{
 		return false;
 	}
-	
+
 	USkillSlot* SkillSlot = SkillComponent->GetSkillSlot(BestSkillIdx);
 	FVector TargetLocation = Target->GetActorLocation();
 

@@ -36,7 +36,7 @@ ABaseProjectile::ABaseProjectile()
     InitialLifeSpan = 3.0f;
 }
 
-void ABaseProjectile::Initialize(int32 InDamage, float InSpeed)
+void ABaseProjectile::Initialize(float InDamage, float InSpeed)
 {
     Damage = InDamage;
     if (IsValid(ProjectileMovement))

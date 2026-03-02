@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/StatComponent.h"
-#include "Components/Items/Equipments/WeaponItemData.h"
 #include "FMonsterData.generated.h"
+class UWeaponItemDataAsset;
 /**
  * 
  */
@@ -27,8 +27,8 @@ struct TEAM11_CH3_PROJECT_API FMonsterData : public FTableRowBase
 	TSoftObjectPtr<USkeletalMesh> SkeletalMesh;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
-	FDataTableRowHandle DefaultWeaponRow;
-	
+	TSoftObjectPtr<UWeaponItemDataAsset> DefaultWeaponData;
+
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
 	TSoftClassPtr<UAnimInstance> AnimBlueprint;
 	

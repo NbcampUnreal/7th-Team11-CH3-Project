@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Characters/Monster/MonsterBase.h"
@@ -7,8 +7,11 @@
 #include "WeaponActor.h"
 #include "WeaponAnimInterface.h"
 #include "Characters/Monster/MonsterControllerBase.h"
+#include "Components/ItemManager.h"
 #include "Components/SkillManager.h"
 #include "Components/StatComponent.h"
+#include "Components/Items/WeaponItemDataAsset.h"
+#include "Components/Items/Equipments/EquipmentInstance.h"
 #include "Components/Skills/SkillSlot.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AISense_Damage.h"
@@ -24,7 +27,7 @@ AMonsterBase::AMonsterBase()
 	GetMesh()->SetupAttachment(RootComponent);
 	StatComponent = CreateDefaultSubobject<UStatComponent>("StatComponent");
 	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
-
+	EquipmentComponent = CreateDefaultSubobject<UItemManager>("EquipmentComponent");
 	ConstructorHelpers::FClassFinder<AMonsterControllerBase> MonsterControllerFinder(
 		TEXT("/Game/Characters/Monster/BP_MonsterControllerBase.BP_MonsterControllerBase_C"));
 	if (MonsterControllerFinder.Succeeded())
@@ -47,29 +50,20 @@ AMonsterBase::AMonsterBase()
 }
 
 
-void AMonsterBase::EquipWeapon(FWeaponItemData* WeaponItemData)
+void AMonsterBase::EquipWeapon(UEquipmentInstance* WeaponItemData)
 {
-	if (WeaponActor)
-	{
-		WeaponActor->Destroy();
-	}
-	FActorSpawnParameters SpawnInfo;
-	SpawnInfo.Owner = this;
-	WeaponActor = GetWorld()->SpawnActor<AWeaponActor>(WeaponItemData->WeaponActorClass.LoadSynchronous(),
-	                                                   SpawnInfo);
-	if (WeaponActor)
-	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	EquipmentComponent->EquipWeapon(WeaponItemData);
+	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
-		if (AnimInstance && AnimInstance->GetClass()->ImplementsInterface(UWeaponAnimInterface::StaticClass()))
+	if (AnimInstance && AnimInstance->GetClass()->ImplementsInterface(UWeaponAnimInterface::StaticClass()))
+	{
+		if (AWeaponActor* WeaponActor = EquipmentComponent->GetCurrentWeapon())
 		{
 			UAnimSequence* GripAnim = WeaponActor->GetGripAnimation();
 			IWeaponAnimInterface::Execute_UpdateGripAnim(AnimInstance, WeaponActor->GetGripAnimation(),
-			                                             (GripAnim != nullptr));
+														 (GripAnim != nullptr));
 		}
-
-		WeaponActor->Init(WeaponItemData, GetMesh());
-		SkillComponent->EquipSkillGem(0, WeaponActor->GetDefaultSkillData());
 	}
 }
 
@@ -87,11 +81,16 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	{
 		AIController->GetBrainComponent()->ResumeLogic(TEXT("Init"));
 	}
-
-
-	if (FWeaponItemData* WeaponItemData = MonsterData->DefaultWeaponRow.GetRow<FWeaponItemData>(TEXT("WeaponLoad")))
+	if (WeaponItemDataInstance)
 	{
-		EquipWeapon(WeaponItemData);
+		//WeaponItemDataInstance->BeginDestroy();
+		WeaponItemDataInstance = nullptr;
+	}
+	WeaponItemDataInstance = NewObject<UEquipmentInstance>(this);
+	if (WeaponItemDataInstance)
+	{
+		WeaponItemDataInstance->Init(MonsterData->DefaultWeaponData.LoadSynchronous(), 1);
+		EquipWeapon(WeaponItemDataInstance);
 	}
 	if (SkillComponent)
 	{
@@ -115,16 +114,33 @@ void AMonsterBase::Clear()
 	{
 		AIController->GetBrainComponent()->PauseLogic(TEXT("Death"));
 	}
-	if (WeaponActor)
-	{
-		WeaponActor->Destroy();
-	}
+
+	EquipmentComponent->Clear();
 	SkillComponent->Clear();
+	//WeaponItemDataInstance->BeginDestroy();
+	EquipmentComponent->UnequipWeapon();
+	WeaponItemDataInstance = nullptr;
 }
 
 AWeaponActor* AMonsterBase::GetWeaponActor() const
 {
-	return WeaponActor;
+	if (EquipmentComponent)
+	{
+		return EquipmentComponent->GetCurrentWeapon();
+	}
+	return nullptr;
+}
+
+void AMonsterBase::UpdateTargetLocation(const FVector& Vector)
+{
+	if (SkillComponent)
+	{
+		if (UActiveSkillSlot* ActiveSkillSlot = SkillComponent->GetActiveSkillSlot())
+		{
+			ActiveSkillSlot->SetTargetLocation(Vector);
+		}
+	}
+	
 }
 
 float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
@@ -209,11 +225,11 @@ FVector AMonsterBase::GetOriginLocation() const
 
 float AMonsterBase::GetAttackRange() const
 {
-	if (!WeaponActor)
+	if (EquipmentComponent && EquipmentComponent->GetCurrentWeapon())
 	{
-		return 0.0f;
+		return EquipmentComponent->GetCurrentWeapon()->GetAttackRange();
 	}
-	return WeaponActor->GetAttackRange();
+	return 0.0f;
 }
 
 UStatComponent* AMonsterBase::GetStatComponent() const
@@ -253,11 +269,16 @@ void AMonsterBase::PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLoca
 
 bool AMonsterBase::TryAttack(AActor* Target)
 {
-	if (!Target ||  SkillComponent->IsSkillActive())
+	if (!Target)
+	{
+		return false;
+	}
+	if (SkillComponent->IsSkillActive())
 	{
 		return false;
 	}
 
+	
 	int32 BestSkillIdx = SkillComponent->GetBestSkill(this, Target);
 	if (SkillComponent->GetCooldownRemaining(BestSkillIdx) > 0.0f)
 	{

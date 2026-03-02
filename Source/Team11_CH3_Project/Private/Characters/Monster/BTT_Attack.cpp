@@ -59,6 +59,31 @@ EBTNodeResult::Type UBTT_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 	
 }
 
+void UBTT_Attack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+{
+	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+	AMonsterControllerBase* MonsterControllerBase = Cast<AMonsterControllerBase>(OwnerComp.GetAIOwner());
+	if (!MonsterControllerBase)
+	{
+		return;
+	}
+	AMonsterBase* MonsterBase = Cast<AMonsterBase>(MonsterControllerBase->GetPawn());
+	if (!MonsterBase)
+	{
+		return ;
+	}
+	
+	if (UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent())
+	{
+		AActor* TargetActor  = Cast<AActor>(BB->GetValueAsObject(TargetActorSelector.SelectedKeyName));
+		MonsterBase->UpdateTargetLocation(TargetActor->GetActorLocation());
+		
+	}
+	
+	
+	
+}
+
 EBTNodeResult::Type UBTT_Attack::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	FBTT_AttackMemory* AttackMemory = CastInstanceNodeMemory<FBTT_AttackMemory>(NodeMemory);

@@ -4,10 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
-#include "Components/Items/PotionItemData.h"
-#include "Components/Items/SkillGemItemData.h"
-#include "Components/Items/Equipments/WeaponItemData.h"
-#include "Components/Items/Equipments/ArmorItemData.h"
 #include "ItemWorldSubsystem.generated.h"
 
 /**
@@ -21,10 +17,6 @@ class TEAM11_CH3_PROJECT_API UItemWorldSubsystem : public UWorldSubsystem
 public:
 	virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
-	FWeaponItemData* FindWeapon(FName RowName);
-	FArmorItemData* FindArmor(FName RowName);
-	FPotionItemData* FindPotion(FName RowName);
-	FSkillGemItemData* FindSkillGem(FName RowName);
 
 private:
 	UPROPERTY()
