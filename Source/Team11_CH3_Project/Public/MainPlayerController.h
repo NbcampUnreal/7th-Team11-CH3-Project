@@ -11,6 +11,7 @@
 class UInputMappingContext;
 class UInputAction;
 class UCanvasPanel;
+class UMainInventoryWidget;
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API AMainPlayerController : public APlayerController, public IGenericTeamAgentInterface
@@ -66,6 +67,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_SetCrosshairVisible(bool bVisible);
 
+	// inventory/skill
+	void HandleOpenInventory();
 protected:
 
 	// move
@@ -79,8 +82,6 @@ protected:
 	void Turn(float Value);
 	void LookUp(float Value);
 
-	// inventory/skill
-	void HandleOpenInventory();
 
 	void HandleUseSkill1();
 	void HandleUseConsumable1();
@@ -98,6 +99,13 @@ protected:
 	FGameplayTag HUDRequestTag;
 
 public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UMainInventoryWidget* InventoryWidgetInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	TSubclassOf<UMainInventoryWidget> InventoryWidgetClass;
+
+	bool bIsInvenOpened = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HUD")
 	UUserWidget* HUDWidgetInstance;

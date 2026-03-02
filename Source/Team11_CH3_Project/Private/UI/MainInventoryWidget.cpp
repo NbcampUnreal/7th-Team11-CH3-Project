@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "UI/MainInventoryWidget.h"
@@ -6,6 +6,7 @@
 #include "UI/EquipmentDetailWidget.h"
 #include "UI/InventoryWidget.h"
 #include "UI/ItemOverlayWidget.h"
+#include "MainPlayerController.h"
 
 void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInventoryComponent,
 	UItemManager* InEquipmentComponent)
@@ -18,6 +19,7 @@ void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInve
 		ItemOverlayWidget->Init(this);
 	InventoryComponent = InInventoryComponent;
 	EquipmentComponent = InEquipmentComponent;
+	InventoryComponent->OnInventorySlotChanged.AddDynamic(this, &UMainInventoryWidget::HandleItemSlotChanged);
 }
 
 void UMainInventoryWidget::UpdateEquipmentDetailWidget(UItemSlot* EquipmentSlot)
@@ -56,4 +58,18 @@ void UMainInventoryWidget::HandleItemSlotChanged(UItemSlot* SlotData)
 	case EItemContainerType::Max:
 		break;
 	}
+}
+
+FReply UMainInventoryWidget::NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
+{
+	if (InKeyEvent.GetKey() == EKeys::Tab || InKeyEvent.GetKey() == EKeys::Escape)
+	{
+		AMainPlayerController* PC = Cast<AMainPlayerController>(GetOwningPlayer());
+		if (PC)
+		{
+			PC->HandleOpenInventory();
+		}
+	}
+
+	return Super::NativeOnKeyDown(InGeometry, InKeyEvent);
 }
