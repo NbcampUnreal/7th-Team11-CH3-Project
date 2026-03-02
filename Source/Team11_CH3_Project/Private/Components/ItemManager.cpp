@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/ItemManager.h"
@@ -281,6 +281,9 @@ void UItemManager::RestoreEquipment(TArray<TObjectPtr<UEquipmentInstance>> Equip
 {
 	for (TObjectPtr<UEquipmentInstance>& EquipmentInstance : EquipmentData)
 	{
-		SetItemAt(EquipmentInstance, static_cast<int64>(EquipmentInstance->GetEquipmentType()));
+		if (EquipmentInstance)
+		{
+			SetItemAt(EquipmentInstance, static_cast<int64>(EquipmentInstance->GetEquipmentType()));
+		}
 	}
 }

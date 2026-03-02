@@ -1,4 +1,4 @@
-﻿#include "Core/T11_GameState.h"
+#include "Core/T11_GameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Core/WaveData.h"
 #include "Core/SpawnVolume.h"
@@ -168,14 +168,14 @@ void AT11_GameState::ActivatePortals()
             UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
             if (IsValid(GI) == false) return;
 
-            if (GI->CurrentStageIndex < 5 && !PortalClass->ActorHasTag(TEXT("Boss")))
+            if (GI->CurrentStageIndex < 5 && PortalClass->Difficulty != "Boss")
             {
                 SetPortalLevel(PortalClass);
                 PortalClass->SetPortalActive(true);
             }
-            else if (GI->CurrentStageIndex >= 5 && PortalClass->ActorHasTag(TEXT("Boss")))
+            else if (GI->CurrentStageIndex >= 5 && PortalClass->Difficulty == "Boss")
             {
-                PortalClass->SetTargetLevel("L_BossStage_Test");
+                PortalClass->SetTargetLevel(BossMapDataConfig.CreateConstIterator()->Key);
                 PortalClass->SetPortalActive(true);
             }
         }
