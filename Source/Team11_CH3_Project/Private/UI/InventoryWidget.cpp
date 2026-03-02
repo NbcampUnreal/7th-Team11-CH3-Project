@@ -3,6 +3,7 @@
 
 #include "UI/InventoryWidget.h"
 
+#include "Components/HorizontalBox.h"
 #include "Components/UniformGridPanel.h"
 #include "Components/Items/EquipmentItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
@@ -12,20 +13,27 @@
 void UInventoryWidget::Init(UMainInventoryWidget* InMainInventoryWidget, UInventoryComponent* InventoryComponent, UItemManager* EquipmentComponent)
 {
 	MainInventoryWidget = InMainInventoryWidget;
-	if (Inventory.Num() > 0)
+	if (InventoryWidgets.Num() > 0)
 	{
 		return;
 	}
 	if (EquipmentComponent)
 	{
-		if (SkillGemSlot0)
+		if (SkillGemBox && SkillGemWidgetClass)
 		{
-			SkillGemSlot0->Init(InMainInventoryWidget, EquipmentComponent->GetSkillGemSlot(0));
+			SkillGemBox->ClearChildren();
+
+			TArray<TObjectPtr<UEquipmentSlot>>& SkillGemSlots = EquipmentComponent->GetSkillGemSlots();
+			for (int32 i = 0; i < SkillGemSlots.Num(); i++)
+			{
+				UInteractableItemSlotWidget* NewSlot = CreateWidget<UInteractableItemSlotWidget>(this, SkillGemWidgetClass);
+				SkillGemBox->AddChildToHorizontalBox(NewSlot);
+				NewSlot->Init(InMainInventoryWidget, SkillGemSlots[i]);
+				SKillGemWidgets.Add(NewSlot);
+			}
+			
 		}
-		if (SkillGemSlot1)
-		{
-			SkillGemSlot1->Init(InMainInventoryWidget, EquipmentComponent->GetSkillGemSlot(1));
-		}
+		
 
 		HeadSlot->Init(InMainInventoryWidget, EquipmentComponent->GetEquipmentSlot(EEquipmentType::Helmet));
 		ChestSlot->Init(InMainInventoryWidget,EquipmentComponent->GetEquipmentSlot(EEquipmentType::Chest));
@@ -48,7 +56,7 @@ void UInventoryWidget::Init(UMainInventoryWidget* InMainInventoryWidget, UInvent
 				int32 Column = i % 5;
 				InventoryGrid->AddChildToUniformGrid(NewSlot, Row, Column);
 				NewSlot->Init(InMainInventoryWidget, InventorySlots[i]);
-				Inventory.Add(NewSlot);
+				InventoryWidgets.Add(NewSlot);
 			}
 		}
 	}
@@ -57,9 +65,9 @@ void UInventoryWidget::Init(UMainInventoryWidget* InMainInventoryWidget, UInvent
 
 void UInventoryWidget::HandleInventoryItemSlotChanged(UItemSlot* SlotData)
 {
-	if (Inventory.IsValidIndex(SlotData->GetIndex()))
+	if (InventoryWidgets.IsValidIndex(SlotData->GetIndex()))
 	{
-		Inventory[SlotData->GetIndex()]->UpdateSlot(SlotData);
+		InventoryWidgets[SlotData->GetIndex()]->UpdateSlot(SlotData);
 	}
 }
 
@@ -97,14 +105,9 @@ void UInventoryWidget::HandleEquipmentItemSlotChanged(UItemSlot* SlotData)
 
 void UInventoryWidget::HandleSkillGemItemSlotChanged(UItemSlot* ItemSlot)
 {
-	UInteractableItemSlotWidget* TargetSlot = nullptr;
 	int32 Index = ItemSlot->GetIndex();
-	if (Index == 1)
+	if (SKillGemWidgets.IsValidIndex(Index))
 	{
-		TargetSlot = SkillGemSlot0;
-	}else if (Index == 2)
-	{
-		TargetSlot = SkillGemSlot1;
+		SKillGemWidgets[Index]->UpdateSlot(ItemSlot);
 	}
-	TargetSlot->UpdateSlot(ItemSlot);
 }

@@ -49,7 +49,7 @@ public:
 
 	// 아이템 장착 해제 시 스탯 수정
 	void UnequipWeapon();
-	UEquipmentSlot* GetSkillGemSlot(int32 Index);
+	TArray<TObjectPtr<UEquipmentSlot>>& GetSkillGemSlots();
 	UEquipmentSlot* GetEquipmentSlot(EEquipmentType EquipmentType);
 	
 	// 장비 Stat 변경시 사용
@@ -70,7 +70,7 @@ private:
 	TArray<TObjectPtr<UEquipmentSlot>> GemSlots;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
-	int32 MaxSKillGemCount = 2;
+	int32 MaxSKillGemCount = 4;
 	// 버프 ID
 	TMap<EEquipmentType, TArray<int32>> EquipmentBuffIDs;
 };
