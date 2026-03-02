@@ -3,6 +3,7 @@
 
 #include "UI/ItemSlotWidget.h"
 
+#include "Blueprint/WidgetBlueprintLibrary.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/Items/ItemDataAsset.h"
@@ -57,6 +58,10 @@ void UItemSlotWidget::UpdateSlot(UItemSlot* InSlot)
 void UItemSlotWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+	if (UWidgetBlueprintLibrary::IsDragDropping())
+	{
+		return;
+	}
 	if (MainInventoryWidget.IsValid())
 	{
 		UItemOverlayWidget* ItemOverlayWidget = MainInventoryWidget->GetItemOverlayWidget();
@@ -67,9 +72,7 @@ void UItemSlotWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPoi
 				ItemOverlayWidget->UpdateOverlayWidget(ScreenPosition, ItemInstance);
 			}
 		}
-
 	}
-	
 }
 
 void UItemSlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
