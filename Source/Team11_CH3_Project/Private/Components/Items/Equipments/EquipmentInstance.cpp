@@ -22,6 +22,8 @@ void UEquipmentInstance::Init(UItemDataAsset* InItemDataAsset, int32 InCount)
 		ItemSlot->Init(this, Index);
 		Sockets[Index] = ItemSlot;
 	}
+	// 인스턴스 생성과 동시에 해줘야 인벤토리 창에서도 스탯이 계산되어있음
+	CalculateStats();
 }
 
 EItemContainerType UEquipmentInstance::GetItemContainerType() const
@@ -52,6 +54,9 @@ bool UEquipmentInstance::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 
 bool UEquipmentInstance::CanReceiveItem(UItemInstance* ItemInstance, int32 TargetIndex)
 {
+	if (ItemInstance == nullptr)
+		return true;
+
 	if (ItemInstance->GetItemType() == EItemType::Parts)
 	{
 		return true;
@@ -95,7 +100,12 @@ void UEquipmentInstance::CalculateStats()
 	{
 		if (Slot == nullptr)
 			continue;
-		UPartsItemDataAsset* Parts = Cast<UPartsItemDataAsset>(Slot->GetItemInstance()->GetItemDataAsset());
+
+		UItemInstance* SlotItem = Slot->GetItemInstance();
+		if (SlotItem == nullptr)
+			continue;
+
+		UPartsItemDataAsset* Parts = Cast<UPartsItemDataAsset>(SlotItem->GetItemDataAsset());
 		if (Parts == nullptr)
 			continue;
 

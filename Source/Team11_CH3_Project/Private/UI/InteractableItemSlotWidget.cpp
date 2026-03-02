@@ -39,10 +39,7 @@ FReply UInteractableItemSlotWidget::NativeOnMouseButtonUp(const FGeometry& InGeo
 		UItemInstance* ItemInstance = ItemSlot->GetItemInstance();
 		if (ItemInstance && ItemInstance->GetItemType() == EItemType::Equipment)
 		{
-			if (UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance))
-			{
-				MainInventoryWidget->UpdateEquipmentDetailWidget(EquipmentInstance);
-			}
+			MainInventoryWidget->UpdateEquipmentDetailWidget(ItemSlot.Get());
 		}
 	}
 	//TODO 드래그중이 아니라면 디테일창 표시 현재는 장비만
@@ -87,7 +84,14 @@ bool UInteractableItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry, cons
 	IItemContainer* Destination = ItemSlot->GetItemContainer();
 	int32 DestinationIndex = ItemSlot->GetIndex();
 
-	return Origin->SwapItems(OriginIndex, Destination, DestinationIndex);
+	bool bSuccess = Origin->SwapItems(OriginIndex, Destination, DestinationIndex);
+	if (bSuccess && MainInventoryWidget.IsValid())
+	{
+		MainInventoryWidget->HandleItemSlotChanged(DragOperation->OriginSlot->GetItemSlot());
+		MainInventoryWidget->HandleItemSlotChanged(ItemSlot.Get());
+
+	}
+	return bSuccess;
 }
 
 void UInteractableItemSlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)

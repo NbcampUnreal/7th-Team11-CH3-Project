@@ -22,10 +22,11 @@ void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInve
 	InventoryComponent->OnInventorySlotChanged.AddDynamic(this, &UMainInventoryWidget::HandleItemSlotChanged);
 }
 
-void UMainInventoryWidget::UpdateEquipmentDetailWidget(const UEquipmentInstance* EquipmentSlot)
+void UMainInventoryWidget::UpdateEquipmentDetailWidget(UItemSlot* EquipmentSlot)
 {
 	EquipmentDetailWidget->SetVisibility(ESlateVisibility::Visible);
 	//TODO 	
+	EquipmentDetailWidget->Update(EquipmentSlot);
 	//EquipmentDetailWidget->UpdateOverlayWidget(UEquipmentInstance* ItemInstance);
 }
 
@@ -48,10 +49,7 @@ void UMainInventoryWidget::HandleItemSlotChanged(UItemSlot* SlotData)
 		InventoryWidget->HandleEquipmentItemSlotChanged(SlotData);
 		break;
 	case EItemContainerType::PartsSockets:
-		if (UEquipmentSlot* EquipmentSlot = Cast<UEquipmentSlot>(SlotData))
-		{
-			EquipmentDetailWidget->HandlePartsSlotChanged(EquipmentSlot);
-		}
+		EquipmentDetailWidget->HandlePartsSlotChanged(SlotData);
 		break;
 	case EItemContainerType::SkillGem:
 		//TODO

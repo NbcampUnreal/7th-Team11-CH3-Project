@@ -65,35 +65,34 @@ void UInventoryWidget::HandleInventoryItemSlotChanged(UItemSlot* SlotData)
 
 void UInventoryWidget::HandleEquipmentItemSlotChanged(UItemSlot* SlotData)
 {
-	//TODO Optimization
-	UEquipmentItemDataAsset*  EquipmentItemData = Cast<UEquipmentItemDataAsset> (SlotData->GetItemInstance()->GetItemDataAsset());
-	int32 SlotIndex = SlotData->GetIndex();
-	if (EquipmentItemData)
+	//TODO Optimization -> 아이템 타입을 슬롯에서 가져오도록 교체
+	UEquipmentSlot* EquipSlot = Cast<UEquipmentSlot>(SlotData);
+	if (IsValid(EquipSlot) == false)
+		return;
+	switch (EquipSlot->GetEquipmentType())
 	{
-		switch (EquipmentItemData->GetEquipmentType())
-		{
-		case EEquipmentType::Weapon:
-			WeaponSlot->UpdateSlot(SlotData);
-			break;
-		case EEquipmentType::Helmet:
-			HeadSlot->UpdateSlot(SlotData);
-			break;
-		case EEquipmentType::Chest:
-			ChestSlot->UpdateSlot(SlotData);
-			break;
-		case EEquipmentType::Gloves:
-			HandSlot->UpdateSlot(SlotData);
-			break;
-		case EEquipmentType::Legs:
-			LegsSlot->UpdateSlot(SlotData);
-			break;
-		case EEquipmentType::Boots:
-			FeetSlot->UpdateSlot(SlotData);
-			break;
-		case EEquipmentType::SkillGem:
-			break;
-		}
+	case EEquipmentType::Weapon:
+		WeaponSlot->UpdateSlot(SlotData);
+		break;
+	case EEquipmentType::Helmet:
+		HeadSlot->UpdateSlot(SlotData);
+		break;
+	case EEquipmentType::Chest:
+		ChestSlot->UpdateSlot(SlotData);
+		break;
+	case EEquipmentType::Gloves:
+		HandSlot->UpdateSlot(SlotData);
+		break;
+	case EEquipmentType::Legs:
+		LegsSlot->UpdateSlot(SlotData);
+		break;
+	case EEquipmentType::Boots:
+		FeetSlot->UpdateSlot(SlotData);
+		break;
+	case EEquipmentType::SkillGem:
+		break;
 	}
+	
 }
 
 void UInventoryWidget::HandleSkillGemItemSlotChanged(UItemSlot* ItemSlot)
