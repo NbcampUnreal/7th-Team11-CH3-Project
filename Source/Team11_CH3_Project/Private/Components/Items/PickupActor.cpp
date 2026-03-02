@@ -16,6 +16,11 @@ APickupActor::APickupActor()
 	OverlapSphere = CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
 	RootComponent = OverlapSphere;
 	OverlapSphere->SetSphereRadius(100.f);
+	
+	OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	OverlapSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
+	OverlapSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+
 	OverlapSphere->OnComponentBeginOverlap.AddDynamic(this, &APickupActor::OnOverlapBegin);
 }
 
@@ -32,7 +37,5 @@ void APickupActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 	{
 		InventoryComponent->AddItem(ItemDataAsset,ItemCount);
 		Destroy();
-		
 	}
-
 }
