@@ -10,27 +10,32 @@
 #include "UI/ItemOverlayWidget.h"
 #include "UI/MainInventoryWidget.h"
 
-void UItemSlotWidget::Init(UMainInventoryWidget* InMainInventoryWidget)
+
+
+
+void UItemSlotWidget::Init(UMainInventoryWidget* InMainInventoryWidget, UItemSlot* InSlot)
 {
 	MainInventoryWidget = InMainInventoryWidget;
-	UpdateSlot(nullptr);
+	UpdateSlot(InSlot);
 }
 
-void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
+void UItemSlotWidget::UpdateSlot(UItemSlot* InSlot)
 {
+	ItemSlot = InSlot;
 
 	if (!IsValid(InSlot) )
 	{
 		Clear();
 		return;
 	}
-	if (!InSlot->ItemInstance || !InSlot->ItemInstance->IsValid())
+	UItemInstance* ItemInstance = ItemSlot->GetItemInstance();
+	if (!ItemInstance || !ItemInstance->IsValid())
 	{
 		Clear();
 		return;
 	}
-	ItemInstance = InSlot->ItemInstance;
-	if (UItemDataAsset* ItemData = InSlot->ItemInstance->GetItemDataAsset())
+	
+	if (UItemDataAsset* ItemData = ItemInstance->GetItemDataAsset())
 	{
 		if (Thumbnail)
 		{
@@ -39,7 +44,7 @@ void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
 		}
 		if (Count)
 		{
-			Count->SetText(FText::AsNumber(InSlot->ItemInstance->GetCount()));
+			Count->SetText(FText::AsNumber(ItemInstance->GetCount()));
 			Count->SetVisibility(ESlateVisibility::Visible);
 		}
 	}
@@ -55,10 +60,12 @@ void UItemSlotWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPoi
 	if (MainInventoryWidget.IsValid())
 	{
 		UItemOverlayWidget* ItemOverlayWidget = MainInventoryWidget->GetItemOverlayWidget();
-		if (ItemOverlayWidget && ItemInstance.IsValid())
+		if (ItemOverlayWidget && ItemSlot.IsValid() )
 		{
-			FVector2D ScreenPosition = InMouseEvent.GetScreenSpacePosition();
-			ItemOverlayWidget->UpdateOverlayWidget(ScreenPosition, ItemInstance.Get());
+			if (UItemInstance* ItemInstance = ItemSlot->GetItemInstance()){
+				FVector2D ScreenPosition = InMouseEvent.GetScreenSpacePosition();
+				ItemOverlayWidget->UpdateOverlayWidget(ScreenPosition, ItemInstance);
+			}
 		}
 
 	}
@@ -87,5 +94,4 @@ void UItemSlotWidget::Clear()
 	if (Count){ 
 		Count->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	ItemInstance = nullptr;
 }

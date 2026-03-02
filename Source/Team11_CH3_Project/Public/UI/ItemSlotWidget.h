@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Types/ItemContainerType.h"
+#include "Types/ItemTypes.h"
 #include "ItemSlotWidget.generated.h"
 
 class UItemInstance;
@@ -18,20 +20,23 @@ UCLASS()
 class TEAM11_CH3_PROJECT_API UItemSlotWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
 public:
-	void Init(UMainInventoryWidget* InMainInventoryWidget);
-	void UpdateSlot(const UItemSlot* InSlot);
+	virtual void Init(UMainInventoryWidget* InMainInventoryWidget, UItemSlot* InSlot);
+	void UpdateSlot(UItemSlot* InSlot);
+	UItemSlot* GetItemSlot() const { return ItemSlot.Get(); }
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
-protected:
 
+protected:
 	void Clear();
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> Thumbnail;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> Count;
-private:
+
 	TWeakObjectPtr<UMainInventoryWidget> MainInventoryWidget;
-	TWeakObjectPtr<UItemInstance> ItemInstance;
+
+	TWeakObjectPtr<UItemSlot> ItemSlot;
 };

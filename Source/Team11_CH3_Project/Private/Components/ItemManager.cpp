@@ -21,6 +21,7 @@ UItemManager::UItemManager()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
+	bWantsInitializeComponent = true;
 
 	// ...
 }
@@ -28,109 +29,47 @@ UItemManager::UItemManager()
 void UItemManager::InitializeComponent()
 {
 	Super::InitializeComponent();
-	UEnum* EnumPtr = StaticEnum<EEquipmentType>();
-	if (EnumPtr)
+	if (UEnum* EnumPtr = StaticEnum<EEquipmentType>())
 	{
 		for (int32 i = 0; i < EnumPtr->NumEnums(); ++i)
 		{
 			EEquipmentType Type = static_cast<EEquipmentType>(EnumPtr->GetValueByIndex(i));
 			UEquipmentSlot* EquipmentSlot = NewObject<UEquipmentSlot>(this);
-			EquipmentSlot->ItemType = EItemType::Equipment;
-			EquipmentSlots.Add(Type, EquipmentSlot);
+			EquipmentSlot->Init(this, i, Type);
+			EquipmentSlots.Add(EquipmentSlot);
 		}
 	}
 	GemSlots.SetNum(MaxSKillGemCount);
 	for (int32 i = 0; i < MaxSKillGemCount; ++i)
 	{
 		UEquipmentSlot* EquipmentSlot = NewObject<UEquipmentSlot>(this);
-
 		GemSlots[i] = EquipmentSlot;
-		GemSlots[i]->ItemType = EItemType::Equipment;
-		GemSlots[i]->EquipmentType = EEquipmentType::SkillGem;
-		GemSlots[i]->ItemInstance = nullptr;
+		GemSlots[i]->Init(this, i, EEquipmentType::SkillGem);
 	}
 }
 
-void UItemManager::Equip(UEquipmentInstance* Data)
+TArray<TObjectPtr<UEquipmentInstance>> UItemManager::GetEquipments()
 {
-
-	if (UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(Data->GetItemDataAsset()))
+	TArray<TObjectPtr<UEquipmentInstance>> Ret;
+	for (TObjectPtr<UEquipmentSlot>& EquipmentSlot : EquipmentSlots)
 	{
-		EEquipmentType Type = EquipmentItemDataAsset->GetEquipmentType();
-		// OnEquipmentStatChanged 바인딩 및 장비 장착 여부 수정 set 스탯 계산
-		Data->OnStatsRecalculated.AddDynamic(this, &UItemManager::OnEquipmentStatChanged);
-		Data->SetIsEquipped(true);
-		// 장착하고 스탯 계산 -> OnEquipmentStatChanged 호출
-		Data->CalculateStats();
-
-		if (EEquipmentType::Weapon == EquipmentItemDataAsset->GetEquipmentType())
-		{
-			EquipWeapon(Data);
-		}
-	}
-}
-
-void UItemManager::Unequip(EEquipmentType SlotType)
-{
-	UEquipmentSlot* Slot = EquipmentSlots.FindRef(SlotType);
-	if (IsValid(Slot) == false)
-		return;
-	UEquipmentInstance* Instance = Cast<UEquipmentInstance>(Slot->ItemInstance);
-	if (IsValid(Instance) == false)
-		return;
-	UBuffManager* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
-	if (IsValid(BuffManager) == false)
-		return;
-
-	// 버프 해제
-	if (TArray<int32>* IDs = EquipmentBuffIDs.Find(SlotType))
-	{
-		for (int32& ID : *IDs)
-		{
-			BuffManager->RemoveBuff(ID);
-		}
-		IDs->Empty();
-	}
-	// 바인딩 해제 및 장비 장착 여부 수정
-	Instance->OnStatsRecalculated.RemoveDynamic(this, &UItemManager::OnEquipmentStatChanged);
-	Instance->SetIsEquipped(false);
-	Slot->ItemInstance = nullptr;
-}
-
-
-TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> UItemManager::GetEquipments()
-{
-	TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> Ret;
-	for (auto& Pair : EquipmentSlots)
-	{
-		Ret.Add(Pair.Key, Cast<UEquipmentInstance>(Pair.Value->ItemInstance));
+		Ret.Add(Cast<UEquipmentInstance>(EquipmentSlot->GetItemInstance()));
 	}
 	return Ret;
 }
 
 void UItemManager::Clear()
 {
-	Super::InitializeComponent();
-	UEnum* EnumPtr = StaticEnum<EEquipmentType>();
-	if (EnumPtr)
+	UnequipWeapon();
+	for (int32 i = 0; i < EquipmentSlots.Num(); ++i)
 	{
-		for (int32 i = 0; i < EnumPtr->NumEnums(); ++i)
-		{
-			EEquipmentType Type = static_cast<EEquipmentType>(EnumPtr->GetValueByIndex(i));
-			Unequip(EEquipmentType::Weapon);
-		}
+		EquipmentSlots[i]->SetItemInstance(nullptr);
+	}
+	for (int32 i = 0; i < GemSlots.Num(); ++i)
+	{
+		GemSlots[i]->SetItemInstance(nullptr);
 	}
 }
-
-// Called when the game starts
-void UItemManager::BeginPlay()
-{
-	Super::BeginPlay();
-
-
-	// ...
-}
-
 
 void UItemManager::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 {
@@ -143,8 +82,6 @@ void UItemManager::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.Owner = GetOwner();
-
-
 	AWeaponActor* Weapon = GetWorld()->SpawnActor<AWeaponActor>(
 		WeaponItemDataAsset->GetWeaponActorClass().LoadSynchronous(), SpawnParams);
 	if (IsValid(Weapon))
@@ -153,12 +90,7 @@ void UItemManager::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 		Weapon->Init(WeaponItemDataAsset, Mesh);
 
 		CurrentWeapon = Weapon;
-		if (EquipmentSlots.Find(EEquipmentType::Weapon))
-		{
-			EquipmentSlots[EEquipmentType::Weapon]->ItemInstance = WeaponItemInstance;
-			EquipmentSlots[EEquipmentType::Weapon]->EquipmentType = EEquipmentType::Weapon;
-		}
-		// PlayerCharacter의 WeaponActor 갱신
+
 		if (APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner()))
 		{
 			if (USkillManager* SkillComponent = Player->FindComponentByClass<USkillManager>())
@@ -176,41 +108,143 @@ void UItemManager::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 	}
 }
 
-void UItemManager::EquipSkillGem(UEquipmentInstance* SkillGemInstance, int32 Index)
+EItemContainerType UItemManager::GetItemContainerType() const
 {
-	if (!GemSlots.IsValidIndex(Index))
+	return EItemContainerType::Equipment;
+}
+
+
+UItemInstance* UItemManager::GetItem(int32 Index)
+{
+	if (Index < 0)
 	{
-		return;
+		return nullptr;
 	}
 
-	GemSlots[Index]->ItemInstance = SkillGemInstance;
-	if (AActor* Owner = GetOwner())
+	if (Index < EquipmentSlots.Num())
 	{
-		if (USkillManager* SkillComponent = Owner->FindComponentByClass<USkillManager>())
+		if (EquipmentSlots[Index])
 		{
-			if (UGemItemDataAsset* GemItemDataAsset = Cast<UGemItemDataAsset>(SkillGemInstance->GetItemDataAsset()))
+			return EquipmentSlots[Index]->GetItemInstance();
+		}
+		return nullptr;
+	}
+	else if (Index < EquipmentSlots.Num() + GemSlots.Num())
+	{
+		Index -= EquipmentSlots.Num();
+		if (GemSlots[Index])
+		{
+			return GemSlots[Index]->GetItemInstance();
+		}
+		return nullptr;
+	}
+	return nullptr;
+}
+
+bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
+{
+	UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance);
+	if (!EquipmentInstance)
+	{
+		//TODO STAT And BroadCast
+		return true;
+	}
+	if (Index < 0)
+	{
+		return false;
+	}
+	if (Index < EquipmentSlots.Num())
+	{
+		if (EquipmentSlots[Index] && EquipmentSlots[Index]->GetEquipmentType() == EquipmentInstance->GetEquipmentType())
+		{
+			//TODO STAT And BroadCast
+			EquipmentSlots[Index]->SetItemInstance(EquipmentInstance);
+		}
+		if (UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(
+			ItemInstance->GetItemDataAsset()))
+		{
+			if (EEquipmentType::Weapon == EquipmentItemDataAsset->GetEquipmentType())
 			{
-				SkillComponent->EquipSkillGem(Index + 1, GemItemDataAsset->GetSkillData());
+				EquipWeapon(EquipmentInstance);
 			}
 		}
 	}
-}
-
-void UItemManager::UnEquipSkillGem(int32 Index)
-{
-	if (!GemSlots.IsValidIndex(Index))
+	else if (Index < EquipmentSlots.Num() + GemSlots.Num())
 	{
-		return;
-	}
-	
-	GemSlots[Index]->ItemInstance = nullptr;
-	if (AActor* Owner = GetOwner())
-	{
-		if (USkillManager* SkillComponent = Owner->FindComponentByClass<USkillManager>())
+		Index -= EquipmentSlots.Num();
+		if (!GemSlots.IsValidIndex(Index))
 		{
-			SkillComponent->UnEquipSkillGem(Index+1);
+			return false;
+		}
+
+		GemSlots[Index]->SetItemInstance(EquipmentInstance);
+		if (AActor* Owner = GetOwner())
+		{
+			if (USkillManager* SkillComponent = Owner->FindComponentByClass<USkillManager>())
+			{
+				if (UGemItemDataAsset* GemItemDataAsset = Cast<
+					UGemItemDataAsset>(EquipmentInstance->GetItemDataAsset()))
+				{
+					//TODO STAT And BroadCast
+					SkillComponent->EquipSkillGem(Index + 1, GemItemDataAsset->GetSkillData());
+				}
+			}
 		}
 	}
+	return true;
+}
+
+
+bool UItemManager::CanReceiveItem(UItemInstance* ItemInstance, int32 Index)
+{
+	if (Index < 0)
+	{
+		return false;
+	}
+	UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance);
+	if (!EquipmentInstance)
+	{
+		return false;
+	}
+	if (Index < EquipmentSlots.Num())
+	{
+		if (EquipmentSlots[Index]->GetEquipmentType() != EquipmentInstance->GetEquipmentType())
+		{
+			return false;
+		}
+		return true;
+	}
+	else if (Index < EquipmentSlots.Num() + GemSlots.Num())
+	{
+		Index -= EquipmentSlots.Num();
+		if (EquipmentInstance->GetEquipmentType() != EEquipmentType::SkillGem)
+		{
+			return false;
+		}
+		return true;
+	}
+	return false;
+}
+
+bool UItemManager::SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int32 OtherIndex)
+{
+	if (OtherContainer == nullptr)
+	{
+		return false;
+	}
+	UItemInstance* OtherItemInstance = OtherContainer->GetItem(OtherIndex);
+	UItemInstance* MyItemInstance = GetItem(MyIndex);
+	if (!CanReceiveItem(OtherItemInstance, MyIndex))
+	{
+		return false;
+	}
+	if (!OtherContainer->CanReceiveItem(MyItemInstance, OtherIndex))
+	{
+		return false;
+	}
+	SetItemAt(OtherItemInstance, MyIndex);
+	OtherContainer->SetItemAt(MyItemInstance, OtherIndex);
+	return true;
 }
 
 void UItemManager::UnequipWeapon()
@@ -221,6 +255,25 @@ void UItemManager::UnequipWeapon()
 	CurrentWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
 	CurrentWeapon->Destroy();
 	CurrentWeapon = nullptr;
+}
+
+UEquipmentSlot* UItemManager::GetSkillGemSlot(int32 Index)
+{
+	if (GemSlots.IsValidIndex(Index))
+	{
+		return GemSlots[Index];
+	}
+	return nullptr;
+}
+
+UEquipmentSlot* UItemManager::GetEquipmentSlot(EEquipmentType EquipmentType)
+{
+	int64 Index = static_cast<int64>(EquipmentType);
+	if (EquipmentSlots.IsValidIndex(Index))
+	{
+		return EquipmentSlots[Index];
+	}
+	return nullptr;
 }
 
 void UItemManager::OnEquipmentStatChanged(EEquipmentType Type, UEquipmentInstance* Instance)
@@ -249,10 +302,10 @@ void UItemManager::OnEquipmentStatChanged(EEquipmentType Type, UEquipmentInstanc
 }
 
 
-void UItemManager::RestoreEquipment(TMap<EEquipmentType, TObjectPtr<UEquipmentInstance>> EquipmentData)
+void UItemManager::RestoreEquipment(TArray<TObjectPtr<UEquipmentInstance>> EquipmentData)
 {
-	for (auto& Pair : EquipmentData)
+	for (TObjectPtr<UEquipmentInstance>& EquipmentInstance : EquipmentData)
 	{
-		Equip(Pair.Value);
+		SetItemAt(EquipmentInstance, static_cast<int64>(EquipmentInstance->GetEquipmentType()));
 	}
 }

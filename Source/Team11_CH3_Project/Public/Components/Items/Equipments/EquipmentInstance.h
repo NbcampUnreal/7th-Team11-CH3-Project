@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ItemContainer.h"
 #include "ItemInstance.h"
 #include "Types/ItemTypes.h"
 #include "Types/StatTypes.h"
@@ -19,14 +20,21 @@ class UEquipmentItemDataAsset;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnStatsRecalculated, EEquipmentType, Type, UEquipmentInstance*, Instance);
 
 UCLASS()
-class TEAM11_CH3_PROJECT_API UEquipmentInstance : public UItemInstance
+class TEAM11_CH3_PROJECT_API UEquipmentInstance : public UItemInstance, public IItemContainer
 {
 	GENERATED_BODY()
 
 public:
-	void Init(UEquipmentItemDataAsset* InItemDataAsset, int32 InMaxGemCount=3);
-	void EquipParts(UItemInstance* PartsItemDataAsset, int32 Index);
-	void UnEquipParts(int32 Index);
+	virtual void Init(UItemDataAsset* InItemDataAsset, int32 InCount) override;	
+	virtual EItemContainerType GetItemContainerType() const override;
+	virtual UItemInstance* GetItem(int32 Index) override;
+	virtual bool SetItemAt(UItemInstance* ItemInstance, int32 Index) override;
+	virtual bool CanReceiveItem(UItemInstance* ItemInstance, int32 TargetIndex) override;	
+	virtual bool SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int32 OtherIndex) override;
+	
+	//void Init(UEquipmentItemDataAsset* InItemDataAsset, int32 InMaxGemCount=3);
+	//void EquipParts(UItemInstance* PartsItemDataAsset, int32 Index);
+	//void UnEquipParts(int32 Index);
 	// Stat 계산 및 불러오기
 	void CalculateStats();
 	float GetStat(EStat Stat) const;
@@ -46,7 +54,7 @@ protected:
 	TArray<TObjectPtr<UItemSlot>> Sockets;
 	
 private:
-	int32 MaxGemCount;
+	int32 MaxGemCount = 3;
 	EEquipmentType EquipmentType;
 	// Container대신 EquipmentInstance에서 Stat보유
 	UPROPERTY()

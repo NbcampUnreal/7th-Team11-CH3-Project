@@ -7,6 +7,8 @@
 #include "Types/ItemContainerType.h"
 #include "InventoryWidget.generated.h"
 
+class UItemManager;
+class UInventoryComponent;
 class UMainInventoryWidget;
 class UGridPanel;
 class UUniformGridPanel;
@@ -23,11 +25,12 @@ class TEAM11_CH3_PROJECT_API UInventoryWidget : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void Init(UMainInventoryWidget* InMainInventoryWidget, int32 InventorySize);
+	void Init(UMainInventoryWidget* InMainInventoryWidget, UInventoryComponent* InventoryComponent, UItemManager* EquipmentComponent);
 	UFUNCTION(BlueprintCallable)
-	void HandleInventoryItemSlotChanged(const UItemSlot* SlotData, int32 SlotIndex);
+	void HandleInventoryItemSlotChanged(UItemSlot* SlotData);
 	UFUNCTION(BlueprintCallable)
-	void HandleEquipmentItemSlotChanged(const UItemSlot* SlotData, int32 SlotIndex);
+	void HandleEquipmentItemSlotChanged(UItemSlot* SlotData);
+	void HandleSkillGemItemSlotChanged(UItemSlot* ItemSlot);
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -44,9 +47,9 @@ protected:
 	TObjectPtr<UInteractableItemSlotWidget> FeetSlot;
 
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UInteractableItemSlotWidget> SkillGemSlot1;
+	TObjectPtr<UInteractableItemSlotWidget> SkillGemSlot0;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UInteractableItemSlotWidget> SkillGemSlot2;
+	TObjectPtr<UInteractableItemSlotWidget> SkillGemSlot1;
 	
 
 	UPROPERTY(meta = (BindWidget))

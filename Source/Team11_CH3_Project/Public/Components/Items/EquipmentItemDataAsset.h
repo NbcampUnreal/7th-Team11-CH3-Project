@@ -16,9 +16,11 @@ class TEAM11_CH3_PROJECT_API UEquipmentItemDataAsset : public UItemDataAsset
 	GENERATED_BODY()
 public:
 	EEquipmentType GetEquipmentType()const{return EquipmentType;}
-	const TMap<EStat,float>& GetStatBonuses() const{return StatBonuses;}
-	
+	TMap<EStat,float> GetStatBonuses() const{return StatBonuses;}
+	int32 GetMaxPartsCount()const{return MaxPartsCount;}
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Equipment")
+	int32 MaxPartsCount;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Equipment")
 	EEquipmentType EquipmentType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Equipment")
