@@ -45,8 +45,8 @@ bool UEquipmentInstance::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 		return false;
 	}
 	Sockets[Index]->SetItemInstance(ItemInstance);
-	//TODO Recalculate Stat And BroadCast
 	
+	CalculateStats();
 	return true;
 }
 
@@ -78,9 +78,6 @@ bool UEquipmentInstance::SwapItems(int32 MyIndex, IItemContainer* OtherContainer
 	SetItemAt(OtherItemInstance, MyIndex);
 	OtherContainer->SetItemAt(MyItemInstance, OtherIndex);
 	return true;
-		Sockets[Index]->ItemInstance = nullptr;
-		CalculateStats();
-	}
 }
 
 void UEquipmentInstance::CalculateStats()
@@ -96,9 +93,9 @@ void UEquipmentInstance::CalculateStats()
 
 	for (UItemSlot* Slot : Sockets)
 	{
-		if (Slot->IsValid() == false)
+		if (Slot == nullptr)
 			continue;
-		UPartsItemDataAsset* Parts = Cast<UPartsItemDataAsset>(Slot->ItemInstance->GetItemDataAsset());
+		UPartsItemDataAsset* Parts = Cast<UPartsItemDataAsset>(Slot->GetItemInstance()->GetItemDataAsset());
 		if (Parts == nullptr)
 			continue;
 

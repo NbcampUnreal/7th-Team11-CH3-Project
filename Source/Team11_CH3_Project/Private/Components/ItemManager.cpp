@@ -140,26 +140,80 @@ UItemInstance* UItemManager::GetItem(int32 Index)
 	}
 	return nullptr;
 }
-
+// 비우는것도 여기서 있는거랑 있는거 바꿀때 구현X 
 bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 {
 	UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance);
-	if (!EquipmentInstance)
-	{
-		//TODO STAT And BroadCast
-		return true;
-	}
+
 	if (Index < 0)
 	{
 		return false;
 	}
+
+	// 장비 스왑용 장착중인 장비랑 빈칸이랑 교환
+	if (!EquipmentInstance)
+	{
+		// 브로드 캐스트 해제
+		// 바인딩 해제 및 장비 장착 여부 수정
+		UBuffManager* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
+		if (IsValid(BuffManager))
+		{
+			// 버프 해제
+			if (TArray<int32>* IDs = EquipmentBuffIDs.Find(EquipmentInstance->GetEquipmentType()))
+			{
+				for (int32& ID : *IDs)
+				{
+					BuffManager->RemoveBuff(ID);
+				}
+				IDs->Empty();
+			}
+		}
+
+		EquipmentInstance->OnStatsRecalculated.RemoveDynamic(this, &UItemManager::OnEquipmentStatChanged);
+		EquipmentInstance->SetIsEquipped(false);
+		EquipmentSlots[Index]->SetItemInstance(nullptr);
+		//TODO UI 브로드 캐스트
+		EquipmentSlots[Index]->SetItemInstance(EquipmentInstance);
+		return true;
+	}
+
+	// 장비 장착
 	if (Index < EquipmentSlots.Num())
 	{
+		// 장비
 		if (EquipmentSlots[Index] && EquipmentSlots[Index]->GetEquipmentType() == EquipmentInstance->GetEquipmentType())
 		{
-			//TODO STAT And BroadCast
+			
+			// 브로드 캐스트 해제
+			// 바인딩 해제 및 장비 장착 여부 수정
+			UBuffManager* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
+			if (IsValid(BuffManager))
+			{
+				// 버프 해제
+				if (TArray<int32>* IDs = EquipmentBuffIDs.Find(EquipmentInstance->GetEquipmentType()))
+				{
+					for (int32& ID : *IDs)
+					{
+						BuffManager->RemoveBuff(ID);
+					}
+					IDs->Empty();
+				}
+			}
+
+
+			EquipmentInstance->OnStatsRecalculated.RemoveDynamic(this, &UItemManager::OnEquipmentStatChanged);
+			EquipmentInstance->SetIsEquipped(false);
+			EquipmentSlots[Index]->SetItemInstance(nullptr);
+			//TODO STAT And BroadCast UI 브로드 캐스트
 			EquipmentSlots[Index]->SetItemInstance(EquipmentInstance);
+			
+			// OnEquipmentStatChanged 바인딩 및 장비 장착 여부 수정 set 스탯 계산
+			EquipmentInstance->OnStatsRecalculated.AddDynamic(this, &UItemManager::OnEquipmentStatChanged);
+			EquipmentInstance->SetIsEquipped(true);
+			// 장착하고 스탯 계산 -> OnEquipmentStatChanged 호출
+			EquipmentInstance->CalculateStats();
 		}
+		// 무기
 		if (UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(
 			ItemInstance->GetItemDataAsset()))
 		{
@@ -169,6 +223,7 @@ bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 			}
 		}
 	}
+	// 스킬 젬
 	else if (Index < EquipmentSlots.Num() + GemSlots.Num())
 	{
 		Index -= EquipmentSlots.Num();
@@ -185,7 +240,7 @@ bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 				if (UGemItemDataAsset* GemItemDataAsset = Cast<
 					UGemItemDataAsset>(EquipmentInstance->GetItemDataAsset()))
 				{
-					//TODO STAT And BroadCast
+					//TODO UI 브로드 캐스트
 					SkillComponent->EquipSkillGem(Index + 1, GemItemDataAsset->GetSkillData());
 				}
 			}

@@ -52,9 +52,6 @@ public:
 	// 장비 Stat 변경시 사용
 	UFUNCTION()
 	void OnEquipmentStatChanged(EEquipmentType Type, UEquipmentInstance* Instance);
-protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
 
 private:
 
