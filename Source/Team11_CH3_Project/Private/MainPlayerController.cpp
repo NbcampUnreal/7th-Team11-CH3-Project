@@ -19,6 +19,7 @@
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanel.h"
+#include "UI/MainInventoryWidget.h"
 
 AMainPlayerController::AMainPlayerController()
 {
@@ -53,7 +54,11 @@ void AMainPlayerController::BeginPlay()
 	}
 	if (InventoryWidgetClass)
 	{
-		InventoryWidgetInstance = CreateWidget<UUserWidget>(this, InventoryWidgetClass);
+		InventoryWidgetInstance = CreateWidget<UMainInventoryWidget>(this, InventoryWidgetClass);
+		if (APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetPawn()))
+		{
+			InventoryWidgetInstance->Init(20, PlayerChar->FindComponentByClass<UInventoryComponent>(), PlayerChar->FindComponentByClass<UItemManager>());
+		}
 	}
 
 	this->PlayerCameraManager->StartCameraFade(1.f, 0.f, 2.0f, FLinearColor::Black, false, false);

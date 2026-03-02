@@ -11,6 +11,7 @@
 class UInputMappingContext;
 class UInputAction;
 class UCanvasPanel;
+class UMainInventoryWidget;
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API AMainPlayerController : public APlayerController, public IGenericTeamAgentInterface
@@ -99,10 +100,10 @@ protected:
 
 public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
-	UUserWidget* InventoryWidgetInstance;
+	UMainInventoryWidget* InventoryWidgetInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-	TSubclassOf<UUserWidget> InventoryWidgetClass;
+	TSubclassOf<UMainInventoryWidget> InventoryWidgetClass;
 
 	bool bIsInvenOpened = false;
 
