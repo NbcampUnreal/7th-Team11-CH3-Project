@@ -16,6 +16,7 @@
 #include "Components/Items/Equipments/EquipmentInstance.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Core/T11_GameInstance.h"
+#include "Components/Items/EquipmentItemDataAsset.h"
 
 APlayerCharacter::APlayerCharacter()
 {
@@ -273,7 +274,7 @@ void APlayerCharacter::BeginPlay()
 		
 		UEquipmentInstance* EquipmentInstance = NewObject<UEquipmentInstance>(GetGameInstance());
 		EquipmentInstance->Init(TESTWEAPONDATAASSET, 1);
-		ItemManager->EquipWeapon(EquipmentInstance);
+		ItemManager->SetItemAt(EquipmentInstance, 0);
 #pragma endregion
 	}
 
