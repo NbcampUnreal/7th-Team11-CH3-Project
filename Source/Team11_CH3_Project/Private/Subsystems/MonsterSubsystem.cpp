@@ -82,6 +82,11 @@ void UMonsterSubsystem::OnMonsterDeath(AMonsterBase* DeadMonster)
 	DeadMonster->SetActorEnableCollision(false);
 	FTimerHandle SpawnedMonsterTimer;
 	GetWorld()->GetTimerManager().SetTimer(SpawnedMonsterTimer,[this,DeadMonster](){DespawnMonster(DeadMonster);},5.0f,false);
+	if (AT11_GameState* GameState = GetWorld()->GetGameState<AT11_GameState>())
+	{
+		// 아이템 드랍을 위해서 몬스터 위치 매개변수(완료) 및 점수 데이터 추가(예정)
+		GameState->OnMonsterKilled(DeadMonster->GetActorLocation(),DeadMonster->GetScoreValue());
+	}
 }
 
 void UMonsterSubsystem::DespawnMonster(AMonsterBase* DeadMonster)
@@ -95,12 +100,5 @@ void UMonsterSubsystem::DespawnMonster(AMonsterBase* DeadMonster)
 		DeadMonster->SetActorHiddenInGame(true);
 		DeadMonster->SetActorEnableCollision(false);
 		DeadMonster->SetActorTickEnabled(false);
-
-		AT11_GameState* GameState = GetWorld()->GetGameState<AT11_GameState>();
-		if (GameState)
-		{
-			// 아이템 드랍을 위해서 몬스터 위치 매개변수(완료) 및 점수 데이터 추가(예정)
-			GameState->OnMonsterKilled(DeadMonster->GetActorLocation(),DeadMonster->GetScoreValue());
-		}
 	}
 }
