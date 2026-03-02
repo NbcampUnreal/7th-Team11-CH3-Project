@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "EquipmentItemDataAsset.h"
 #include "ItemDataAsset.h"
 #include "Components/Skills/SkillDataAsset.h"
 #include "GemItemDataAsset.generated.h"
@@ -11,7 +12,7 @@
  * 
  */
 UCLASS()
-class TEAM11_CH3_PROJECT_API UGemItemDataAsset : public UItemDataAsset
+class TEAM11_CH3_PROJECT_API UGemItemDataAsset : public UEquipmentItemDataAsset
 {
 	GENERATED_BODY()
 public:

@@ -18,7 +18,7 @@ class TEAM11_CH3_PROJECT_API UItemInstance : public UObject
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void Init(UItemDataAsset* InItemDataAsset, int32 InCount);
+	virtual void Init(UItemDataAsset* InItemDataAsset, int32 InCount);
 	FText GetItemName() const;
 	EItemType GetItemType() const;
 	UItemDataAsset* GetItemDataAsset() const;

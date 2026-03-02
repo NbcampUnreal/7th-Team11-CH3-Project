@@ -12,6 +12,7 @@
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
 
+class UEquipmentItemDataAsset;
 class UItemDataAsset;
 class USkillSlot;
 class AWeaponActor;
@@ -50,7 +51,7 @@ class TEAM11_CH3_PROJECT_API APlayerCharacter : public ABaseCharacter
 public:
 #pragma region TESTCODE
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Test|Weapon")
-	TObjectPtr<UItemDataAsset> TESTWEAPONDATAASSET;
+	TObjectPtr<UEquipmentItemDataAsset> TESTWEAPONDATAASSET;
 #pragma endregion
 	APlayerCharacter();
 

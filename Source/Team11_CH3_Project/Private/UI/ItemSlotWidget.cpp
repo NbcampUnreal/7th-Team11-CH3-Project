@@ -7,22 +7,35 @@
 #include "Components/TextBlock.h"
 #include "Components/Items/ItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
-#include "Subsystems/ItemWorldSubsystem.h"
+#include "UI/ItemOverlayWidget.h"
+#include "UI/MainInventoryWidget.h"
 
-void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
+
+
+
+void UItemSlotWidget::Init(UMainInventoryWidget* InMainInventoryWidget, UItemSlot* InSlot)
 {
+	MainInventoryWidget = InMainInventoryWidget;
+	UpdateSlot(InSlot);
+}
+
+void UItemSlotWidget::UpdateSlot(UItemSlot* InSlot)
+{
+	ItemSlot = InSlot;
+
 	if (!IsValid(InSlot) )
 	{
 		Clear();
 		return;
 	}
-	if (!InSlot->ItemInstance || !InSlot->ItemInstance->IsValid())
+	UItemInstance* ItemInstance = ItemSlot->GetItemInstance();
+	if (!ItemInstance || !ItemInstance->IsValid())
 	{
 		Clear();
 		return;
 	}
-	;
-	if (UItemDataAsset* ItemData = InSlot->ItemInstance->GetItemDataAsset())
+	
+	if (UItemDataAsset* ItemData = ItemInstance->GetItemDataAsset())
 	{
 		if (Thumbnail)
 		{
@@ -31,7 +44,7 @@ void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
 		}
 		if (Count)
 		{
-			Count->SetText(FText::AsNumber(InSlot->ItemInstance->GetCount()));
+			Count->SetText(FText::AsNumber(ItemInstance->GetCount()));
 			Count->SetVisibility(ESlateVisibility::Visible);
 		}
 	}
@@ -40,36 +53,37 @@ void UItemSlotWidget::UpdateSlot(const UItemSlot* InSlot)
 		Clear();
 	}
 }
+
+void UItemSlotWidget::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+	if (MainInventoryWidget.IsValid())
+	{
+		UItemOverlayWidget* ItemOverlayWidget = MainInventoryWidget->GetItemOverlayWidget();
+		if (ItemOverlayWidget && ItemSlot.IsValid() )
+		{
+			if (UItemInstance* ItemInstance = ItemSlot->GetItemInstance()){
+				FVector2D ScreenPosition = InMouseEvent.GetScreenSpacePosition();
+				ItemOverlayWidget->UpdateOverlayWidget(ScreenPosition, ItemInstance);
+			}
+		}
+
+	}
 	
-
-FReply UItemSlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
-{
-	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 }
 
-FReply UItemSlotWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+void UItemSlotWidget::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 {
-	
-	//TODO 드래그중이 아니라면 디테일창 표시 현재는 장비만
-	return Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
+	Super::NativeOnMouseLeave(InMouseEvent);
+	if (MainInventoryWidget.IsValid())
+	{
+		if (UItemOverlayWidget* ItemOverlayWidget = MainInventoryWidget->GetItemOverlayWidget())
+		{
+			ItemOverlayWidget->ClearOverlayWidget();
+		}
+	}
 }
 
-void UItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent,
-	UDragDropOperation*& OutOperation)
-{
-	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
-}
-
-bool UItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent,
-	UDragDropOperation* InOperation)
-{
-	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
-}
-
-void UItemSlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
-{
-	Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
-}
 
 void UItemSlotWidget::Clear()
 {
