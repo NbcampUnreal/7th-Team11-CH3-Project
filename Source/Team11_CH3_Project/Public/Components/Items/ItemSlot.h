@@ -23,6 +23,7 @@ public:
 		ItemContainer = Cast<UObject>(InItemContainer);
 		Index = InIndex;
 	}
+
 	virtual void SetItemInstance(UItemInstance* InItemInstance) { ItemInstance = InItemInstance; }
 
 	EItemType GetItemType() const
@@ -57,6 +58,7 @@ public:
 		Super::Init(InItemContainer, InIndex);
 		EquipmentType = InEquipmentType;
 	}
+
 	virtual void SetItemInstance(UItemInstance* InItemInstance) override
 	{
 		Super::SetItemInstance(InItemInstance);
@@ -65,6 +67,8 @@ public:
 			EquipmentType = EquipmentInstance->GetEquipmentType();
 		}
 	}
+
+	UEquipmentInstance* GetEquipmentInstance() const { return Cast<UEquipmentInstance>(ItemInstance); }
 
 	EEquipmentType GetEquipmentType() const { return EquipmentType; }
 
