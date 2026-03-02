@@ -167,6 +167,8 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 		if (AAIController* AIController = Cast<AAIController>(GetController()))
 		{
 			AIController->GetBrainComponent()->PauseLogic(TEXT("Death"));
+			AIController->StopMovement();
+			AIController->ClearFocus(EAIFocusPriority::Gameplay);
 		}
 		StopAnimMontage();
 		PlayAnimMontage(MonsterDieAnimMontage, 1,TEXT("FullBody"));
