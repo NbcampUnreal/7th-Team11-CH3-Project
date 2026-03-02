@@ -19,6 +19,7 @@
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanel.h"
+#include "UI/MainInventoryWidget.h"
 
 AMainPlayerController::AMainPlayerController()
 {
@@ -50,6 +51,14 @@ void AMainPlayerController::BeginPlay()
 	if (LoadingWidgetClass)
 	{
 		LoadingWidgetInstance = CreateWidget<UUserWidget>(this, LoadingWidgetClass);
+	}
+	if (InventoryWidgetClass)
+	{
+		InventoryWidgetInstance = CreateWidget<UMainInventoryWidget>(this, InventoryWidgetClass);
+		if (APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetPawn()))
+		{
+			InventoryWidgetInstance->Init(20, PlayerChar->FindComponentByClass<UInventoryComponent>(), PlayerChar->FindComponentByClass<UItemManager>());
+		}
 	}
 
 	this->PlayerCameraManager->StartCameraFade(1.f, 0.f, 2.0f, FLinearColor::Black, false, false);
@@ -188,8 +197,33 @@ void AMainPlayerController::HandleDodge()
 
 void AMainPlayerController::HandleOpenInventory()
 {
-	UE_LOG(LogTemp, Log, TEXT("Inventory Opened"));
-	// TODO: UI 위젯 표시
+	UE_LOG(LogTemp, Log, TEXT("Inventory Toggle"));
+	if (InventoryWidgetInstance)
+	{
+		if (bIsInvenOpened)
+		{
+			InventoryWidgetInstance->RemoveFromParent();
+			FInputModeGameOnly InputMode;
+			SetInputMode(InputMode);
+
+			bShowMouseCursor = false;
+			//bEnableClickEvents = false;
+			//bEnableMouseOverEvents = false;
+			bIsInvenOpened = false;
+		}
+		else
+		{
+			InventoryWidgetInstance->AddToViewport();
+			FInputModeUIOnly InputMode;
+			InputMode.SetWidgetToFocus(InventoryWidgetInstance->TakeWidget());
+			SetInputMode(InputMode);
+
+			bShowMouseCursor = true;
+			//bEnableClickEvents = true;
+			//bEnableMouseOverEvents = true;
+			bIsInvenOpened = true;
+		}
+	}
 }
 
 void AMainPlayerController::UseSkillSlot(int32 Index)
