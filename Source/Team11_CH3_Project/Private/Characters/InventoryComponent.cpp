@@ -32,10 +32,12 @@ bool UInventoryComponent::AddItem(UItemDataAsset* ItemDataAsset, int32 Count)
 	if (ItemDataAsset->GetInstanceClass() == UItemInstance::StaticClass())
 	{
 		ItemInstance->Init(ItemDataAsset, Count);
-	}else if (ItemDataAsset->GetInstanceClass() == UEquipmentInstance::StaticClass())
+	}
+	else if (ItemDataAsset->GetInstanceClass() == UEquipmentInstance::StaticClass())
 	{
 		UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance);
-		EquipmentInstance->Init(ItemDataAsset, 3);
+		check(Count == 1);
+		EquipmentInstance->Init(ItemDataAsset, 1);
 	}
 	if (ItemInstance->IsValid() == false)
 	{
@@ -49,9 +51,10 @@ bool UInventoryComponent::AddItem(UItemDataAsset* ItemDataAsset, int32 Count)
 	{
 		for (Index = 0; Index < InventorySlots.Num(); ++Index)
 		{
-			if (InventorySlots[Index]->GetItemInstance() && InventorySlots[Index]->GetItemInstance()->GetItemDataAsset()->
-			                                                                  GetItemID() == ItemInstance->
-				GetItemDataAsset()->GetItemID())
+			if (InventorySlots[Index]->GetItemInstance() && InventorySlots[Index]->GetItemInstance()->GetItemDataAsset()
+				->
+				GetItemID() == ItemInstance->
+				               GetItemDataAsset()->GetItemID())
 			{
 				break;
 			}

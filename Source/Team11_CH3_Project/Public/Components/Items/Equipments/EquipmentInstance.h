@@ -21,7 +21,7 @@ class TEAM11_CH3_PROJECT_API UEquipmentInstance : public UItemInstance, public I
 	GENERATED_BODY()
 
 public:
-	void Init(UItemDataAsset* InItemDataAsset, int32 InMaxGemCount=3) ;
+	virtual void Init(UItemDataAsset* InItemDataAsset, int32 InCount) override;	
 	virtual EItemContainerType GetItemContainerType() const override;
 	virtual UItemInstance* GetItem(int32 Index) override;
 	virtual bool SetItemAt(UItemInstance* ItemInstance, int32 Index) override;
@@ -36,7 +36,7 @@ protected:
 	TArray<TObjectPtr<UItemSlot>> Sockets;
 	
 private:
-	int32 MaxGemCount;
+	int32 MaxGemCount = 3;
 	EEquipmentType EquipmentType;
 	//TODO StatContainer
 };

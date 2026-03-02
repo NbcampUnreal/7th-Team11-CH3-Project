@@ -22,7 +22,7 @@ UItemManager::UItemManager()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 	bWantsInitializeComponent = true;
-	
+
 	// ...
 }
 
@@ -44,7 +44,7 @@ void UItemManager::InitializeComponent()
 	{
 		UEquipmentSlot* EquipmentSlot = NewObject<UEquipmentSlot>(this);
 		GemSlots[i] = EquipmentSlot;
-		GemSlots[i]->Init(this, i,EEquipmentType::SkillGem);
+		GemSlots[i]->Init(this, i, EEquipmentType::SkillGem);
 	}
 }
 
@@ -155,8 +155,7 @@ bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 	}
 	if (Index < EquipmentSlots.Num())
 	{
-		if (EquipmentSlots[Index]->IsValid() &&
-			EquipmentSlots[Index]->GetEquipmentType() == EquipmentInstance->GetEquipmentType())
+		if (EquipmentSlots[Index] && EquipmentSlots[Index]->GetEquipmentType() == EquipmentInstance->GetEquipmentType())
 		{
 			//TODO STAT And BroadCast
 			EquipmentSlots[Index]->SetItemInstance(EquipmentInstance);

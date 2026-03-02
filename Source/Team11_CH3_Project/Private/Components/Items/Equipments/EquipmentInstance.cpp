@@ -6,15 +6,15 @@
 #include "Components/Items/EquipmentItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
 
-void UEquipmentInstance::Init(UItemDataAsset* InItemDataAsset, int32 InMaxGemCount)
+void UEquipmentInstance::Init(UItemDataAsset* InItemDataAsset, int32 InCount)
 {
 	Super::Init(InItemDataAsset, 1);
 	if (UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(InItemDataAsset))
 	{
 		EquipmentType = EquipmentItemDataAsset->GetEquipmentType();
+		MaxGemCount = EquipmentItemDataAsset->GetMaxPartsCount();
 	}
 	Sockets.Empty();
-	MaxGemCount = InMaxGemCount;
 	Sockets.SetNum(MaxGemCount);
 	for (int32 Index = 0; Index < Sockets.Num(); Index++)
 	{

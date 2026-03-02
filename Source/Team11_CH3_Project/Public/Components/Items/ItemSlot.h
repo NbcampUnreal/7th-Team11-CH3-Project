@@ -38,8 +38,6 @@ public:
 	IItemContainer* GetItemContainer() const { return Cast<IItemContainer>(ItemContainer.Get()); }
 	int32 GetIndex() const { return Index; }
 
-	bool IsValid() const { return ItemInstance&&ItemInstance->IsValid(); }
-
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UItemInstance> ItemInstance;
