@@ -2,7 +2,7 @@
 
 
 #include "Components/Items/Equipments/EquipmentInstance.h"
-
+#include "Components/Items/PartsItemDataAsset.h"
 #include "Components/Items/EquipmentItemDataAsset.h"
 #include "Components/Items/ItemSlot.h"
 
@@ -45,8 +45,8 @@ bool UEquipmentInstance::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 		return false;
 	}
 	Sockets[Index]->SetItemInstance(ItemInstance);
-	//TODO Recalculate Stat And BroadCast
 	
+	CalculateStats();
 	return true;
 }
 
@@ -78,4 +78,42 @@ bool UEquipmentInstance::SwapItems(int32 MyIndex, IItemContainer* OtherContainer
 	SetItemAt(OtherItemInstance, MyIndex);
 	OtherContainer->SetItemAt(MyItemInstance, OtherIndex);
 	return true;
+}
+
+void UEquipmentInstance::CalculateStats()
+{
+	CachedStats.Empty();
+	UEquipmentItemDataAsset* EquipmentItemDataAsset = Cast<UEquipmentItemDataAsset>(ItemDataAsset);
+	if (EquipmentItemDataAsset == nullptr)
+		return;
+	for (auto& Pair : EquipmentItemDataAsset->GetStatBonuses())
+	{
+		CachedStats.FindOrAdd(Pair.Key) += Pair.Value;
+	}
+
+	for (UItemSlot* Slot : Sockets)
+	{
+		if (Slot == nullptr)
+			continue;
+		UPartsItemDataAsset* Parts = Cast<UPartsItemDataAsset>(Slot->GetItemInstance()->GetItemDataAsset());
+		if (Parts == nullptr)
+			continue;
+
+		for (auto& Pair : Parts->GetStatBonuses())
+		{
+			CachedStats.FindOrAdd(Pair.Key) += Pair.Value;
+		}
+
+	}
+
+	if (bIsEquipped == false)
+		return;
+
+	OnStatsRecalculated.Broadcast(EquipmentType, this);
+}
+
+float UEquipmentInstance::GetStat(EStat Stat) const
+{
+	const float* Found = CachedStats.Find(Stat);
+	return Found ? *Found : 0.f;
 }

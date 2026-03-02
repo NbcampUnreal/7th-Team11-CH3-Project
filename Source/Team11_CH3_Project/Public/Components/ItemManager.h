@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -49,6 +49,10 @@ public:
 	UEquipmentSlot* GetSkillGemSlot(int32 Index);
 	UEquipmentSlot* GetEquipmentSlot(EEquipmentType EquipmentType);
 	
+	// 장비 Stat 변경시 사용
+	UFUNCTION()
+	void OnEquipmentStatChanged(EEquipmentType Type, UEquipmentInstance* Instance);
+
 private:
 
 
@@ -65,5 +69,5 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Item", meta = (AllowPrivateAccess = "true"))
 	int32 MaxSKillGemCount = 2;
 	// 버프 ID
-	TMap<FName, TArray<int32>> EquipmentBuffIDs;
+	TMap<EEquipmentType, TArray<int32>> EquipmentBuffIDs;
 };
