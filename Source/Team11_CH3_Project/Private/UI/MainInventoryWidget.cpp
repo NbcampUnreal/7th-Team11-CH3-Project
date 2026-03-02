@@ -65,7 +65,6 @@ FReply UMainInventoryWidget::NativeOnKeyDown(const FGeometry& InGeometry, const 
 {
 	if (InKeyEvent.GetKey() == EKeys::Tab || InKeyEvent.GetKey() == EKeys::Escape)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("asd"));
 		AMainPlayerController* PC = Cast<AMainPlayerController>(GetOwningPlayer());
 		if (PC)
 		{
