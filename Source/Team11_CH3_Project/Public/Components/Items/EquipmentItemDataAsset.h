@@ -20,7 +20,7 @@ public:
 	int32 GetMaxPartsCount()const{return MaxPartsCount;}
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Equipment")
-	int32 MaxPartsCount;
+	int32 MaxPartsCount = 3;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Equipment")
 	EEquipmentType EquipmentType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item|Equipment")
