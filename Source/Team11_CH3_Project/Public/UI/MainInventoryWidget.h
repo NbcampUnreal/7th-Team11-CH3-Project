@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -7,6 +7,7 @@
 #include "Types/ItemContainerType.h"
 #include "Characters/InventoryComponent.h"
 #include "Components/ItemManager.h"
+#include "Input/Reply.h"
 #include "MainInventoryWidget.generated.h"
 
 class UItemManager;
@@ -36,6 +37,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void HandleItemSlotChanged (UItemSlot* SlotData);
 	
+	UFUNCTION(BlueprintCallable)
+	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
+
 	UFUNCTION(BlueprintCallable)
 	UItemOverlayWidget* GetItemOverlayWidget(){return ItemOverlayWidget;}
 	

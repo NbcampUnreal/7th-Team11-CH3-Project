@@ -66,6 +66,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void BP_SetCrosshairVisible(bool bVisible);
 
+	// inventory/skill
+	void HandleOpenInventory();
 protected:
 
 	// move
@@ -79,8 +81,6 @@ protected:
 	void Turn(float Value);
 	void LookUp(float Value);
 
-	// inventory/skill
-	void HandleOpenInventory();
 
 	void HandleUseSkill1();
 	void HandleUseConsumable1();
@@ -98,6 +98,13 @@ protected:
 	FGameplayTag HUDRequestTag;
 
 public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Inventory")
+	UUserWidget* InventoryWidgetInstance;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	TSubclassOf<UUserWidget> InventoryWidgetClass;
+
+	bool bIsInvenOpened = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HUD")
 	UUserWidget* HUDWidgetInstance;
