@@ -50,10 +50,9 @@ AMonsterBase::AMonsterBase()
 }
 
 
-void AMonsterBase::EquipWeapon(UEquipmentInstance* WeaponItemData)
+void AMonsterBase::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 {
-	EquipmentComponent->EquipWeapon(WeaponItemData);
-	
+	EquipmentComponent->SetItemAt(WeaponItemInstance,0);
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
 	if (AnimInstance && AnimInstance->GetClass()->ImplementsInterface(UWeaponAnimInterface::StaticClass()))

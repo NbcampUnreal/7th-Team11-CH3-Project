@@ -70,6 +70,7 @@ void UMonsterSubsystem::SpawnMonster(FMonsterData* MonsterData, const FVector& L
 		Monster->SetActorTickEnabled(true);
 
 		Monster->Init(MonsterData);
+		Monster->SetActorEnableCollision(true);
 
 		SpawnedMonsterCount++;
 		AliveMonsterCount++;
@@ -82,6 +83,7 @@ void UMonsterSubsystem::OnMonsterDeath(AMonsterBase* DeadMonster)
 	DeadMonster->SetActorEnableCollision(false);
 	FTimerHandle SpawnedMonsterTimer;
 	GetWorld()->GetTimerManager().SetTimer(SpawnedMonsterTimer,[this,DeadMonster](){DespawnMonster(DeadMonster);},5.0f,false);
+	DeadMonster->SetActorEnableCollision(false);
 	if (AT11_GameState* GameState = GetWorld()->GetGameState<AT11_GameState>())
 	{
 		// 아이템 드랍을 위해서 몬스터 위치 매개변수(완료) 및 점수 데이터 추가(예정)
