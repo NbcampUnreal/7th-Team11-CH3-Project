@@ -9,7 +9,7 @@ public class Team11_CH3_Project : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "NavigationSystem" , "AIModule" , "GameplayTasks", "UMG", "Slate", "SlateCore", "GameplayTags", "CommonUI", "CommonInput", "Niagara", "Slate", "SlateCore"});
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "NavigationSystem" , "AIModule" , "GameplayTasks", "UMG", "Slate", "SlateCore", "GameplayTags", "CommonUI", "CommonInput", "Niagara"});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

@@ -37,7 +37,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void HandleItemSlotChanged (UItemSlot* SlotData);
 	
-	UFUNCTION(BlueprintCallable)
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
 	UFUNCTION(BlueprintCallable)
