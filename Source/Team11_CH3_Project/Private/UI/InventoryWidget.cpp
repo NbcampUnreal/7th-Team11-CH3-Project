@@ -77,6 +77,7 @@ void UInventoryWidget::HandleEquipmentItemSlotChanged(UItemSlot* SlotData)
 	UEquipmentSlot* EquipSlot = Cast<UEquipmentSlot>(SlotData);
 	if (IsValid(EquipSlot) == false)
 		return;
+	int32 Index;
 	switch (EquipSlot->GetEquipmentType())
 	{
 	case EEquipmentType::Weapon:
@@ -98,16 +99,15 @@ void UInventoryWidget::HandleEquipmentItemSlotChanged(UItemSlot* SlotData)
 		FeetSlot->UpdateSlot(SlotData);
 		break;
 	case EEquipmentType::SkillGem:
+		Index = EquipSlot->GetIndex() - MainInventoryWidget->GetEquipmentComponent()->GetEquipments().Num();
+		if (SKillGemWidgets.IsValidIndex(Index))
+		{
+			SKillGemWidgets[Index]->UpdateSlot(EquipSlot);
+		}
+		break;
+	case EEquipmentType::Max:
 		break;
 	}
 	
 }
 
-void UInventoryWidget::HandleSkillGemItemSlotChanged(UItemSlot* ItemSlot)
-{
-	int32 Index = ItemSlot->GetIndex();
-	if (SKillGemWidgets.IsValidIndex(Index))
-	{
-		SKillGemWidgets[Index]->UpdateSlot(ItemSlot);
-	}
-}

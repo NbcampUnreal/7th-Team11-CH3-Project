@@ -31,7 +31,6 @@ public:
 	void HandleInventoryItemSlotChanged(UItemSlot* SlotData);
 	UFUNCTION(BlueprintCallable)
 	void HandleEquipmentItemSlotChanged(UItemSlot* SlotData);
-	void HandleSkillGemItemSlotChanged(UItemSlot* ItemSlot);
 
 protected:
 	UPROPERTY(meta = (BindWidget))
