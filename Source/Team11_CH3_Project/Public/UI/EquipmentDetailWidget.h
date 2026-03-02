@@ -26,7 +26,7 @@ class TEAM11_CH3_PROJECT_API UEquipmentDetailWidget : public UUserWidget
 public:
 	void Init(UMainInventoryWidget* InMainInventoryWidget);
 	void Update(UItemSlot* ItemSlot);
-	void HandlePartsSlotChanged(UEquipmentSlot* SlotData);
+	void HandlePartsSlotChanged(UItemSlot* SlotData);
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UItemSlotWidget> EquipmentThumbnail;
@@ -54,5 +54,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InventoryWidget")
 	TSubclassOf<UStatRowWidget> StatRowWidgetClass;
 private:
+	void UpdateStatBox(const TMap<EStat, float>& Stats);
 	TWeakObjectPtr<UMainInventoryWidget> MainInventoryWidget;
+	TWeakObjectPtr<UEquipmentInstance> CurrentEquipment;
 };

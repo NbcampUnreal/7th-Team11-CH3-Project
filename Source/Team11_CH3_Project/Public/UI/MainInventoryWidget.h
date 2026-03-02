@@ -29,7 +29,7 @@ public:
 	void Init(int32 InventorySize, UInventoryComponent* InInventoryComponent, UItemManager* InEquipmentComponent);
 	
 	UFUNCTION(BlueprintCallable)
-	void UpdateEquipmentDetailWidget(const UEquipmentInstance* EquipmentSlot);
+	void UpdateEquipmentDetailWidget(UItemSlot* EquipmentSlot);
 	
 	virtual void SetVisibility(ESlateVisibility InVisibility) override;	
 

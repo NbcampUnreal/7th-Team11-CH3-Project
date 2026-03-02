@@ -9,6 +9,7 @@
 #include "Components/VerticalBox.h"
 #include "Components/Items/ItemDataAsset.h"
 #include "Components/Items/Equipments/EquipmentInstance.h"
+#include "Components/Items/PartsItemDataAsset.h"
 #include "Components/Items/Equipments/ItemInstance.h"
 #include "Types/ItemTypes.h"
 #include "UI/ItemSlotWidget.h"
@@ -98,9 +99,10 @@ void UItemOverlayWidget::UpdateOverlayWidget(FVector2D ScreenPosition, UItemInst
 		CollapseSocketBox();
 		break;
 	case EItemType::Parts:
-		if (UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance))
+		if (UPartsItemDataAsset* Parts = Cast<UPartsItemDataAsset>(ItemInstance->GetItemDataAsset()))
 		{
-			UpdateStatBox(EquipmentInstance);
+			StatBox->SetVisibility(ESlateVisibility::Visible);
+			UpdateStatBoxFromStats(Parts->GetStatBonuses());
 		}else
 		{
 			CollapseStatBox();
@@ -121,9 +123,9 @@ void UItemOverlayWidget::ClearOverlayWidget()
 void UItemOverlayWidget::UpdateStatBox(UEquipmentInstance* EquipmentInstance)
 {
 	StatBox->SetVisibility(ESlateVisibility::Visible);
-	if (StatRowWidgetClass)
+	if (StatRowWidgetClass && EquipmentInstance)
 	{
-		//TODO
+		UpdateStatBoxFromStats(EquipmentInstance->GetCachedStats());
 	}
 }
 
@@ -149,4 +151,20 @@ void UItemOverlayWidget::CollapseSocketBox()
 {
 	SocketBox->SetVisibility(ESlateVisibility::Collapsed);
 	
+}
+
+void UItemOverlayWidget::UpdateStatBoxFromStats(const TMap<EStat, float>& Stats)
+{
+	StatRows.Empty();
+	StatBox->ClearChildren();
+	for (const auto& Pair : Stats)
+	{
+		UStatRowWidget* Row = CreateWidget<UStatRowWidget>(this, StatRowWidgetClass);
+		if (IsValid(Row) == false)
+			continue;
+
+		Row->Update(Pair.Key, Pair.Value);
+		StatBox->AddChildToVerticalBox(Row);
+		StatRows.Add(Row);
+	}
 }

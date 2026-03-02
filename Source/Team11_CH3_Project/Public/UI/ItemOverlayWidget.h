@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Types/StatTypes.h"
 #include "ItemOverlayWidget.generated.h"
 
 class UEquipmentInstance;
@@ -30,6 +31,7 @@ private:
 	void UpdateSocketBox(UEquipmentInstance* EquipmentInstance);
 	void CollapseStatBox();
 	void CollapseSocketBox();
+	void UpdateStatBoxFromStats(const TMap<EStat, float>& Stats);
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> ItemName;

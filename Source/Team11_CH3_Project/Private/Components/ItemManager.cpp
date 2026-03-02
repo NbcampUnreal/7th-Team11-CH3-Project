@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/ItemManager.h"
@@ -144,7 +144,6 @@ UItemInstance* UItemManager::GetItem(int32 Index)
 bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 {
 	UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance);
-
 	if (Index < 0)
 	{
 		return false;
@@ -153,27 +152,29 @@ bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 	// 장비 스왑용 장착중인 장비랑 빈칸이랑 교환
 	if (!EquipmentInstance)
 	{
-		// 브로드 캐스트 해제
-		// 바인딩 해제 및 장비 장착 여부 수정
-		UBuffManager* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
-		if (IsValid(BuffManager))
+		UEquipmentInstance* CurrentEquip = Cast<UEquipmentInstance>(EquipmentSlots[Index]->GetItemInstance());
+		if (CurrentEquip)
 		{
-			// 버프 해제
-			if (TArray<int32>* IDs = EquipmentBuffIDs.Find(EquipmentInstance->GetEquipmentType()))
+			// 브로드 캐스트 해제
+			// 바인딩 해제 및 장비 장착 여부 수정
+			UBuffManager* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
+			if (IsValid(BuffManager))
 			{
-				for (int32& ID : *IDs)
+				// 버프 해제
+				if (TArray<int32>* IDs = EquipmentBuffIDs.Find(CurrentEquip->GetEquipmentType()))
 				{
-					BuffManager->RemoveBuff(ID);
+					for (int32& ID : *IDs)
+					{
+						BuffManager->RemoveBuff(ID);
+					}
+					IDs->Empty();
 				}
-				IDs->Empty();
 			}
+			CurrentEquip->OnStatsRecalculated.RemoveDynamic(this, &UItemManager::OnEquipmentStatChanged);
+			CurrentEquip->SetIsEquipped(false);
 		}
-
-		EquipmentInstance->OnStatsRecalculated.RemoveDynamic(this, &UItemManager::OnEquipmentStatChanged);
-		EquipmentInstance->SetIsEquipped(false);
-		EquipmentSlots[Index]->SetItemInstance(nullptr);
 		//TODO UI 브로드 캐스트
-		EquipmentSlots[Index]->SetItemInstance(EquipmentInstance);
+		EquipmentSlots[Index]->SetItemInstance(nullptr);
 		return true;
 	}
 
@@ -256,6 +257,9 @@ bool UItemManager::CanReceiveItem(UItemInstance* ItemInstance, int32 Index)
 	{
 		return false;
 	}
+	if (ItemInstance == nullptr)
+		return true;// 장비 해제 허용
+
 	UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance);
 	if (!EquipmentInstance)
 	{

@@ -15,6 +15,7 @@ UCLASS()
 class TEAM11_CH3_PROJECT_API UStatRowWidget : public UUserWidget
 {
 	GENERATED_BODY()
+public:
 	void Update(EStat Stat, float Amount);
 protected:
 	UPROPERTY(meta = (BindWidget))
