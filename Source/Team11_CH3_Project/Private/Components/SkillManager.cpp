@@ -37,7 +37,7 @@ void USkillManager::BeginPlay()
 
 	SkillSlots.Empty();
 	// for (USkillDataAsset* SkillData : DefaultSkillSlotData)
-	for (int32 i = 0;i<3;++i)
+	for (int32 i = 0;i<5;++i)
 	{
 		USkillSlot* NewSlot = NewObject<USkillSlot>(this);
 		NewSlot->Init(this);
@@ -153,18 +153,7 @@ void USkillManager::UnEquipSkillGem(int32 SlotIndex)
 	SkillSlots[SlotIndex]->ClearSlot();
 }
 
-void USkillManager::AddSKillGems(TArray<TSoftObjectPtr<USkillDataAsset>> Skills)
-{
-	for (TSoftObjectPtr<USkillDataAsset> SkillData : Skills)
-	{
-		if (IsValid(SkillData.LoadSynchronous()))
-		{
-			USkillSlot* NewSlot = NewObject<USkillSlot>(this);
-			NewSlot->EquipGem(SkillData.Get());
-			SkillSlots.Add(NewSlot);
-		}
-	}
-}
+
 
 bool USkillManager::IsSkillOnCooldown(int32 SlotIndex) const
 {
