@@ -3,7 +3,7 @@
 
 #include "UI/InteractableItemSlotWidget.h"
 
-#include "ItemDragDropOperation.h"
+#include "UI/ItemDragDropOperation.h"
 #include "Blueprint/DragDropOperation.h"
 #include "Characters/InventoryComponent.h"
 #include "Components/ItemManager.h"
