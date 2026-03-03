@@ -76,6 +76,20 @@ void AMainPlayerController::BeginPlay()
 	SetHUD();
 }
 
+void AMainPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FTimerManager& TimerManager = World->GetTimerManager();
+		for (FTimerHandle& TimerHandle : SkillCooldownTimerHandles)
+		{
+			TimerManager.ClearTimer(TimerHandle);
+		}
+	}
+}
+
 void AMainPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -524,6 +538,10 @@ void AMainPlayerController::UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbn
 				;
 				GetWorldTimerManager().SetTimer(SkillCooldownTimerHandles[Index], [this,Index,WeakSkillSlot,WeakSkillCooldownBar]()
 				{
+					if (IsValid(this))
+					{
+						return;
+					}
 					if (!WeakSkillCooldownBar.IsValid())
 					{
 						GetWorldTimerManager().ClearTimer(SkillCooldownTimerHandles[Index]);
