@@ -18,6 +18,7 @@ class TEAM11_CH3_PROJECT_API UStatDetailWidget : public UUserWidget
 	GENERATED_BODY()
 	
 
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InventoryWidget")
 	TSubclassOf<UStatRowWidget> StatRowWidgetClass;
 
@@ -25,6 +26,5 @@ class TEAM11_CH3_PROJECT_API UStatDetailWidget : public UUserWidget
 	TObjectPtr<UVerticalBox> StatBox;
 	TArray<TObjectPtr<UStatRowWidget>> StatRows;
 
-public:
 	void UpdateStatBox(TMap<EStat, float> Stats);
 };

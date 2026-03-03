@@ -11,7 +11,7 @@
 #include "Characters/PlayerCharacter.h"
 
 void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInventoryComponent,
-	UItemManager* InEquipmentComponent)
+	UItemManager* InEquipmentComponent, UStatComponent* InStatComponent)
 {
 	if (InventoryWidget)
 		InventoryWidget->Init(this, InInventoryComponent,InEquipmentComponent);
@@ -21,6 +21,7 @@ void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInve
 		ItemOverlayWidget->Init(this);
 	InventoryComponent = InInventoryComponent;
 	EquipmentComponent = InEquipmentComponent;
+	InStatComponent->OnStatChanged.AddDynamic(this, &UMainInventoryWidget::HandleStatChanged);
 	InventoryComponent->OnInventorySlotChanged.AddDynamic(this, &UMainInventoryWidget::HandleItemSlotChanged);
 	EquipmentComponent->OnEquipmentSlotChanged.AddDynamic(this, &UMainInventoryWidget::HandleItemSlotChanged);
 }
@@ -61,6 +62,7 @@ void UMainInventoryWidget::HandleItemSlotChanged(UItemSlot* SlotData)
 
 void UMainInventoryWidget::HandleStatChanged(UStatComponent* StatComp)
 {
+	UE_LOG(LogTemp, Warning, TEXT("StatChanged"));
 	if (StatDetailWidget)
 	{
 		TMap<EStat, float> StatMap;

@@ -63,7 +63,7 @@ void AMainPlayerController::BeginPlay()
 		{
 			InventoryWidgetInstance = CreateWidget<UMainInventoryWidget>(this, InventoryWidgetClass);
 			InventoryWidgetInstance->Init(20, PlayerChar->FindComponentByClass<UInventoryComponent>(),
-			                              PlayerChar->FindComponentByClass<UItemManager>());
+			                              PlayerChar->FindComponentByClass<UItemManager>(), PlayerChar->FindComponentByClass<UStatComponent>());
 		}
 		if (USkillManager* SkillComponent = PlayerChar->FindComponentByClass<USkillManager>())
 		{

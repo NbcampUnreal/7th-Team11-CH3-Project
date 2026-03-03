@@ -31,7 +31,7 @@ class TEAM11_CH3_PROJECT_API UMainInventoryWidget : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void Init(int32 InventorySize, UInventoryComponent* InInventoryComponent, UItemManager* InEquipmentComponent);
+	void Init(int32 InventorySize, UInventoryComponent* InInventoryComponent, UItemManager* InEquipmentComponent, UStatComponent* InStatComponent);
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateEquipmentDetailWidget(UItemSlot* EquipmentSlot);

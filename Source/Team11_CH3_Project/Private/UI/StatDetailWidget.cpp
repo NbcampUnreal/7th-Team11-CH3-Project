@@ -16,6 +16,7 @@ void UStatDetailWidget::UpdateStatBox(TMap<EStat, float> Stats)
 	if (IsValid(StatRowWidgetClass) == false)
 		return;
 
+	UE_LOG(LogTemp, Warning, TEXT("StatBoxChanged"));
 	for (auto Pair : Stats)
 	{
 		UStatRowWidget* Row = CreateWidget<UStatRowWidget>(this, StatRowWidgetClass);
