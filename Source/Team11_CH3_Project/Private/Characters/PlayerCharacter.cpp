@@ -1,4 +1,4 @@
-#include "Characters/PlayerCharacter.h"
+﻿#include "Characters/PlayerCharacter.h"
 #include "Characters/InventoryComponent.h"
 #include "MainPlayerController.h"
 #include "Camera/CameraComponent.h"
@@ -254,7 +254,7 @@ void APlayerCharacter::BeginPlay()
 
 	if (GI->HasSavedData())
 	{
-		GI->RestorePlayerData(StatComponent, ItemManager, SkillComponent);
+		GI->RestorePlayerData(StatComponent, ItemManager, SkillComponent, InventoryComponent);
 	}
 	else
 	{

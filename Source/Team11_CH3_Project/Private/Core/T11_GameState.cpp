@@ -1,4 +1,4 @@
-#include "Core/T11_GameState.h"
+﻿#include "Core/T11_GameState.h"
 #include "Kismet/GameplayStatics.h"
 #include "Core/WaveData.h"
 #include "Core/SpawnVolume.h"
@@ -13,6 +13,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Blueprint/UserWidget.h"
+#include "Characters/InventoryComponent.h"
 
 void AT11_GameState::BeginPlay()
 {
@@ -121,23 +122,8 @@ void AT11_GameState::StartNextWave()
 
 void AT11_GameState::EndLevel()
 {
-    // 플레이어 데이터 저장
-    APlayerController* PC = GetWorld()->GetFirstPlayerController();
-    if (IsValid(PC) == false || IsValid(PC->GetPawn()) == false)
-        return;
-    APawn* Pawn = PC->GetPawn();
-    UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
-    if (IsValid(GI) == false)
-        return;
-    GI->SavePlayerData(
-        Pawn->FindComponentByClass<UStatComponent>(),
-        Pawn->FindComponentByClass<UItemManager>(),
-        Pawn->FindComponentByClass<USkillManager>()
-    );
 
     ActivatePortals();
-    // 임의로 다음 스테이지로 이동
-    //UGameplayStatics::OpenLevel(GetWorld(), FName("L_Stage2_Test"));
 }
 
 void AT11_GameState::EndWave()
@@ -221,6 +207,18 @@ void AT11_GameState::UsePortal(FString Difficulty, FString TargetLevel)
     if (Difficulty == "Easy") GI->CurrentDifficulty = 0;
     else if (Difficulty == "Hard") GI->CurrentDifficulty = 1;
     else if (Difficulty == "Boss") GI->CurrentDifficulty = 2;
+    // 여기서 한번 더 데이터 갱신
+    APlayerController* PC = GetWorld()->GetFirstPlayerController();
+    if (IsValid(PC) == false || IsValid(PC->GetPawn()) == false)
+        return;
+    APawn* Pawn = PC->GetPawn();
+    GI->SavePlayerData(
+        Pawn->FindComponentByClass<UStatComponent>(),
+        Pawn->FindComponentByClass<UItemManager>(),
+        Pawn->FindComponentByClass<USkillManager>(),
+        Pawn->FindComponentByClass<UInventoryComponent>()
+    );
+
     LevelFinished.Broadcast(TargetLevel);
 }
 
