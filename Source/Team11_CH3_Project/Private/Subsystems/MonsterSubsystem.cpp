@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Subsystems/MonsterSubsystem.h"
@@ -86,16 +86,15 @@ void UMonsterSubsystem::OnMonsterDeath(AMonsterBase* DeadMonster)
 	AliveMonsterCount--;
 	DeadMonster->SetActorEnableCollision(false);
 	FTimerHandle SpawnedMonsterTimer;
+	FTimerDelegate TimerDelegate;
+
+	TimerDelegate.BindUFunction(this, FName("DespawnMonster"), DeadMonster);
 	GetWorld()->GetTimerManager().SetTimer(
 		SpawnedMonsterTimer,
-		[this,DeadMonster]()
-		{
-			if (this)
-			{
-				DespawnMonster(DeadMonster);
-			}
-		},
-		5.0f, false);
+		TimerDelegate,
+		5.0f,
+		false
+	);
 	DeadMonster->SetActorEnableCollision(false);
 	if (AT11_GameState* GameState = GetWorld()->GetGameState<AT11_GameState>())
 	{

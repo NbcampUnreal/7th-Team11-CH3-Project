@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -23,6 +23,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SpawnMonster(FMonsterData MonsterData, const FVector& Location){SpawnMonster(&MonsterData,Location);}
 	void OnMonsterDeath(AMonsterBase* DeadMonster);
+	UFUNCTION()
 	void DespawnMonster(AMonsterBase* DeadMonster);
 protected:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
