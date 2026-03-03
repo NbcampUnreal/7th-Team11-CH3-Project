@@ -218,7 +218,7 @@ void AMainPlayerController::HandleOpenInventory()
 		}
 		else
 		{
-			InventoryWidgetInstance->AddToViewport(1);
+			InventoryWidgetInstance->AddToViewport();
 			FInputModeUIOnly InputMode;
 			InputMode.SetWidgetToFocus(InventoryWidgetInstance->TakeWidget());
 			SetInputMode(InputMode);
