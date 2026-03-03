@@ -19,6 +19,7 @@
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanel.h"
+#include "Components/SkillManager.h"
 #include "Components/Skills/SkillSlot.h"
 #include "UI/MainInventoryWidget.h"
 #include "UI/HUDWidget.h"
@@ -528,7 +529,7 @@ void AMainPlayerController::UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbn
 			if (UProgressBar* SkillCooldownBar = Cast<UProgressBar>(HUDWidget->GetWidgetFromName(WidgetFName)))
 			{
 
-				if (SkillSlot->GetEquippedSkill()->GetCooldownTime() > 0.2f)
+				if (SkillSlot->GetEquippedSkill() && SkillSlot->GetEquippedSkill()->GetCooldownTime() > 0.2f)
 				{				
 					TWeakObjectPtr<UProgressBar> WeakSkillCooldownBar = SkillCooldownBar;
 					TWeakObjectPtr<USkillSlot> WeakSkillSlot = SkillSlot;

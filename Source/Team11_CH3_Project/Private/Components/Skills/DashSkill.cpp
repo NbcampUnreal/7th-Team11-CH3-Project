@@ -6,7 +6,9 @@
 #include "AIController.h"
 #include "NavigationSystem.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/StatComponent.h"
 #include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 
 void UDashSkill::Activate(UActiveSkillSlot* InActiveSkillSlot)
 {
@@ -94,6 +96,77 @@ void UDashSkill::Tick(float DeltaSeconds)
 
 		if (FVector::DistSquared(NextLoc, NavDestination) < 10000.0f)
 		{
+			APawn* Instigator = Cast<APawn> (ActiveSkillSlot->GetOwner());
+			if (!Instigator)
+			{
+				return;
+			}
+	
+			TArray<AActor*> OverlappingActors;
+			TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+			ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)); // Pawn만 검출
+
+			UKismetSystemLibrary::SphereOverlapActors(
+				Instigator->GetWorld(),
+				Instigator->GetActorLocation(), 
+				200.0f, 
+				ObjectTypes, 
+				APawn::StaticClass(),
+				TArray<AActor*>(), 
+				OverlappingActors
+			);
+
+			UStatComponent* StatComp = Instigator->FindComponentByClass<UStatComponent>();
+			float BaseDamage = Damage;
+			if (IsValid(StatComp))
+			{
+				BaseDamage += StatComp->GetCurrentStat(EStat::AttackDamage);
+			}
+	
+	
+			for (AActor* HitActor : OverlappingActors)
+			{
+				if (IsValid(HitActor) == false || HitActor == Instigator)
+				{
+					continue;
+				}
+				AController* InstigatorController = Instigator->GetController();
+				if (InstigatorController == nullptr)
+				{
+					continue;
+				}
+
+				if (const IGenericTeamAgentInterface* InstigatorTeam = Cast<IGenericTeamAgentInterface>(InstigatorController))
+				{
+					if (InstigatorTeam->GetTeamAttitudeTowards(*HitActor) != ETeamAttitude::Hostile)
+					{
+						continue;
+					}
+				}
+
+				float ActualDamage = BaseDamage;
+				if (IsValid(StatComp))
+				{
+					// 크리티컬 판정
+					float CriticalChance = StatComp->GetCurrentStat(EStat::CriticalChance);
+					float CriticalMultiplier = StatComp->GetCurrentStat(EStat::CriticalDamage);
+
+					if (FMath::FRandRange(0.0f, 100.0f) < CriticalChance)
+					{
+						ActualDamage *= CriticalMultiplier;
+						UE_LOG(LogTemp, Warning, TEXT("Critical Hit"));
+					}
+				}
+				UGameplayStatics::ApplyDamage(
+					HitActor,
+					ActualDamage,
+					InstigatorController,
+					Instigator,
+					UDamageType::StaticClass()
+				);
+				UE_LOG(LogTemp, Warning, TEXT("Hit : %s, Damage : %0.1f"), *HitActor->GetName(), ActualDamage);
+			}
+			
 			AnimInstance->Montage_Stop(0.2f, SkillMontage);
 			return; 
 		}
