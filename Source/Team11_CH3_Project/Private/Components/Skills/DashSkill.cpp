@@ -54,12 +54,13 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 		{
 			FNavLocation ResultLocation;
 			FVector NavDashingStartLocation = Actor->GetActorLocation();
+			NavDestination = ActiveSkillSlot->GetTargetLocation();
 			FVector Extents = FVector(100.0f, 100.0f, 500.0f);
-			if (NavigationSystemV1->ProjectPointToNavigation(ActiveSkillSlot->GetTargetLocation(), ResultLocation,Extents))
+			if (NavigationSystemV1->ProjectPointToNavigation(NavDestination, ResultLocation,Extents))
 			{
 				NavDestination = ResultLocation.Location; 
 			}
-			if (NavigationSystemV1->ProjectPointToNavigation(Actor->GetActorLocation(), ResultLocation,Extents))
+			if (NavigationSystemV1->ProjectPointToNavigation(NavDashingStartLocation, ResultLocation,Extents))
 			{
 				NavDashingStartLocation = ResultLocation.Location; 
 			}
@@ -74,9 +75,11 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 	{	
 		AnimInstance->Montage_Stop(0.2f);
 	}
-	//가까우면 처리
-	if (FVector::DistSquared(Actor->GetActorLocation(), NavDestination) < 10000.f)
+	//적과 충돌
+	//TODO Optimization TargetActor
+	if (FVector::DistSquared(Actor->GetActorLocation(), ActiveSkillSlot->GetTargetLocation()) < 10000.f)
 	{
+		// if (Actor->GetOverlappingActors())
 		AnimInstance->Montage_Stop(0.2f);
 	}
 	//Dashing
@@ -93,7 +96,7 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 		FHitResult Hit;
 		Actor->SetActorLocation(NextLoc, true, &Hit);
 
-		if (FVector::DistSquared(NextLoc, NavDestination) < 10000.0f)
+		if (FVector::DistSquared(NextLoc, NavDestination) < 100.0f)
 		{
 			AnimInstance->Montage_Stop(0.2f, SkillMontage);
 			return; 
