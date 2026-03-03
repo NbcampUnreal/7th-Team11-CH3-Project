@@ -210,6 +210,11 @@ void AMainPlayerController::HandleOpenInventory()
 			//bEnableClickEvents = false;
 			//bEnableMouseOverEvents = false;
 			bIsInvenOpened = false;
+			// 사운드 출력
+			if (InventoryCloseSound)
+			{
+				UGameplayStatics::PlaySound2D(GetWorld(), InventoryCloseSound, 0.5f);
+			}
 		}
 		else
 		{
@@ -222,6 +227,11 @@ void AMainPlayerController::HandleOpenInventory()
 			//bEnableClickEvents = true;
 			//bEnableMouseOverEvents = true;
 			bIsInvenOpened = true;
+			// 사운드 출력
+			if (InventoryOpenSound)
+			{
+				UGameplayStatics::PlaySound2D(GetWorld(), InventoryOpenSound, 0.5f);
+			}
 		}
 	}
 }

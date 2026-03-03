@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -19,4 +19,7 @@ public:
 	                      const FVector& TargetLocation)  override;
 	virtual float GetScore(const AActor* Actor, const AActor* Target) const override;
 	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation, FName Name)  override;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill|Sound")
+	class USoundBase* SwordSound;
 };

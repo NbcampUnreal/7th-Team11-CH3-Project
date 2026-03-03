@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/Skills/MeleeSimpleAttackSkillData.h"
@@ -77,7 +77,11 @@ void UMeleeSimpleAttackSkillData::Activate(APawn* Instigator, AWeaponActor* Weap
 
 	}
 	
-	
+	// 사운드 출력
+	if (SwordSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SwordSound, Instigator->GetActorLocation(), 0.5f);
+	}
 	
 	
 	
