@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/Skills/ProjectileSkillData.h"
@@ -19,18 +19,18 @@ void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor
 
 	// 마법진 소환
 	UNiagaraSystem* MagicCircle = GetMagicCircleEffect();
-	if (IsValid(MagicCircle) == false)
-		return;
+	if (IsValid(MagicCircle))
+	{
+		FVector SpawnLocation = Instigator->GetActorLocation();
+		SpawnLocation.Z -= 85.f;
 
-	FVector SpawnLocation = Instigator->GetActorLocation();
-	SpawnLocation.Z -= 85.f;
-
-	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		Instigator->GetWorld(),
-		MagicCircle,
-		SpawnLocation,
-		Instigator->GetActorRotation()
-	);
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			Instigator->GetWorld(),
+			MagicCircle,
+			SpawnLocation,
+			Instigator->GetActorRotation()
+		);
+	}
 
 	FVector Direction = TargetLocation - Origin;
 	// 손 -> 타겟 방향 계산
