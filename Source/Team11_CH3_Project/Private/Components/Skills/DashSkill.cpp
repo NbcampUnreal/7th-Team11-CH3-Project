@@ -5,6 +5,7 @@
 
 #include "AIController.h"
 #include "NavigationSystem.h"
+#include "Blueprint/UserWidget.h"
 #include "GameFramework/Character.h"
 
 void UDashSkill::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
@@ -18,7 +19,7 @@ void UDashSkill::Enter(AActor* Actor, const FVector& TargetLocation)
 	Super::Enter(Actor,TargetLocation);
 	ChargingTimer = 0.0f;
 	bIsDashing = false;
-	Destination = TargetLocation;
+	NavDestination = TargetLocation;
 	
 }
 
@@ -47,7 +48,24 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 	{
 		bIsDashing = true;
 		ActiveSkillSlot->OnExecute();
-		Destination = ActiveSkillSlot->GetTargetLocation();
+		
+		UNavigationSystemV1* NavigationSystemV1 = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Actor->GetWorld());
+		if (NavigationSystemV1)
+		{
+			FNavLocation ResultLocation;
+			FVector NavDashingStartLocation = Actor->GetActorLocation();
+			FVector Extents = FVector(100.0f, 100.0f, 500.0f);
+			if (NavigationSystemV1->ProjectPointToNavigation(ActiveSkillSlot->GetTargetLocation(), ResultLocation,Extents))
+			{
+				NavDestination = ResultLocation.Location; 
+			}
+			if (NavigationSystemV1->ProjectPointToNavigation(Actor->GetActorLocation(), ResultLocation,Extents))
+			{
+				NavDashingStartLocation = ResultLocation.Location; 
+			}
+			DashingDir = (NavDestination - NavDashingStartLocation).GetSafeNormal();
+		}
+		// Destination = ActiveSkillSlot->GetTargetLocation();
 		AnimInstance->Montage_JumpToSection(TEXT("Dashing"),SkillMontage);
 		return;
 	}
@@ -57,7 +75,7 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 		AnimInstance->Montage_Stop(0.2f);
 	}
 	//가까우면 처리
-	if (FVector::DistSquared(Actor->GetActorLocation(), Destination) < 10.f)
+	if (FVector::DistSquared(Actor->GetActorLocation(), NavDestination) < 10000.f)
 	{
 		AnimInstance->Montage_Stop(0.2f);
 	}
@@ -65,12 +83,17 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 	if (bIsDashing)
 	{
 		FVector CurrentLoc = Actor->GetActorLocation();
-		FVector NextLoc = FMath::VInterpTo(CurrentLoc, Destination, DeltaSeconds, DashSpeed);
-
+		
+		FVector NextLoc = CurrentLoc + (DashingDir * DashSpeed* DeltaSeconds) ;
+		UE_LOG(LogTemp, Warning, TEXT("CurrentLoc Vector: %s, Size: %f"), *CurrentLoc.ToString(), CurrentLoc.Size());
+		UE_LOG(LogTemp, Warning, TEXT("Destination Vector: %s, Size: %f"), *NavDestination.ToString(), NavDestination.Size());
+		UE_LOG(LogTemp, Warning, TEXT("Dir Vector: %s, Size: %f"), *DashingDir.ToString(), DashingDir.Size());
+		UE_LOG(LogTemp, Warning, TEXT("NextLoc Vector: %s, Size: %f"), *NextLoc.ToString(), NextLoc.Size());
+		
 		FHitResult Hit;
 		Actor->SetActorLocation(NextLoc, true, &Hit);
 
-		if (FVector::DistSquared(NextLoc, Destination) < 10.0f)
+		if (FVector::DistSquared(NextLoc, NavDestination) < 10000.0f)
 		{
 			AnimInstance->Montage_Stop(0.2f, SkillMontage);
 			return; 
