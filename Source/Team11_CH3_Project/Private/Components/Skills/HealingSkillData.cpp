@@ -5,8 +5,10 @@
 #include "Components/StatComponent.h"
 #include "NiagaraFunctionLibrary.h"
 
-void UHealingSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation)
+
+void UHealingSkillData::DoHeal()
 {
+	APawn* Instigator = Cast<APawn>(ActiveSkillSlot->GetOwner());
 	if (IsValid(Instigator) == false)
 		return;
 	UStatComponent* StatComp = Instigator->FindComponentByClass<UStatComponent>();
@@ -36,6 +38,6 @@ void UHealingSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, con
 	Super::Notify(Instigator, WeaponActor, Origin, TargetLocation, Name);
 	if (Name == TEXT("DealDamage"))
 	{
-		Activate(Instigator, WeaponActor, Origin, TargetLocation);
+		DoHeal();
 	}
 }

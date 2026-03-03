@@ -8,31 +8,27 @@
 #include "Blueprint/UserWidget.h"
 #include "GameFramework/Character.h"
 
-void UDashSkill::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
-                          const FVector& TargetLocation)
+void UDashSkill::Activate(UActiveSkillSlot* InActiveSkillSlot)
 {
-	Super::Activate(Instigator, WeaponActor, Origin, TargetLocation);
-}
-
-void UDashSkill::Enter(AActor* Actor, const FVector& TargetLocation)
-{
-	Super::Enter(Actor,TargetLocation);
+	Super::Activate(InActiveSkillSlot);
 	ChargingTimer = 0.0f;
 	bIsDashing = false;
-	NavDestination = TargetLocation;
-	
+	NavDestination = ActiveSkillSlot->GetTargetLocation();
 }
+
+
 
 void UDashSkill::Execute()
 {
 	Super::Execute();
 }
 
-void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* ActiveSkillSlot)
+void UDashSkill::Tick(float DeltaSeconds)
 {
 	ChargingTimer += DeltaSeconds;
 	UAnimInstance* AnimInstance = nullptr;
-	if (ACharacter* Character = Cast<ACharacter>(Actor))
+	AActor* Owner = ActiveSkillSlot->GetOwner();
+	if (ACharacter* Character = Cast<ACharacter>(Owner))
 	{
 		if (USkeletalMeshComponent* SkeletalMeshComponent = Character->GetMesh())
 		{
@@ -49,11 +45,11 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 		bIsDashing = true;
 		ActiveSkillSlot->OnExecute();
 		
-		UNavigationSystemV1* NavigationSystemV1 = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Actor->GetWorld());
+		UNavigationSystemV1* NavigationSystemV1 = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Owner->GetWorld());
 		if (NavigationSystemV1)
 		{
 			FNavLocation ResultLocation;
-			FVector NavDashingStartLocation = Actor->GetActorLocation();
+			FVector NavDashingStartLocation = Owner->GetActorLocation();
 			NavDestination = ActiveSkillSlot->GetTargetLocation();
 			FVector Extents = FVector(100.0f, 100.0f, 500.0f);
 			if (NavigationSystemV1->ProjectPointToNavigation(NavDestination, ResultLocation,Extents))
@@ -77,7 +73,7 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 	}
 	//적과 충돌
 	//TODO Optimization TargetActor
-	if (FVector::DistSquared(Actor->GetActorLocation(), ActiveSkillSlot->GetTargetLocation()) < 10000.f)
+	if (FVector::DistSquared(Owner->GetActorLocation(), ActiveSkillSlot->GetTargetLocation()) < 10000.f)
 	{
 		// if (Actor->GetOverlappingActors())
 		AnimInstance->Montage_Stop(0.2f);
@@ -85,7 +81,7 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 	//Dashing
 	if (bIsDashing)
 	{
-		FVector CurrentLoc = Actor->GetActorLocation();
+		FVector CurrentLoc = Owner->GetActorLocation();
 		
 		FVector NextLoc = CurrentLoc + (DashingDir * DashSpeed* DeltaSeconds) ;
 		UE_LOG(LogTemp, Warning, TEXT("CurrentLoc Vector: %s, Size: %f"), *CurrentLoc.ToString(), CurrentLoc.Size());
@@ -94,7 +90,7 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 		UE_LOG(LogTemp, Warning, TEXT("NextLoc Vector: %s, Size: %f"), *NextLoc.ToString(), NextLoc.Size());
 		
 		FHitResult Hit;
-		Actor->SetActorLocation(NextLoc, true, &Hit);
+		Owner->SetActorLocation(NextLoc, true, &Hit);
 
 		if (FVector::DistSquared(NextLoc, NavDestination) < 10000.0f)
 		{

@@ -7,8 +7,18 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
-void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation)
+
+void UProjectileSkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
 {
+	Super::Activate(InActiveSkillSlot);
+}
+
+void UProjectileSkillData::SpawnProjectile()
+{
+	Super::Execute();
+	
+	APawn* Instigator = Cast<APawn>(ActiveSkillSlot->GetOwner());;
+	
 	// StatComp 불러오기
 	if (!IsValid(Instigator))
 	{
@@ -31,8 +41,8 @@ void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor
 		SpawnLocation,
 		Instigator->GetActorRotation()
 	);
-
-	FVector Direction = TargetLocation - Origin;
+	FVector Origin = Instigator->GetActorLocation();
+	FVector Direction = ActiveSkillSlot->GetTargetLocation() - Origin;
 	// 손 -> 타겟 방향 계산
 	FRotator SpawnRotation = Direction.Rotation();
 	// 투사체 스폰
@@ -71,6 +81,7 @@ void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ProjectileSound, Instigator->GetActorLocation(), 0.5f);
 	}
+	
 }
 
 float UProjectileSkillData::GetScore(const AActor* Actor, const AActor* Target) const
@@ -103,7 +114,7 @@ void UProjectileSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, 
 	Super::Notify(Instigator, WeaponActor, Origin, TargetLocation, Name);
 	if (Name == TEXT("DealDamage"))
 	{
-		Activate(Instigator,WeaponActor,Origin,TargetLocation);
+		SpawnProjectile();
 	}
 	
 }

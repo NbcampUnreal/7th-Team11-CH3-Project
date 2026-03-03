@@ -3,39 +3,34 @@
 
 #include "Components/Skills/LocationSkillData.h"
 #include "Components/Skills/SkillIndicatorActor.h"
-#include "Components/Skills/ExplosionSkillActor.h" 
-#include "Components/Skills/ParticleDamageActor.h" 
+#include "Components/Skills/ExplosionSkillActor.h"
+#include "Components/Skills/ParticleDamageActor.h"
 #include "Components/StatComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "GameFramework/Character.h"
 #include "Characters/PlayerCharacter.h"
 #include "Characters/Monster/MonsterBase.h"
 
-void ULocationSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
+void ULocationSkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
 {
-}
-
-void ULocationSkillData::Enter(AActor* Actor, const FVector& TargetLocation) 
-{
-	if (IsValid(Actor) == false)
-		return;
+	Super::Activate(InActiveSkillSlot);
 
 	UNiagaraSystem* MagicCircle = GetMagicCircleEffect();
 	if (IsValid(MagicCircle) == false)
 		return;
-	Owner = Actor;
-	FVector SpawnLocation = Actor->GetActorLocation();
+	AActor* Owner = InActiveSkillSlot->GetOwner();
+	FVector SpawnLocation = Owner->GetActorLocation();
 	SpawnLocation.Z -= 85.f;
 
 	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		Actor->GetWorld(),
+		Owner->GetWorld(),
 		MagicCircle,
 		SpawnLocation,
-		Actor->GetActorRotation()
+		Owner->GetActorRotation()
 	);
 }
 
-void ULocationSkillData::Execute() 
+void ULocationSkillData::Execute()
 {
 	if (bIsExecuted)
 		return;
@@ -53,27 +48,25 @@ void ULocationSkillData::Execute()
 	AnimInstance->Montage_JumpToSection("EndCasting", SkillMontage);
 }
 
-void ULocationSkillData::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* ActiveSkillSlot) 
+void ULocationSkillData::Tick(float DeltaSeconds)
 {
-	if (IsValid(SpawnedIndicator) || IsValid(Actor) == false || IsValid(IndicatorClass) == false)
+	Super::Tick(DeltaSeconds);
+	AActor* Owner = ActiveSkillSlot->GetOwner();
+	if (IsValid(SpawnedIndicator) || IsValid(Owner) == false || IsValid(IndicatorClass) == false)
 		return;
 
-	APawn* Instigator = Cast<APawn>(Actor);
+	APawn* Instigator = Cast<APawn>(Owner);
 	if (IsValid(Instigator) == false)
 		return;
 
-	FVector SpawnLocation = Actor->GetActorLocation();
-	//TODO
-	// if (Owner->IsA(AMonsterBase::StaticClass()))
-	// {
-	// 	SpawnLocation =  
-	// }
-	SpawnLocation.Z -= 85.f;  // 발밑으로 보정
+	FVector SpawnLocation = Owner->GetActorLocation();
+
+	SpawnLocation.Z -= 85.f; // 발밑으로 보정
 
 	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = Actor;
+	SpawnParams.Owner = Owner;
 
-	ASkillIndicatorActor* Indicator = Actor->GetWorld()->SpawnActor<ASkillIndicatorActor>(
+	ASkillIndicatorActor* Indicator = Owner->GetWorld()->SpawnActor<ASkillIndicatorActor>(
 		IndicatorClass,
 		SpawnLocation,
 		FRotator::ZeroRotator,
@@ -95,7 +88,6 @@ void ULocationSkillData::OnExit()
 
 	SpawnedIndicator->Destroy();
 	SpawnedIndicator = nullptr;
-	
 }
 
 void ULocationSkillData::SpawnSkill()
@@ -104,7 +96,27 @@ void ULocationSkillData::SpawnSkill()
 		return;
 
 	FVector SkillLocation = SpawnedIndicator->GetIndicatorLocation();
-	
+	if (ActiveSkillSlot->GetTarget() != nullptr)
+	{
+		FVector TargetLocation = ActiveSkillSlot->GetTargetLocation();
+		FVector End = TargetLocation - FVector(0.0f, 0.0f, 1000.0f);
+
+		FHitResult HitResult;
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(ActiveSkillSlot->GetTarget());
+		bool bHit = GetWorld()->LineTraceSingleByChannel(
+			HitResult,
+			TargetLocation,
+			End,
+			ECC_WorldStatic, // 주로 바닥(Static Mesh)은 이 채널을 사용합니다.
+			QueryParams
+		);
+		if (bHit)
+		{
+			SkillLocation = HitResult.ImpactPoint; 
+		}
+	}
+
 	SkillLocation.Z += 5;
 	if (IsValid(SkillEffectClass) == false)
 		return;
@@ -130,7 +142,6 @@ void ULocationSkillData::SpawnSkill()
 			ActualDamage += StatComp->GetCurrentStat(EStat::AttackDamage);
 			Explosion->Initialize(ActualDamage);
 		}
-
 	}
 
 	if (AParticleDamageActor* ParticleActor = Cast<AParticleDamageActor>(Effect))
@@ -143,7 +154,7 @@ void ULocationSkillData::SpawnSkill()
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Spawned Effect: %s at %s"),
-		*GetNameSafe(Effect), *SkillLocation.ToString());
+	       *GetNameSafe(Effect), *SkillLocation.ToString());
 
 	SpawnedIndicator->Destroy();
 	SpawnedIndicator = nullptr;
@@ -151,14 +162,15 @@ void ULocationSkillData::SpawnSkill()
 
 float ULocationSkillData::GetScore(const AActor* Actor, const AActor* Target) const
 {
-	if (FVector::DistSquared(Target->GetActorLocation(), Actor->GetActorLocation()) < Range*Range)
+	if (FVector::DistSquared(Target->GetActorLocation(), Actor->GetActorLocation()) < Range * Range)
 	{
 		return 100.0f;
 	}
 	return Super::GetScore(Actor, Target);
 }
 
-void ULocationSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name)
+void ULocationSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
+                                const FVector& Direction, FName Name)
 {
 	Super::Notify(Instigator, WeaponActor, Origin, Direction, Name);
 	if (Name == TEXT("DealDamage"))

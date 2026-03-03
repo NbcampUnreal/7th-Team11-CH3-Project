@@ -31,6 +31,7 @@ public:
 	virtual bool TryAttack(AActor* Target);
 	virtual bool CanUseSkill(AActor* Target)const;
 	void PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLocation);
+	void PerformSkill(USkillSlot* SkillSlot, AActor* Target);
 	
 	void DealDamage();
 	void BlackboardUpdate();

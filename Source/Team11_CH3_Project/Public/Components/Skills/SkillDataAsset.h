@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "ActiveSkillSlot.h"
-#include "Components/SkillManager.h"
 #include "Engine/DataAsset.h"
 #include "NiagaraSystem.h"
 #include "SkillDataAsset.generated.h"
@@ -29,20 +28,20 @@ class TEAM11_CH3_PROJECT_API USkillDataAsset : public UPrimaryDataAsset
 	GENERATED_BODY()
 	
 public:
-	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
-	                      const FVector& TargetLocation)
-	{
-	}
+	virtual void Activate(UActiveSkillSlot* InActiveSkillSlot){ActiveSkillSlot = InActiveSkillSlot;}
+	virtual void Execute() {}
+	virtual void Tick(float DeltaSeconds) {}
+	virtual void OnExit() {}
+	
+	
+	
 	UTexture2D* GetThumbnail()const{return Thumbnail.LoadSynchronous();}
 	FText GetSKillName()const { return SkillName; }
 	float GetCooldownTime() const { return CooldownTime; }
 	virtual float GetScore(const AActor* Actor, const AActor* Target) const { return -1.0f; }
 	UAnimMontage* GetSkillMontage() const { return SkillMontage; }
 
-	virtual void Enter(AActor* Actor, const FVector& TargetLocation) {}
-	virtual void Execute() {}
-	virtual void Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* ActiveSkillSlot) {}
-	virtual void OnExit() {}
+
 	ESkillType GetSkillType() const { return SkillType; }
 	UNiagaraSystem* GetMagicCircleEffect() const { return MagicCircleEffect; }
 	
@@ -72,7 +71,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
 	float Duration = 100.0f;
-	
+
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TObjectPtr<UAnimMontage> SkillMontage = nullptr;
 
@@ -81,4 +80,7 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TObjectPtr<UNiagaraSystem> MagicCircleEffect;
+protected:
+	UPROPERTY()
+	TWeakObjectPtr<UActiveSkillSlot> ActiveSkillSlot;
 };

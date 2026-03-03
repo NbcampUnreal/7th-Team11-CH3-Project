@@ -288,7 +288,43 @@ void AMonsterBase::PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLoca
 			false);
 	}
 
-	SkillComponent->ActiveSkill(this, TargetLocation, SkillSlot);
+	SkillComponent->ActiveSkill(this, nullptr, SkillSlot);
+}
+
+void AMonsterBase::PerformSkill(USkillSlot* SkillSlot, AActor* Target)
+{
+	if (SkillComponent->IsSkillActive())
+	{
+		return;
+	}
+
+	if (IsValid(SkillSlot->GetEquippedSkill()) == false)
+		return;
+	if (IsValid(SkillSlot->GetEquippedSkill()->GetSkillMontage()) == false)
+		return;
+
+	//	SkillComponent
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		CharacterMovementComponent->bUseControllerDesiredRotation = true;
+		CharacterMovementComponent->bOrientRotationToMovement = false;
+	}
+	if (SkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Aiming)
+	{
+		TWeakObjectPtr<USkillManager> WeakSkillComponent = SkillComponent;
+		GetWorldTimerManager().SetTimer(
+			ExecuteTimer,
+			[WeakSkillComponent]()
+			{
+				if (WeakSkillComponent.IsValid())
+				{
+					WeakSkillComponent->ExecuteActiveSkill();
+				}
+			}, 0.5f,
+			false);
+	}
+
+	SkillComponent->ActiveSkill(this, Target, SkillSlot);
 }
 
 bool AMonsterBase::TryAttack(AActor* Target)
@@ -310,9 +346,9 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	}
 
 	USkillSlot* SkillSlot = SkillComponent->GetSkillSlot(BestSkillIdx);
-	FVector TargetLocation = Target->GetActorLocation();
+	// FVector TargetLocation = Target->GetActorLocation();
 
-	PerformSkill(SkillSlot, TargetLocation);
+	PerformSkill(SkillSlot, Target);
 
 	return true;
 }

@@ -14,9 +14,7 @@ class TEAM11_CH3_PROJECT_API UHealingSkillData : public USkillDataAsset
 {
 	GENERATED_BODY()
 protected:
-	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor,
-		const FVector& Origin, const FVector& TargetLocation) override;
-
+	void DoHeal();
 	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor,
 		const FVector& Origin, const FVector& TargetLocation, FName Name) override;
 

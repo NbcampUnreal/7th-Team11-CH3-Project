@@ -51,7 +51,7 @@ public:
 	void Clear();
 
 	UActiveSkillSlot* GetActiveSkillSlot() const;
-	void ActiveSkill(AActor* Owner, const FVector& TargetLocation, USkillSlot* CurrentSlot);
+	void ActiveSkill(AActor* Owner,  AActor* Target, USkillSlot* CurrentSlot);
 	void TickActiveSkill(float DeltaSeconds);
 	void ExecuteActiveSkill();
 	void ExitActiveSkill();

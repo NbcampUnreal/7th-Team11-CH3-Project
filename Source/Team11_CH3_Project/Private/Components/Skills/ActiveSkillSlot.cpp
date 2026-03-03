@@ -7,19 +7,20 @@
 #include "Characters/Monster/MonsterBase.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Components/Skills/SkillDataAsset.h"
+#include "Components/SkillManager.h"
 
 void UActiveSkillSlot::Init(USkillManager* SkillManager)
 {
 	SkillComponent = SkillManager;
 }
 
-void UActiveSkillSlot::OnStartSkill(AActor* InOwner, const FVector& InTargetLocation, USkillSlot* SkillSlot)
+void UActiveSkillSlot::OnStartSkill(AActor* InOwner, AActor* InTarget, USkillSlot* SkillSlot)
 // 여기서 슬롯을 받게
 {
 	Owner = InOwner;
-	TargetLocation = InTargetLocation;
+	Target = InTarget;
 	CurrentActiveSkillSlot = SkillSlot;
-	CurrentActiveSkillSlot->GetEquippedSkill()->Enter(InOwner, TargetLocation);
+	CurrentActiveSkillSlot->GetEquippedSkill()->Activate(this);
 	// Aiming 아닌경우 쿨타임 여기서
 	if (CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillType() != ESkillType::Aiming)
 	{
@@ -46,7 +47,7 @@ void UActiveSkillSlot::OnTick(float DeltaSeconds)
 		SetIsEnd(true);
 		return;
 	}
-	CurrentActiveSkillSlot->GetEquippedSkill()->Tick(DeltaSeconds, Owner.Get(), this);
+	CurrentActiveSkillSlot->GetEquippedSkill()->Tick(DeltaSeconds);
 	ElapsedTime += DeltaSeconds;
 	if (CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Duration)
 	{
@@ -65,8 +66,11 @@ void UActiveSkillSlot::OnExit()
 	CurrentActiveSkillSlot.Reset();
 	CurrentActiveSkillSlot = nullptr;
 	SetIsEnd(false);
+	Owner.Reset();
 	Owner = nullptr;
-	TargetLocation = FVector::ZeroVector;
+	Target.Reset();
+	Target = nullptr;
+
 }
 
 void UActiveSkillSlot::Notify(FName NotifyName)
@@ -86,7 +90,7 @@ void UActiveSkillSlot::Notify(FName NotifyName)
 		WeaponActor = MonsterBase->GetWeaponActor();
 	}
 	CurrentActiveSkillSlot->GetEquippedSkill()->Notify(Cast<APawn>(Owner), WeaponActor, Owner->GetActorLocation(),
-	                                                   TargetLocation, NotifyName);
+	                                                   GetTargetLocation(), NotifyName);
 }
 
 float UActiveSkillSlot::GetElapsedTime() const
@@ -94,14 +98,13 @@ float UActiveSkillSlot::GetElapsedTime() const
 	return ElapsedTime;
 }
 
-void UActiveSkillSlot::SetTargetLocation(const FVector& InTargetLocation)
-{
-	TargetLocation = InTargetLocation;
-}
 
 FVector UActiveSkillSlot::GetTargetLocation() const
 {
-	return TargetLocation;
+	if (Target.IsValid()){
+		return Target->GetActorLocation();
+	}
+	return  TargetLocation;
 }
 
 bool UActiveSkillSlot::GetIsEnd()
@@ -116,4 +119,9 @@ bool UActiveSkillSlot::GetIsEnd()
 void UActiveSkillSlot::SetIsEnd(bool isEnd)
 {
 	bIsEnd = isEnd;
+}
+
+void UActiveSkillSlot::SetTargetLocation(const FVector& Vector)
+{
+	TargetLocation = Vector;
 }

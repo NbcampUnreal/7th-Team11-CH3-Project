@@ -19,22 +19,26 @@ class TEAM11_CH3_PROJECT_API UActiveSkillSlot : public UObject
 
 public:
 	void Init(USkillManager* SkillManager);
-	void OnStartSkill(AActor* InOwner, const FVector& InTargetLocation, USkillSlot* SkillSlot);
+	
+	void OnStartSkill(AActor* InOwner, AActor* InTarget, USkillSlot* SkillSlot);
 	void OnExecute();
 	void OnTick(float DeltaSeconds);
 	void OnExit();
 	void Notify(FName NotifyName);
+	
 	float GetElapsedTime() const;
 	UFUNCTION(BlueprintCallable)
 	USkillSlot* GetSkillSlot() const { return CurrentActiveSkillSlot.Get(); }
-
-	void SetTargetLocation(const FVector& InTargetLocation);
+	AActor* GetTarget() const { return Target.Get(); }
+	AActor* GetOwner() const { return Owner.Get(); }
 	FVector GetTargetLocation() const;
 	bool GetIsEnd();
 	void SetIsEnd(bool isEnd);
+	void SetTargetLocation(const FVector& Vector);
 
 private:
 	TWeakObjectPtr<AActor> Owner;
+	TWeakObjectPtr<AActor> Target;
 	FVector TargetLocation;
 	float ElapsedTime;
 	UPROPERTY()
