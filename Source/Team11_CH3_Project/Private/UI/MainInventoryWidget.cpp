@@ -6,7 +6,9 @@
 #include "UI/EquipmentDetailWidget.h"
 #include "UI/InventoryWidget.h"
 #include "UI/ItemOverlayWidget.h"
+#include "UI/StatDetailWidget.h"
 #include "MainPlayerController.h"
+#include "Characters/PlayerCharacter.h"
 
 void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInventoryComponent,
 	UItemManager* InEquipmentComponent)
@@ -54,6 +56,23 @@ void UMainInventoryWidget::HandleItemSlotChanged(UItemSlot* SlotData)
 		break;
 	case EItemContainerType::Max:
 		break;
+	}
+}
+
+void UMainInventoryWidget::HandleStatChanged(UStatComponent* StatComp)
+{
+	if (StatDetailWidget)
+	{
+		TMap<EStat, float> StatMap;
+		if (UEnum* EnumPtr = StaticEnum<EStat>())
+		{
+			for (int32 i = 0; i < EnumPtr->NumEnums(); ++i)
+			{
+				EStat Type = static_cast<EStat>(EnumPtr->GetValueByIndex(i));
+				StatMap.Add(Type, StatComp->GetCurrentStat(Type));
+			}
+		}
+		StatDetailWidget->UpdateStatBox(StatMap);
 	}
 }
 

@@ -246,7 +246,7 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// 스탯 변경 시 이동속도 업데이트
-	StatComponent->OnStatChanged.AddDynamic(this, &APlayerCharacter::UpdateMovementSpeed);
+	//StatComponent->OnStatChanged.AddDynamic(this, &APlayerCharacter::UpdateMovementSpeed);
 
 	UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
 	if (IsValid(GI) == false)
