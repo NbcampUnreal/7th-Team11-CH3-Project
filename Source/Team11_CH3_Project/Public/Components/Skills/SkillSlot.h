@@ -16,7 +16,7 @@ class TEAM11_CH3_PROJECT_API USkillSlot : public UObject
 	GENERATED_BODY()
 	
 public:
-	void Init(USkillManager* SkillManager);
+	void Init(USkillManager* SkillManager, int32 InIndex);
 	// 보석 장착
 	UFUNCTION(BlueprintCallable)
 	void EquipGem(const USkillDataAsset* NewSkillData);
@@ -31,6 +31,7 @@ public:
 	float GetCooldownRemaining() const;
 	float GetScore(const AActor* Actor, const AActor* Target) const;
 	USkillManager* GetSkillComponent()const;
+	int32 GetIndex() const { return Index; }
 private:
 	UPROPERTY()
 	TObjectPtr<USkillDataAsset> EquippedSkill;
@@ -39,4 +40,6 @@ private:
 	
 	FTimerHandle CooldownTimer;
 	bool bIsOnCooldown;
+	
+	int32 Index;
 };

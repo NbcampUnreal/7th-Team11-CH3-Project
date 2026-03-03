@@ -12,6 +12,9 @@ class UStatComponent;
 class USkillSlot;
 class USkillDataAsset;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnSkillSlotChanged, USkillSlot*, SlotData, bool, bIsThumbnailChanged, bool, bIsCooldownStart);
+
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TEAM11_CH3_PROJECT_API USkillManager : public UActorComponent
 {
@@ -34,10 +37,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetBestSkill(const AActor* Actor, const AActor* Target) const;
 
-	// 스킬 실행
-	UFUNCTION(BlueprintCallable)
-	void StartSkillCooldown(int32 Index);
-
 	// 스킬 보석 교체
 	UFUNCTION(BlueprintCallable)
 	void EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData);
@@ -59,6 +58,10 @@ public:
 	bool IsSkillActive() const;
 	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
 
+	UPROPERTY(BlueprintAssignable)
+	FOnSkillSlotChanged OnSkillSlotChanged;
+	
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
