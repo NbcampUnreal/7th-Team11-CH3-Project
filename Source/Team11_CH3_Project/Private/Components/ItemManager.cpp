@@ -252,12 +252,14 @@ bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 	if (Index < EquipmentSlots.Num())
 	{
 		EquipTo(Index, EquipmentInstance);
+		OnEquipmentSlotChanged.Broadcast(EquipmentSlots[Index]);
 	}
 	// 스킬 젬
 	else if (Index < EquipmentSlots.Num() + GemSlots.Num())
 	{
 		Index -= EquipmentSlots.Num();
 		EquipGemTo(Index, EquipmentInstance);
+		OnEquipmentSlotChanged.Broadcast(GemSlots[Index]);
 	}
 	return true;
 }

@@ -33,6 +33,7 @@ public:
 	                      const FVector& TargetLocation)
 	{
 	}
+	UTexture2D* GetThumbnail()const{return Thumbnail.LoadSynchronous();}
 	FText GetSKillName()const { return SkillName; }
 	float GetCooldownTime() const { return CooldownTime; }
 	virtual float GetScore(const AActor* Actor, const AActor* Target) const { return -1.0f; }
@@ -51,6 +52,9 @@ public:
 						  const FVector& TargetLocation, FName Name){};
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	TSoftObjectPtr<UTexture2D> Thumbnail;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
 	FName SkillID;
 

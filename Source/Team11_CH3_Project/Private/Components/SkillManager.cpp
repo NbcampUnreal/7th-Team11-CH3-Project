@@ -22,7 +22,7 @@ USkillManager::USkillManager()
 }
 
 void USkillManager::TickComponent(float DeltaTime, enum ELevelTick TickType,
-	FActorComponentTickFunction* ThisTickFunction)
+                                  FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	TickActiveSkill(DeltaTime);
@@ -36,31 +36,15 @@ void USkillManager::BeginPlay()
 
 
 	SkillSlots.Empty();
-	// for (USkillDataAsset* SkillData : DefaultSkillSlotData)
-	for (int32 i = 0;i<5;++i)
+	for (int32 i = 0; i < 5; ++i)
 	{
 		USkillSlot* NewSlot = NewObject<USkillSlot>(this);
-		NewSlot->Init(this);
+		NewSlot->Init(this, i);
 		SkillSlots.Add(NewSlot);
-		// if (IsValid(SkillData))
-		// {
-		// 	USkillSlot* NewSlot = NewObject<USkillSlot>(this);
-		// 	NewSlot->EquipGem(SkillData);
-		// 	SkillSlots.Add(NewSlot);
-		// }
 	}
 	ActiveSkillSlot = NewObject<UActiveSkillSlot>(this);
 	ActiveSkillSlot->Init(this);
 }
-
-
-// Called every frame
-//void USkillManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-//{
-//	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-//
-//	// ...
-//}
 
 
 TArray<int32> USkillManager::FindReadySlotIndexes() const
@@ -68,7 +52,8 @@ TArray<int32> USkillManager::FindReadySlotIndexes() const
 	TArray<int32> Ret;
 	for (int32 i = 0; i < SkillSlots.Num(); i++)
 	{
-		if (SkillSlots.IsValidIndex(i) && IsValid(SkillSlots[i]->GetEquippedSkill()) &&  !SkillSlots[i]->IsSkillOnCooldown())
+		if (SkillSlots.IsValidIndex(i) && IsValid(SkillSlots[i]->GetEquippedSkill()) && !SkillSlots[i]->
+			IsSkillOnCooldown())
 		{
 			Ret.Add(i);
 		}
@@ -84,13 +69,14 @@ int32 USkillManager::GetBestSkill(const AActor* Actor, const AActor* Target) con
 	TArray<int32> BestSkillIdx;
 	for (int32 i = 0; i < ReadySkillIndexes.Num(); i++)
 	{
-		float Score = SkillSlots[i]->GetScore(Actor,Target);
+		float Score = SkillSlots[i]->GetScore(Actor, Target);
 		if (MaxScore < Score)
 		{
 			MaxScore = Score;
 			BestSkillIdx.Empty();
 			BestSkillIdx.Add(i);
-		}else if (MaxScore == Score)
+		}
+		else if (MaxScore == Score)
 		{
 			BestSkillIdx.Add(i);
 		}
@@ -99,32 +85,9 @@ int32 USkillManager::GetBestSkill(const AActor* Actor, const AActor* Target) con
 	{
 		return -1;
 	}
-	return BestSkillIdx[FMath::RandRange(0,BestSkillIdx.Num()-1)];
+	return BestSkillIdx[FMath::RandRange(0, BestSkillIdx.Num() - 1)];
 }
 
-void USkillManager::StartSkillCooldown(int32 Index)
-{
-	// 예외 상황 체크
-	if (SkillSlots.IsValidIndex(Index) == false)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%d In Valid SKill Slot"), Index);
-		return;
-	}
-	if (SkillSlots[Index] == nullptr || SkillSlots[Index]->GetEquippedSkill() == nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("%d Skill Is Empty"), Index);
-		return;
-	}
-	// 쿨타임 체크
-	if (IsSkillOnCooldown(Index))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Skill On Cooldown: %.1fs"), GetCooldownRemaining(Index));
-		return;
-	}
-
-	// 스킬 발동
-	SkillSlots[Index]->StartCooldown();
-}
 
 void USkillManager::EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData)
 {
@@ -139,6 +102,7 @@ void USkillManager::EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData
 	}
 	// 장착
 	SkillSlots[SlotIndex]->EquipGem(NewSkillData);
+	OnSkillSlotChanged.Broadcast(SkillSlots[SlotIndex], true,false);
 	UE_LOG(LogTemp, Warning, TEXT("EquipGem : %s"), *NewSkillData->GetName());
 }
 
@@ -150,9 +114,9 @@ void USkillManager::UnEquipSkillGem(int32 SlotIndex)
 		UE_LOG(LogTemp, Warning, TEXT("%d In Valid SKill Slot"), SlotIndex);
 		return;
 	}
+	OnSkillSlotChanged.Broadcast(SkillSlots[SlotIndex], true,false);
 	SkillSlots[SlotIndex]->ClearSlot();
 }
-
 
 
 bool USkillManager::IsSkillOnCooldown(int32 SlotIndex) const
@@ -177,6 +141,10 @@ float USkillManager::GetCooldownRemaining(int32 SlotIndex) const
 
 void USkillManager::Clear()
 {
+	for (int32 i = 0; i < SkillSlots.Num();++i)
+	{
+		UnEquipSkillGem(i);
+	}
 	SkillSlots.Empty();
 	if (IsSkillActive())
 	{
@@ -202,7 +170,7 @@ void USkillManager::ActiveSkill(AActor* Owner, const FVector& TargetLocation, US
 	}
 	if (!IsValid(SkeletalMeshComponent))
 	{
-		return;	
+		return;
 	}
 
 
@@ -210,16 +178,16 @@ void USkillManager::ActiveSkill(AActor* Owner, const FVector& TargetLocation, US
 	UAnimInstance* AnimInstance = SkeletalMeshComponent->GetAnimInstance();
 	float CastSpeed = 1.0f;
 	StatComp = GetOwner()->FindComponentByClass<UStatComponent>();
-	
+
 	if (StatComp.IsValid() == false)
 		return;
-	CastSpeed += StatComp->GetCurrentStat(EStat::CastSpeed);  
+	CastSpeed += StatComp->GetCurrentStat(EStat::CastSpeed);
 
 	if (!IsValid(AnimInstance))
 	{
 		return;
 	}
-	float MontageCheck = AnimInstance->Montage_Play(SkillMontage,CastSpeed);
+	float MontageCheck = AnimInstance->Montage_Play(SkillMontage, CastSpeed);
 	if (MontageCheck <= 0.0f)
 	{
 		return;
@@ -227,7 +195,7 @@ void USkillManager::ActiveSkill(AActor* Owner, const FVector& TargetLocation, US
 	FOnMontageEnded EndDelegate;
 	EndDelegate.BindUObject(this, &USkillManager::OnAttackMontageEnded);
 	SkeletalMeshComponent->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
-	
+
 	ActiveSkillSlot->OnStartSkill(Owner, TargetLocation, SkillSlot);
 }
 
@@ -264,7 +232,7 @@ void USkillManager::ExitActiveSkill()
 
 bool USkillManager::IsSkillActive() const
 {
-	if (ActiveSkillSlot->GetSkillSlot() )
+	if (ActiveSkillSlot->GetSkillSlot())
 	{
 		return true;
 	}

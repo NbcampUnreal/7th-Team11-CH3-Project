@@ -8,6 +8,7 @@
 #include "Types/StatTypes.h"
 #include "MainPlayerController.generated.h"
 
+class USkillSlot;
 class UInputMappingContext;
 class UInputAction;
 class UCanvasPanel;
@@ -19,6 +20,10 @@ class TEAM11_CH3_PROJECT_API AMainPlayerController : public APlayerController, p
 	GENERATED_BODY()
 
 public:
+#pragma region TESTCODE
+	TArray<FTimerHandle> SkillCooldownTimerHandles;
+#pragma endregion
+	
 	AMainPlayerController();
 
 	virtual void BeginPlay() override;
@@ -147,6 +152,10 @@ public:
 	void UpdateWaveInfo(int32 WaveIndex, int32 MaxWave);
 	UFUNCTION()
 	void UpdateHP(float CurrentHP, float MaxHP);
+	
+	UFUNCTION()
+	void UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbnailChanged, bool bIsCooldownStart);
+
 	UFUNCTION()
 	void UpdateLevelFinished(FString TargetLevel);
 

@@ -20,6 +20,7 @@ void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInve
 	InventoryComponent = InInventoryComponent;
 	EquipmentComponent = InEquipmentComponent;
 	InventoryComponent->OnInventorySlotChanged.AddDynamic(this, &UMainInventoryWidget::HandleItemSlotChanged);
+	EquipmentComponent->OnEquipmentSlotChanged.AddDynamic(this, &UMainInventoryWidget::HandleItemSlotChanged);
 }
 
 void UMainInventoryWidget::UpdateEquipmentDetailWidget(UItemSlot* EquipmentSlot)
