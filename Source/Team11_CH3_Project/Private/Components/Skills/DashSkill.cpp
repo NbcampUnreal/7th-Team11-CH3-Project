@@ -6,33 +6,31 @@
 #include "AIController.h"
 #include "NavigationSystem.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/StatComponent.h"
 #include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 
-void UDashSkill::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
-                          const FVector& TargetLocation)
+void UDashSkill::Activate(UActiveSkillSlot* InActiveSkillSlot)
 {
-	Super::Activate(Instigator, WeaponActor, Origin, TargetLocation);
-}
-
-void UDashSkill::Enter(AActor* Actor, const FVector& TargetLocation)
-{
-	Super::Enter(Actor,TargetLocation);
+	Super::Activate(InActiveSkillSlot);
 	ChargingTimer = 0.0f;
 	bIsDashing = false;
-	NavDestination = TargetLocation;
-	
+	NavDestination = ActiveSkillSlot->GetTargetLocation();
 }
+
+
 
 void UDashSkill::Execute()
 {
 	Super::Execute();
 }
 
-void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* ActiveSkillSlot)
+void UDashSkill::Tick(float DeltaSeconds)
 {
 	ChargingTimer += DeltaSeconds;
 	UAnimInstance* AnimInstance = nullptr;
-	if (ACharacter* Character = Cast<ACharacter>(Actor))
+	AActor* Owner = ActiveSkillSlot->GetOwner();
+	if (ACharacter* Character = Cast<ACharacter>(Owner))
 	{
 		if (USkeletalMeshComponent* SkeletalMeshComponent = Character->GetMesh())
 		{
@@ -49,11 +47,11 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 		bIsDashing = true;
 		ActiveSkillSlot->OnExecute();
 		
-		UNavigationSystemV1* NavigationSystemV1 = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Actor->GetWorld());
+		UNavigationSystemV1* NavigationSystemV1 = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Owner->GetWorld());
 		if (NavigationSystemV1)
 		{
 			FNavLocation ResultLocation;
-			FVector NavDashingStartLocation = Actor->GetActorLocation();
+			FVector NavDashingStartLocation = Owner->GetActorLocation();
 			NavDestination = ActiveSkillSlot->GetTargetLocation();
 			FVector Extents = FVector(100.0f, 100.0f, 500.0f);
 			if (NavigationSystemV1->ProjectPointToNavigation(NavDestination, ResultLocation,Extents))
@@ -77,15 +75,11 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 	}
 	//적과 충돌
 	//TODO Optimization TargetActor
-	if (FVector::DistSquared(Actor->GetActorLocation(), ActiveSkillSlot->GetTargetLocation()) < 10000.f)
-	{
-		// if (Actor->GetOverlappingActors())
-		AnimInstance->Montage_Stop(0.2f);
-	}
+
 	//Dashing
 	if (bIsDashing)
 	{
-		FVector CurrentLoc = Actor->GetActorLocation();
+		FVector CurrentLoc = Owner->GetActorLocation();
 		
 		FVector NextLoc = CurrentLoc + (DashingDir * DashSpeed* DeltaSeconds) ;
 		UE_LOG(LogTemp, Warning, TEXT("CurrentLoc Vector: %s, Size: %f"), *CurrentLoc.ToString(), CurrentLoc.Size());
@@ -94,9 +88,91 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 		UE_LOG(LogTemp, Warning, TEXT("NextLoc Vector: %s, Size: %f"), *NextLoc.ToString(), NextLoc.Size());
 		
 		FHitResult Hit;
-		Actor->SetActorLocation(NextLoc, true, &Hit);
+		Owner->SetActorLocation(NextLoc, true, &Hit);
 
-		if (FVector::DistSquared(NextLoc, NavDestination) < 10000.0f)
+		if (FVector::DistSquared(Owner->GetActorLocation(), ActiveSkillSlot->GetTargetLocation()) < 250000.f)
+		{
+			APawn* Instigator = Cast<APawn> (ActiveSkillSlot->GetOwner());
+			if (!Instigator)
+			{
+				return;
+			}
+	
+			TArray<AActor*> OverlappingActors;
+			TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+			ObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn)); // Pawn만 검출
+
+			UKismetSystemLibrary::SphereOverlapActors(
+				Instigator->GetWorld(),
+				Instigator->GetActorLocation(), 
+				200.0f, 
+				ObjectTypes, 
+				APawn::StaticClass(),
+				TArray<AActor*>(), 
+				OverlappingActors
+			);
+
+			UStatComponent* StatComp = Instigator->FindComponentByClass<UStatComponent>();
+			float BaseDamage = Damage;
+			if (IsValid(StatComp))
+			{
+				BaseDamage += StatComp->GetCurrentStat(EStat::AttackDamage);
+			}
+	
+			bool bIsHit = false;
+			for (AActor* HitActor : OverlappingActors)
+			{
+				if (IsValid(HitActor) == false || HitActor == Instigator)
+				{
+					continue;
+				}
+				AController* InstigatorController = Instigator->GetController();
+				if (InstigatorController == nullptr)
+				{
+					continue;
+				}
+
+				if (const IGenericTeamAgentInterface* InstigatorTeam = Cast<IGenericTeamAgentInterface>(InstigatorController))
+				{
+					if (InstigatorTeam->GetTeamAttitudeTowards(*HitActor) != ETeamAttitude::Hostile)
+					{
+						continue;
+					}
+				}
+				bIsHit = true;
+				float ActualDamage = BaseDamage;
+				if (IsValid(StatComp))
+				{
+					// 크리티컬 판정
+					float CriticalChance = StatComp->GetCurrentStat(EStat::CriticalChance);
+					float CriticalMultiplier = StatComp->GetCurrentStat(EStat::CriticalDamage);
+
+					if (FMath::FRandRange(0.0f, 100.0f) < CriticalChance)
+					{
+						ActualDamage *= CriticalMultiplier;
+						UE_LOG(LogTemp, Warning, TEXT("Critical Hit"));
+					}
+				}
+				UGameplayStatics::ApplyDamage(
+					HitActor,
+					ActualDamage,
+					InstigatorController,
+					Instigator,
+					UDamageType::StaticClass()
+				);
+				UE_LOG(LogTemp, Warning, TEXT("Hit : %s, Damage : %0.1f"), *HitActor->GetName(), ActualDamage);
+			}
+			
+			if (bIsHit)
+			{
+				AnimInstance->Montage_Stop(0.2f);
+			}
+			
+		}
+		
+		
+		
+		if (FVector::DistSquared(NextLoc, NavDestination) < 250000.0f)
 		{
 			AnimInstance->Montage_Stop(0.2f, SkillMontage);
 			return; 

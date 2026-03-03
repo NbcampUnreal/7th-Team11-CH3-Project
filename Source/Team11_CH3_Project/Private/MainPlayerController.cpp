@@ -19,6 +19,7 @@
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanel.h"
+#include "Components/SkillManager.h"
 #include "Components/Skills/SkillSlot.h"
 #include "UI/MainInventoryWidget.h"
 #include "UI/HUDWidget.h"
@@ -521,37 +522,43 @@ void AMainPlayerController::UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbn
 				}
 			}
 		}	
-		if (bIsCooldownStart)
+		if (bIsThumbnailChanged || bIsCooldownStart)
 		{	
 			FString WidgetName = FString::Printf(TEXT("SkillProgressBar%d"), Index);
 			FName WidgetFName = FName(*WidgetName);
 			if (UProgressBar* SkillCooldownBar = Cast<UProgressBar>(HUDWidget->GetWidgetFromName(WidgetFName)))
 			{
-				TWeakObjectPtr<UProgressBar> WeakSkillCooldownBar = SkillCooldownBar;
-				TWeakObjectPtr<USkillSlot> WeakSkillSlot = SkillSlot;
-				;
-				GetWorldTimerManager().SetTimer(SkillCooldownTimerHandles[Index], [this,Index,WeakSkillSlot,WeakSkillCooldownBar]()
+
+				if (SkillSlot->GetEquippedSkill() && SkillSlot->GetEquippedSkill()->GetCooldownTime() > 0.2f)
+				{				
+					TWeakObjectPtr<UProgressBar> WeakSkillCooldownBar = SkillCooldownBar;
+					TWeakObjectPtr<USkillSlot> WeakSkillSlot = SkillSlot;
+					GetWorldTimerManager().SetTimer(SkillCooldownTimerHandles[Index], [this,Index,WeakSkillSlot,WeakSkillCooldownBar]()
+					{
+						if (!IsValid(this))
+						{
+							return;
+						}
+						if (!WeakSkillCooldownBar.IsValid())
+						{
+							GetWorldTimerManager().ClearTimer(SkillCooldownTimerHandles[Index]);
+							return;
+						}
+						if (!WeakSkillSlot.IsValid())
+						{
+							WeakSkillCooldownBar->SetPercent(1.0f);
+							return;
+						}
+						float TotalCooldown = WeakSkillSlot->GetEquippedSkill()->GetCooldownTime();
+						float RemainCooldown = WeakSkillSlot->GetCooldownRemaining();
+					
+						WeakSkillCooldownBar->SetPercent((TotalCooldown - RemainCooldown)/TotalCooldown);
+					
+					}, 0.03, true);
+				}else
 				{
-					if (IsValid(this))
-					{
-						return;
-					}
-					if (!WeakSkillCooldownBar.IsValid())
-					{
-						GetWorldTimerManager().ClearTimer(SkillCooldownTimerHandles[Index]);
-						return;
-					}
-					if (!WeakSkillSlot.IsValid())
-					{
-						WeakSkillCooldownBar->SetPercent(1.0f);
-						return;
-					}
-					float TotalCooldown = WeakSkillSlot->GetEquippedSkill()->GetCooldownTime();
-					float RemainCooldown = WeakSkillSlot->GetCooldownRemaining();
-					
-					WeakSkillCooldownBar->SetPercent((TotalCooldown - RemainCooldown)/TotalCooldown);
-					
-				}, 0.03, true);
+					SkillCooldownBar->SetPercent(1.0f);
+				}
 			}
 		}
 	}

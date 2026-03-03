@@ -6,8 +6,12 @@
 #include "Components/CapsuleComponent.h"
 #include "NiagaraFunctionLibrary.h"
 
-void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
+
+void UMobilitySkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
 {
+	Super::Activate(InActiveSkillSlot);
+	APawn* Instigator = Cast<APawn>(ActiveSkillSlot->GetOwner());;
+	
 	// 마법진 소환
 	if (IsValid(Instigator) == false)
 		return;
@@ -85,13 +89,4 @@ void UMobilitySkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, 
 	}
 
 	Instigator->SetActorLocation(Destination, true);
-}
-
-void UMobilitySkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation, FName Name)
-{
-	Super::Notify(Instigator, WeaponActor, Origin, TargetLocation, Name);
-	if (Name == TEXT("DealDamage"))
-	{
-		Activate(Instigator, WeaponActor, Origin, TargetLocation);
-	}
 }

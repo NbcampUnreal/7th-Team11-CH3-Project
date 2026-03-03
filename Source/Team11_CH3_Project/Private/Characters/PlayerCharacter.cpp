@@ -663,7 +663,7 @@ void APlayerCharacter::PerformSkill(USkillSlot* SkillSlot, const FVector& Target
 	if (IsValid(SkillSlot->GetEquippedSkill()->GetSkillMontage()) == false)
 		return;
 
-	SkillComponent->ActiveSkill(this, TargetLocation, SkillSlot);
+	SkillComponent->ActiveSkill(this, nullptr, SkillSlot);
 }
 
 

@@ -16,7 +16,8 @@ class TEAM11_CH3_PROJECT_API UProjectileSkillData : public USkillDataAsset
 	GENERATED_BODY()
 	
 public:
-	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) override;
+	virtual void Activate(UActiveSkillSlot* InActiveSkillSlot) override;
+	void SpawnProjectile();
 	virtual float GetScore(const AActor* Actor, const AActor* Target)const override;
 	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation, FName Name) override;
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Sound")

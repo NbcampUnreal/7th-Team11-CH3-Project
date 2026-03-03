@@ -4,32 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "SkillDataAsset.h"
-#include "DashSkill.generated.h"
+#include "WhirlwindSkillData.generated.h"
+
+class USoundBase;
 
 /**
  * 
  */
+
+
 UCLASS()
-class TEAM11_CH3_PROJECT_API UDashSkill : public USkillDataAsset
+class TEAM11_CH3_PROJECT_API UWhirlwindSkillData : public USkillDataAsset
 {
 	GENERATED_BODY()
 public:
-	virtual void Activate(UActiveSkillSlot* InActiveSkillSlot) override;
-	virtual void Execute() override;
+	void DealDamage();
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnExit() override;
-	
 	virtual float GetScore(const AActor* Actor, const AActor* Target) const override;
+	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation, FName Name)  override;
 protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Dash")
-	float ChargingTime = 2.0f;
-	UPROPERTY(EditDefaultsOnly, Category = "Skill|Dash")
-	float DashSpeed;
-
+	float MoveSpeed = 300.0f;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Skill|Sound")
+	USoundBase* WhirlwindSound;
 private:
-	float ChargingTimer = 0.0f;
-	bool bIsDashing = false;
-	FVector NavDestination;
-	FVector DashingDir;
+	float Timer = 0.0f;
+	
 };
-

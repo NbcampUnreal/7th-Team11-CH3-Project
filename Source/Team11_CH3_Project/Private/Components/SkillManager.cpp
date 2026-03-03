@@ -157,7 +157,7 @@ UActiveSkillSlot* USkillManager::GetActiveSkillSlot() const
 	return ActiveSkillSlot.Get();
 }
 
-void USkillManager::ActiveSkill(AActor* Owner, const FVector& TargetLocation, USkillSlot* SkillSlot)
+void USkillManager::ActiveSkill(AActor* Owner, AActor* Target, USkillSlot* SkillSlot)
 {
 	USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
 	if (ACharacter* Character = Cast<ACharacter>(Owner))
@@ -196,7 +196,7 @@ void USkillManager::ActiveSkill(AActor* Owner, const FVector& TargetLocation, US
 	EndDelegate.BindUObject(this, &USkillManager::OnAttackMontageEnded);
 	SkeletalMeshComponent->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
 
-	ActiveSkillSlot->OnStartSkill(Owner, TargetLocation, SkillSlot);
+	ActiveSkillSlot->OnStartSkill(Owner, Target, SkillSlot);
 }
 
 void USkillManager::TickActiveSkill(float DeltaSeconds)
@@ -210,7 +210,9 @@ void USkillManager::TickActiveSkill(float DeltaSeconds)
 
 void USkillManager::ExecuteActiveSkill()
 {
-	ActiveSkillSlot->OnExecute();
+	if (ActiveSkillSlot){
+		ActiveSkillSlot->OnExecute();
+	}
 }
 
 void USkillManager::ExitActiveSkill()

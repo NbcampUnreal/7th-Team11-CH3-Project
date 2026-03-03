@@ -52,7 +52,7 @@ AMonsterBase::AMonsterBase()
 
 void AMonsterBase::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 {
-	EquipmentComponent->SetItemAt(WeaponItemInstance,0);
+	EquipmentComponent->SetItemAt(WeaponItemInstance, 0);
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
 	if (AnimInstance && AnimInstance->GetClass()->ImplementsInterface(UWeaponAnimInterface::StaticClass()))
@@ -61,7 +61,7 @@ void AMonsterBase::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 		{
 			UAnimSequence* GripAnim = WeaponActor->GetGripAnimation();
 			IWeaponAnimInterface::Execute_UpdateGripAnim(AnimInstance, WeaponActor->GetGripAnimation(),
-														 (GripAnim != nullptr));
+			                                             (GripAnim != nullptr));
 		}
 	}
 }
@@ -95,9 +95,9 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	{
 		const TArray<TSoftObjectPtr<USkillDataAsset>>& Skills = MonsterData->Skills;
 
-		for (int32 i = 0; i < Skills.Num();++i)
+		for (int32 i = 0; i < Skills.Num(); ++i)
 		{
-			SkillComponent->EquipSkillGem(i+1,Skills[i].LoadSynchronous());
+			SkillComponent->EquipSkillGem(i + 1, Skills[i].LoadSynchronous());
 		}
 	}
 
@@ -109,6 +109,8 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	}
 	GetCharacterMovement()->MaxWalkSpeed = StatComponent->GetBaseStat(EStat::MoveSpeed);
 	BlackboardUpdate();
+	SetActorScale3D({1.f, 1.f, 1.f});
+	
 }
 
 void AMonsterBase::Clear()
@@ -124,6 +126,7 @@ void AMonsterBase::Clear()
 	//WeaponItemDataInstance->BeginDestroy();
 	EquipmentComponent->UnequipWeapon();
 	WeaponItemDataInstance = nullptr;
+	GetWorldTimerManager().ClearTimer(ExecuteTimer);
 }
 
 AWeaponActor* AMonsterBase::GetWeaponActor() const
@@ -144,7 +147,6 @@ void AMonsterBase::UpdateTargetLocation(const FVector& Vector)
 			ActiveSkillSlot->SetTargetLocation(Vector);
 		}
 	}
-	
 }
 
 float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
@@ -190,6 +192,12 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 	};
 	// GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%f"), StatComponent->GetCurrentHP()));
 	return ActualDamage;
+}
+
+void AMonsterBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	Clear();
 }
 
 
@@ -255,22 +263,70 @@ void AMonsterBase::PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLoca
 	{
 		return;
 	}
-	
+
 	if (IsValid(SkillSlot->GetEquippedSkill()) == false)
 		return;
 	if (IsValid(SkillSlot->GetEquippedSkill()->GetSkillMontage()) == false)
 		return;
-	
+
 	//	SkillComponent
 	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
 	{
 		CharacterMovementComponent->bUseControllerDesiredRotation = true;
 		CharacterMovementComponent->bOrientRotationToMovement = false;
 	}
-	
-	
-	SkillComponent->ActiveSkill(this,TargetLocation, SkillSlot);
+	if (SkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Aiming)
+	{
+		TWeakObjectPtr<USkillManager> WeakSkillComponent = SkillComponent;
+		GetWorldTimerManager().SetTimer(
+			ExecuteTimer,
+			[WeakSkillComponent]()
+			{
+				if (WeakSkillComponent.IsValid())
+				{
+					WeakSkillComponent->ExecuteActiveSkill();
+				}
+			}, 0.5f,
+			false);
+	}
 
+	SkillComponent->ActiveSkill(this, nullptr, SkillSlot);
+}
+
+void AMonsterBase::PerformSkill(USkillSlot* SkillSlot, AActor* Target)
+{
+	if (SkillComponent->IsSkillActive())
+	{
+		return;
+	}
+
+	if (IsValid(SkillSlot->GetEquippedSkill()) == false)
+		return;
+	if (IsValid(SkillSlot->GetEquippedSkill()->GetSkillMontage()) == false)
+		return;
+
+	//	SkillComponent
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		CharacterMovementComponent->bUseControllerDesiredRotation = true;
+		CharacterMovementComponent->bOrientRotationToMovement = false;
+	}
+	if (SkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Aiming)
+	{
+		TWeakObjectPtr<USkillManager> WeakSkillComponent = SkillComponent;
+		GetWorldTimerManager().SetTimer(
+			ExecuteTimer,
+			[WeakSkillComponent]()
+			{
+				if (WeakSkillComponent.IsValid())
+				{
+					WeakSkillComponent->ExecuteActiveSkill();
+				}
+			}, 0.5f,
+			false);
+	}
+
+	SkillComponent->ActiveSkill(this, Target, SkillSlot);
 }
 
 bool AMonsterBase::TryAttack(AActor* Target)
@@ -284,7 +340,7 @@ bool AMonsterBase::TryAttack(AActor* Target)
 		return false;
 	}
 
-	
+
 	int32 BestSkillIdx = SkillComponent->GetBestSkill(this, Target);
 	if (SkillComponent->GetCooldownRemaining(BestSkillIdx) > 0.0f)
 	{
@@ -292,9 +348,9 @@ bool AMonsterBase::TryAttack(AActor* Target)
 	}
 
 	USkillSlot* SkillSlot = SkillComponent->GetSkillSlot(BestSkillIdx);
-	FVector TargetLocation = Target->GetActorLocation();
+	// FVector TargetLocation = Target->GetActorLocation();
 
-	PerformSkill(SkillSlot, TargetLocation);
+	PerformSkill(SkillSlot, Target);
 
 	return true;
 }
@@ -303,7 +359,7 @@ bool AMonsterBase::CanUseSkill(AActor* Target) const
 {
 	//TODO Optimization
 	int32 BestSkillIdx = SkillComponent->GetBestSkill(this, Target);
-	return BestSkillIdx>=0;
+	return BestSkillIdx >= 0;
 }
 
 //CallByAnimNotify
