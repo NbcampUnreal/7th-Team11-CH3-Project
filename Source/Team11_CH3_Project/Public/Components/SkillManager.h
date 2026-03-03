@@ -43,8 +43,6 @@ public:
 	void EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData);
 	UFUNCTION(BlueprintCallable)
 	void UnEquipSkillGem(int32 SlotIndex);
-	UFUNCTION(BlueprintCallable)
-	void AddSKillGems(TArray<TSoftObjectPtr<USkillDataAsset>> Skills);
 	// 쿨타임 조회
 	UFUNCTION(BlueprintCallable)
 	bool IsSkillOnCooldown(int32 SlotIndex) const;

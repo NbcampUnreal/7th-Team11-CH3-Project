@@ -1,10 +1,11 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/Skills/ProjectileSkillData.h"
 #include "Camera/CameraComponent.h"
 #include "Components/Skills/BaseProjectile.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation)
 {
@@ -63,6 +64,12 @@ void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor
 	if (IsValid(Projectile))
 	{
 		Projectile->Initialize(ActualDamage, ActualProjectileSpeed);
+	}
+
+	// 사운드 출력
+	if (ProjectileSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), ProjectileSound, Instigator->GetActorLocation(), 0.5f);
 	}
 }
 

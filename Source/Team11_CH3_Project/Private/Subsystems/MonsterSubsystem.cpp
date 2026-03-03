@@ -10,31 +10,31 @@
 void UMonsterSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
-// #pragma region TESTCODE
-// 	FTimerHandle SpawnedMonsterTimer;
-// 	GetWorld()->GetTimerManager().SetTimer(SpawnedMonsterTimer,[this]()
-// 	{
-// 		FMonsterData MonsterData;
-//
-// 		MonsterData.StatData;
-//
-// 		
-// 		MonsterData.AnimBlueprint = StaticLoadClass(UAnimInstance::StaticClass(), nullptr, 
-// 			TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
-//
-// 		// 2. 스켈레탈 메시 로드
-// 		MonsterData.SkeletalMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, 
-// 			TEXT("/Game/KayKit_Fix/KayKit_Skeletons_11_FREE/characters/gltf/Skeleton_Warrior/SkeletalMeshes/Skeleton_Warrior.Skeleton_Warrior")));
-// 		
-// 		MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
-// 		MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
-// 		MonsterData.WeaponItemData.WeaponType = EWeaponType::Melee;
-// 		MonsterData.StatData.MaxHP = 100.0f;
-// 		MonsterData.StatData.MoveSpeed = 600.0f;
-// 		SpawnMonster(MonsterData, {100,100,100});
-// 	},3,true
-// 	);
-// #pragma endregion
+	// #pragma region TESTCODE
+	// 	FTimerHandle SpawnedMonsterTimer;
+	// 	GetWorld()->GetTimerManager().SetTimer(SpawnedMonsterTimer,[this]()
+	// 	{
+	// 		FMonsterData MonsterData;
+	//
+	// 		MonsterData.StatData;
+	//
+	// 		
+	// 		MonsterData.AnimBlueprint = StaticLoadClass(UAnimInstance::StaticClass(), nullptr, 
+	// 			TEXT("/Game/Characters/Monster/Animations/ABP_Monster.ABP_Monster_C"));
+	//
+	// 		// 2. 스켈레탈 메시 로드
+	// 		MonsterData.SkeletalMesh = Cast<USkeletalMesh>(StaticLoadObject(USkeletalMesh::StaticClass(), nullptr, 
+	// 			TEXT("/Game/KayKit_Fix/KayKit_Skeletons_11_FREE/characters/gltf/Skeleton_Warrior/SkeletalMeshes/Skeleton_Warrior.Skeleton_Warrior")));
+	// 		
+	// 		MonsterData.WeaponItemData.WeaponActorClass = StaticLoadClass(AWeaponActor::StaticClass(), nullptr, TEXT("/Game/Blueprints/Weapons/BP_StaffWeaponActor.BP_StaffWeaponActor_C"));
+	// 		MonsterData.WeaponItemData.StatBonuses.Emplace(EStat::AttackDamage,100.0f);
+	// 		MonsterData.WeaponItemData.WeaponType = EWeaponType::Melee;
+	// 		MonsterData.StatData.MaxHP = 100.0f;
+	// 		MonsterData.StatData.MoveSpeed = 600.0f;
+	// 		SpawnMonster(MonsterData, {100,100,100});
+	// 	},3,true
+	// 	);
+	// #pragma endregion
 }
 
 UMonsterSubsystem::UMonsterSubsystem()
@@ -56,8 +56,7 @@ void UMonsterSubsystem::SpawnMonster(FMonsterData* MonsterData, const FVector& L
 	}
 	else
 	{
-
-		FActorSpawnParameters SpawnParameters;	
+		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 		Monster = GetWorld()->SpawnActor<AMonsterBase>(MonsterClass.LoadSynchronous(), SpawnParameters);
 		Monsters.Add(Monster);
@@ -82,12 +81,21 @@ void UMonsterSubsystem::OnMonsterDeath(AMonsterBase* DeadMonster)
 	AliveMonsterCount--;
 	DeadMonster->SetActorEnableCollision(false);
 	FTimerHandle SpawnedMonsterTimer;
-	GetWorld()->GetTimerManager().SetTimer(SpawnedMonsterTimer,[this,DeadMonster](){DespawnMonster(DeadMonster);},5.0f,false);
+	GetWorld()->GetTimerManager().SetTimer(
+		SpawnedMonsterTimer,
+		[this,DeadMonster]()
+		{
+			if (this)
+			{
+				DespawnMonster(DeadMonster);
+			}
+		},
+		5.0f, false);
 	DeadMonster->SetActorEnableCollision(false);
 	if (AT11_GameState* GameState = GetWorld()->GetGameState<AT11_GameState>())
 	{
 		// 아이템 드랍을 위해서 몬스터 위치 매개변수(완료) 및 점수 데이터 추가(예정)
-		GameState->OnMonsterKilled(DeadMonster->GetActorLocation(),DeadMonster->GetScoreValue());
+		GameState->OnMonsterKilled(DeadMonster->GetActorLocation(), DeadMonster->GetScoreValue());
 	}
 }
 

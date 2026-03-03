@@ -105,6 +105,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	TSubclassOf<UMainInventoryWidget> InventoryWidgetClass;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	class USoundBase* InventoryOpenSound;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	class USoundBase* InventoryCloseSound;
+
 	bool bIsInvenOpened = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HUD")

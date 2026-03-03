@@ -93,7 +93,12 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	}
 	if (SkillComponent)
 	{
-		SkillComponent->AddSKillGems(MonsterData->Skills);
+		const TArray<TSoftObjectPtr<USkillDataAsset>>& Skills = MonsterData->Skills;
+
+		for (int32 i = 0; i < Skills.Num();++i)
+		{
+			SkillComponent->EquipSkillGem(i+1,Skills[i].LoadSynchronous());
+		}
 	}
 
 	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())
@@ -167,6 +172,8 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 		if (AAIController* AIController = Cast<AAIController>(GetController()))
 		{
 			AIController->GetBrainComponent()->PauseLogic(TEXT("Death"));
+			AIController->StopMovement();
+			AIController->ClearFocus(EAIFocusPriority::Gameplay);
 		}
 		StopAnimMontage();
 		PlayAnimMontage(MonsterDieAnimMontage, 1,TEXT("FullBody"));

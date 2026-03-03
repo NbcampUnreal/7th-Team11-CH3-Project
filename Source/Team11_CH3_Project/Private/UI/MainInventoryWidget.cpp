@@ -51,10 +51,6 @@ void UMainInventoryWidget::HandleItemSlotChanged(UItemSlot* SlotData)
 	case EItemContainerType::PartsSockets:
 		EquipmentDetailWidget->HandlePartsSlotChanged(SlotData);
 		break;
-	case EItemContainerType::SkillGem:
-		//TODO
-		InventoryWidget->HandleSkillGemItemSlotChanged(SlotData);
-		break;
 	case EItemContainerType::Max:
 		break;
 	}

@@ -12,6 +12,7 @@
 #include "Components/Items/Equipments/ItemInstance.h"
 #include "Types/ItemTypes.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
+#include "UI/ItemOverlayWidget.h"
 #include "UI/MainInventoryWidget.h"
 
 
@@ -60,9 +61,18 @@ void UInteractableItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeomet
 	}
 	
 	bIsDraging = true;
+	SetRenderOpacity(0.5f);
+	MainInventoryWidget->GetItemOverlayWidget()->ClearOverlayWidget();
 	
 	UItemDragDropOperation* DragOperation = Cast<UItemDragDropOperation>(UWidgetBlueprintLibrary::CreateDragDropOperation(UItemDragDropOperation::StaticClass()));
 	DragOperation->OriginSlot = this;
+	DragOperation->Pivot = EDragPivot::MouseDown;
+	if (UItemSlotWidget* DragSlotWidget = CreateWidget<UItemSlotWidget>(this, MainInventoryWidget->GetDragItemSLotWidgetClass()))
+	{
+		DragSlotWidget->SetRenderOpacity(0.5f);
+		DragSlotWidget->UpdateSlot(ItemSlot.Get());
+		DragOperation->DefaultDragVisual = DragSlotWidget;
+	}
 	OutOperation = DragOperation;
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
 	
@@ -72,12 +82,13 @@ bool UInteractableItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry, cons
 	UDragDropOperation* InOperation)
 {
 	bIsDraging = false;
+	
 	UItemDragDropOperation* DragOperation = Cast<UItemDragDropOperation>(InOperation);
 	if (!DragOperation || !DragOperation->OriginSlot.IsValid())
 	{
 		return false;
 	}
-
+	DragOperation->OriginSlot->SetRenderOpacity(1.0f);
 	IItemContainer* Origin = DragOperation->OriginSlot->GetItemSlot()->GetItemContainer();
 	int32 OriginIndex = DragOperation->OriginSlot->GetItemSlot()->GetIndex();
 
@@ -98,4 +109,14 @@ void UInteractableItemSlotWidget::NativeOnDragCancelled(const FDragDropEvent& In
 {
 	Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
 	bIsDraging = false;
+	
+	UItemDragDropOperation* DragOperation = Cast<UItemDragDropOperation>(InOperation);
+	if (DragOperation && DragOperation->OriginSlot.IsValid())
+	{
+		DragOperation->OriginSlot->SetRenderOpacity(1.0f);
+		DragOperation->OriginSlot.Reset();
+	}
+	SetRenderOpacity(1.0f);
+	
+	
 }

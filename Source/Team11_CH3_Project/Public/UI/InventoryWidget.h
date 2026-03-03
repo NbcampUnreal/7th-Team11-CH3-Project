@@ -7,6 +7,7 @@
 #include "Types/ItemContainerType.h"
 #include "InventoryWidget.generated.h"
 
+class UHorizontalBox;
 class UItemManager;
 class UInventoryComponent;
 class UMainInventoryWidget;
@@ -30,7 +31,6 @@ public:
 	void HandleInventoryItemSlotChanged(UItemSlot* SlotData);
 	UFUNCTION(BlueprintCallable)
 	void HandleEquipmentItemSlotChanged(UItemSlot* SlotData);
-	void HandleSkillGemItemSlotChanged(UItemSlot* ItemSlot);
 
 protected:
 	UPROPERTY(meta = (BindWidget))
@@ -45,21 +45,23 @@ protected:
 	TObjectPtr<UInteractableItemSlotWidget> HandSlot;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UInteractableItemSlotWidget> FeetSlot;
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UInteractableItemSlotWidget> SkillGemSlot0;
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UInteractableItemSlotWidget> SkillGemSlot1;
 	
-
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UHorizontalBox> SkillGemBox;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="InventoryWidget")
+	TArray<TObjectPtr<UInteractableItemSlotWidget>> SKillGemWidgets;
+	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UUniformGridPanel> InventoryGrid;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="InventoryWidget")
-	TArray<TObjectPtr<UInteractableItemSlotWidget>> Inventory;
+	TArray<TObjectPtr<UInteractableItemSlotWidget>> InventoryWidgets;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="InventoryWidget")
 	TObjectPtr<UEquipmentDetailWidget> EquipmentDetailWidget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InventoryWidget")
+	TSubclassOf<UInteractableItemSlotWidget> SkillGemWidgetClass;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InventoryWidget")
 	TSubclassOf<UInteractableItemSlotWidget> ItemSlotWidgetClass;
 private:

@@ -44,7 +44,7 @@ void UItemManager::InitializeComponent()
 	{
 		UEquipmentSlot* EquipmentSlot = NewObject<UEquipmentSlot>(this);
 		GemSlots[i] = EquipmentSlot;
-		GemSlots[i]->Init(this, i, EEquipmentType::SkillGem);
+		GemSlots[i]->Init(this, EquipmentSlots.Num() + i, EEquipmentType::SkillGem);
 	}
 }
 
@@ -147,11 +147,12 @@ UItemInstance* UItemManager::GetItem(int32 Index)
 
 void UItemManager::UnequipAt(int32 Index)
 {
-	if (UEquipmentInstance* CurrentEquipmentInstance = EquipmentSlots[Index]->GetEquipmentInstance())
+	if (Index < EquipmentSlots.Num())
 	{
-		CurrentEquipmentInstance->SetIsEquipped(false);
-		if (Index < EquipmentSlots.Num())
+		if (UEquipmentInstance* CurrentEquipmentInstance = EquipmentSlots[Index]->GetEquipmentInstance())
 		{
+			CurrentEquipmentInstance->SetIsEquipped(false);
+
 			UBuffManager* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
 			if (IsValid(BuffManager))
 			{
@@ -167,10 +168,22 @@ void UItemManager::UnequipAt(int32 Index)
 			CurrentEquipmentInstance->OnStatsRecalculated.RemoveDynamic(this, &UItemManager::OnEquipmentStatChanged);
 			EquipmentSlots[Index]->SetItemInstance(nullptr);
 		}
-		else if (Index < EquipmentSlots.Num() + GemSlots.Num())
+	}
+	else if (Index < EquipmentSlots.Num() + GemSlots.Num())
+	{
+		int32 GemIndex = Index - EquipmentSlots.Num();
+		if (UEquipmentInstance* CurrentEquipmentInstance = GemSlots[GemIndex]->GetEquipmentInstance())
 		{
-			int32 GemIndex = Index - EquipmentSlots.Num();
-			GemSlots[GemIndex]->SetItemInstance(nullptr);
+			CurrentEquipmentInstance->SetIsEquipped(false);
+		}
+		GemSlots[GemIndex]->SetItemInstance(nullptr);
+
+		if (AActor* Owner = GetOwner())
+		{
+			if (USkillManager* SkillComponent = Owner->FindComponentByClass<USkillManager>())
+			{
+				SkillComponent->UnEquipSkillGem(GemIndex + 1);
+			}
 		}
 	}
 }
@@ -218,10 +231,6 @@ void UItemManager::EquipGemTo(int32 Index, UEquipmentInstance* EquipmentInstance
 					SkillComponent->EquipSkillGem(Index + 1, GemItemDataAsset->GetSkillData());
 				}
 			}
-			else
-			{
-				SkillComponent->UnEquipSkillGem(Index + 1);
-			}
 		}
 	}
 }
@@ -231,7 +240,7 @@ bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 {
 	UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance);
 
-	if (Index < 0 || Index>=EquipmentSlots.Num() + GemSlots.Num())
+	if (Index < 0 || Index >= EquipmentSlots.Num() + GemSlots.Num())
 	{
 		return false;
 	}
@@ -320,14 +329,11 @@ void UItemManager::UnequipWeapon()
 	CurrentWeapon = nullptr;
 }
 
-UEquipmentSlot* UItemManager::GetSkillGemSlot(int32 Index)
+TArray<TObjectPtr<UEquipmentSlot>>& UItemManager::GetSkillGemSlots()
 {
-	if (GemSlots.IsValidIndex(Index))
-	{
-		return GemSlots[Index];
-	}
-	return nullptr;
+	return GemSlots;
 }
+
 
 UEquipmentSlot* UItemManager::GetEquipmentSlot(EEquipmentType EquipmentType)
 {

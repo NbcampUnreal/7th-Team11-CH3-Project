@@ -15,7 +15,6 @@ enum class EItemContainerType : uint8
 	Inventory,
 	Equipment,
 	PartsSockets,
-	SkillGem,
 	Max,
 };
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnItemSlotChanged, UItemSlot*, SlotData);

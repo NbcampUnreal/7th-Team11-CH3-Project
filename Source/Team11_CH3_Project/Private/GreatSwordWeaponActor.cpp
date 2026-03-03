@@ -20,10 +20,10 @@ void AGreatSwordWeaponActor::Init(UWeaponItemDataAsset* WeaponItemDataAsset, USk
 {
 	Super::Init(WeaponItemDataAsset, SkeletalMesh);
 	FAttachmentTransformRules AttachRules(
-	EAttachmentRule::SnapToTarget,
-	EAttachmentRule::SnapToTarget,
-	EAttachmentRule::KeepWorld,
-	true
-);
+		EAttachmentRule::SnapToTarget,
+		EAttachmentRule::SnapToTarget,
+		EAttachmentRule::KeepWorld,
+		true
+	);
 	StaticMeshComponent->AttachToComponent(SkeletalMesh, AttachRules,TEXT("handslot_r"));
 }
