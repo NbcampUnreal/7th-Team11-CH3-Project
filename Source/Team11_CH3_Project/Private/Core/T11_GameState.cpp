@@ -34,7 +34,7 @@ void AT11_GameState::StartLevel()
     if (GI->CurrentDifficulty == 0) MapName = CurrentWorld->GetName() + "_Easy";
     else if (GI->CurrentDifficulty == 1) MapName = CurrentWorld->GetName() + "_Hard";
     else if (GI->CurrentDifficulty == 2) MapName = CurrentWorld->GetName();
-    if (CurrentStageIndex < 2)
+    if (CurrentStageIndex < GI->MaxStageCount)
     {
         if (CurrentWorld && MapDataConfigs.Contains(MapName))
         {
@@ -168,14 +168,19 @@ void AT11_GameState::ActivatePortals()
             UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
             if (IsValid(GI) == false) return;
 
-            if (GI->CurrentStageIndex < 2 && PortalClass->Difficulty != "Boss")
+            if (GI->CurrentStageIndex < GI->MaxStageCount && PortalClass->Difficulty != "Boss")
             {
                 SetPortalLevel(PortalClass);
                 PortalClass->SetPortalActive(true);
             }
-            else if (GI->CurrentStageIndex >= 2 && PortalClass->Difficulty == "Boss")
+            else if (GI->CurrentStageIndex >= GI->MaxStageCount && PortalClass->Difficulty == "Boss")
             {
                 PortalClass->SetTargetLevel(BossMapDataConfig.CreateConstIterator()->Key);
+                PortalClass->SetPortalActive(true);
+            }
+            else if (PortalClass->Difficulty == "Clear")
+            {
+                PortalClass->SetTargetLevel("L_GameClear");
                 PortalClass->SetPortalActive(true);
             }
         }

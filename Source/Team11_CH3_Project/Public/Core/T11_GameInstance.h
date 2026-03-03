@@ -33,6 +33,8 @@ public:
 
 	// 저장 된 데이터 변수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stage")
+	int32 MaxStageCount = 5;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stage")
 	int32 CurrentStageIndex = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Data|Stage")
 	int32 CurrentDifficulty = 0; // 0 == Normal, 1 == Hard Enum으로 설정하는 방향

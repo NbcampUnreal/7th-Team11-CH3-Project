@@ -596,7 +596,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 
 	if (bDied)
 	{
-		//    Die();
+		Die();
 	}
 	else
 	{
