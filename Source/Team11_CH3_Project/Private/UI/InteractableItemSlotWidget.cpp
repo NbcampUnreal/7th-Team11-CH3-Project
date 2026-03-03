@@ -99,11 +99,11 @@ bool UInteractableItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry, cons
 	int32 DestinationIndex = ItemSlot->GetIndex();
 
 	bool bSuccess = Origin->SwapItems(OriginIndex, Destination, DestinationIndex);
-	// if (bSuccess && MainInventoryWidget.IsValid())
-	// {
-		// MainInventoryWidget->HandleItemSlotChanged(DragOperation->OriginSlot->GetItemSlot());
-		// MainInventoryWidget->HandleItemSlotChanged(ItemSlot.Get());
-	// }
+	if (bSuccess && MainInventoryWidget.IsValid())
+	{
+		MainInventoryWidget->HandleItemSlotChanged(DragOperation->OriginSlot->GetItemSlot());
+		MainInventoryWidget->HandleItemSlotChanged(ItemSlot.Get());
+	}
 	return bSuccess;
 }
 
