@@ -58,6 +58,27 @@ TArray<TObjectPtr<UEquipmentInstance>> UItemManager::GetEquipments()
 	return Ret;
 }
 
+//TArray<TObjectPtr<UEquipmentInstance>> UItemManager::GetGemEquipments()
+//{
+//	TArray<TObjectPtr<UEquipmentInstance>> Ret;
+//	for (TObjectPtr<UEquipmentSlot>& GemSlot : GemSlots)
+//	{
+//		Ret.Add(Cast<UEquipmentInstance>(GemSlot->GetItemInstance()));
+//	}
+//	return Ret;
+//}
+//
+//void UItemManager::RestoreGemEquipments(const TArray<TObjectPtr<UEquipmentInstance>>& GemData)
+//{
+//	for (int32 i = 0; i < GemData.Num(); i++)
+//	{
+//		if (IsValid(GemData[i]) == false)
+//			continue;
+//		
+//		EquipGemTo(i, GemData[i]);
+//	}
+//}
+
 void UItemManager::Clear()
 {
 	UnequipWeapon();
@@ -321,6 +342,100 @@ bool UItemManager::SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int3
 	return true;
 }
 
+TArray<FSavedEquipmentData> UItemManager::GetEquipmentSaveData()
+{
+	TArray<FSavedEquipmentData> Result;
+	// 장비 슬롯 저장
+	for (TObjectPtr<UEquipmentSlot>& Slot : EquipmentSlots)
+	{
+		FSavedEquipmentData Data;
+		// 슬롯이 비어있으면 nullptr 저장
+		UEquipmentInstance* Equip = Slot ? Slot->GetEquipmentInstance() : nullptr;
+		if (IsValid(Equip))
+		{
+			// 장비슬롯에 장비가 있으면 Parts 소켓 체크
+			Data.DataAsset = Equip->GetItemDataAsset();
+			for (UItemSlot* Socket : Equip->GetPartsSlots())
+			{
+				// 소켓이 비어있으면 그대로 nullptr 저장
+				UItemInstance* Part = IsValid(Socket) ? Socket->GetItemInstance() : nullptr;
+				Data.PartSlots.Add(IsValid(Part) ? Part->GetItemDataAsset() : nullptr);
+			}
+		}
+		Result.Add(Data);
+	}
+	return Result;
+}
+
+TArray<FSavedEquipmentData> UItemManager::GetGemSaveData()
+{
+	TArray<FSavedEquipmentData> Result;
+	// 스킬 젬 슬롯 저장
+	for (TObjectPtr<UEquipmentSlot>& GemSlot : GemSlots)
+	{
+		FSavedEquipmentData Data;
+		// 비어있으면 nullptr 저장
+		UEquipmentInstance* Gem = GemSlot ? GemSlot->GetEquipmentInstance() : nullptr;
+		if (IsValid(Gem))
+		{
+			Data.DataAsset = Gem->GetItemDataAsset();
+		}
+		Result.Add(Data);
+	}
+	return Result;
+}
+
+void UItemManager::RestoreFromSaveData(const TArray<FSavedEquipmentData>& Data)
+{
+	//UObject* GI = GetWorld()->GetGameInstance();
+	for (int32 i = 0; i < Data.Num(); i++)
+	{
+		if (Data[i].DataAsset.IsNull())
+			continue;
+		UItemDataAsset* EquipData = Data[i].DataAsset.LoadSynchronous();
+		if (IsValid(EquipData) == false)
+			continue;
+
+		UEquipmentInstance* Equip = NewObject<UEquipmentInstance>();
+		Equip->Init(EquipData, 1);
+		// 파츠 복구
+		for (int32 j = 0; j < Data[i].PartSlots.Num(); j++)
+		{
+			if (Data[i].PartSlots[j].IsNull())
+				continue;
+			UItemDataAsset* PartData = Data[i].PartSlots[j].LoadSynchronous();
+			if (IsValid(PartData) == false)
+				continue;
+			
+			UClass* PartClass = PartData->GetInstanceClass();
+			UItemInstance* PartInstance = PartClass
+				? NewObject<UItemInstance>(Equip, PartClass)
+				: NewObject<UItemInstance>(Equip);
+			PartInstance->Init(PartData, 1);
+			Equip->SetItemAt(PartInstance, j);
+
+		}
+		SetItemAt(Equip, static_cast<int64>(Equip->GetEquipmentType()));
+	}
+}
+
+void UItemManager::RestoreGemFromSaveData(const TArray<FSavedEquipmentData>& Data)
+{
+	//UObject* GI = GetWorld()->GetGameInstance();
+	for (int32 i = 0; i < Data.Num(); i++)
+	{
+		if (Data[i].DataAsset.IsNull())
+			continue;
+		UItemDataAsset* GemData = Data[i].DataAsset.LoadSynchronous();
+		if (IsValid(GemData) == false)
+			continue;
+
+		UEquipmentInstance* GemInstance = NewObject<UEquipmentInstance>();
+		GemInstance->Init(GemData, 1);
+		EquipGemTo(i, GemInstance);
+	}
+}
+
 void UItemManager::UnequipWeapon()
 {
 	if (IsValid(CurrentWeapon) == false)
@@ -372,13 +487,13 @@ void UItemManager::OnEquipmentStatChanged(EEquipmentType Type, UEquipmentInstanc
 }
 
 
-void UItemManager::RestoreEquipment(TArray<TObjectPtr<UEquipmentInstance>> EquipmentData)
-{
-	for (TObjectPtr<UEquipmentInstance>& EquipmentInstance : EquipmentData)
-	{
-		if (EquipmentInstance)
-		{
-			SetItemAt(EquipmentInstance, static_cast<int64>(EquipmentInstance->GetEquipmentType()));
-		}
-	}
-}
+//void UItemManager::RestoreEquipment(TArray<TObjectPtr<UEquipmentInstance>> EquipmentData)
+//{
+//	for (TObjectPtr<UEquipmentInstance>& EquipmentInstance : EquipmentData)
+//	{
+//		if (EquipmentInstance)
+//		{
+//			SetItemAt(EquipmentInstance, static_cast<int64>(EquipmentInstance->GetEquipmentType()));
+//		}
+//	}
+//}

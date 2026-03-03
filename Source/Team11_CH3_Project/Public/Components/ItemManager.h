@@ -6,6 +6,7 @@
 #include "ItemContainer.h"
 #include "Components/ActorComponent.h"
 #include "Types/ItemTypes.h"
+#include "Types/SaveTypes.h"
 #include "ItemManager.generated.h"
 
 
@@ -41,12 +42,21 @@ public:
 	virtual bool CanReceiveItem(UItemInstance* ItemInstance, int32 Index) override;
 	virtual bool SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int32 OtherIndex) override;
 	
+	// 스테이지 저장 복구(직렬화 구조체 사용)
+	TArray<FSavedEquipmentData> GetEquipmentSaveData();
+	TArray<FSavedEquipmentData> GetGemSaveData();
+	void RestoreFromSaveData(const TArray<FSavedEquipmentData>& Data);
+	void RestoreGemFromSaveData(const TArray<FSavedEquipmentData>& Data);
+
 	// GameInstance에서 장비 데이터 받아오는 함수
-	void RestoreEquipment(TArray<TObjectPtr<UEquipmentInstance>>  EquipmentData);
+	//void RestoreEquipment(TArray<TObjectPtr<UEquipmentInstance>>  EquipmentData);
 	// Getter
 	UFUNCTION(BlueprintCallable, Category = "Item")
 	AWeaponActor* GetCurrentWeapon() const { return CurrentWeapon; }
-	TArray<TObjectPtr<UEquipmentInstance>> GetEquipments() ;
+
+	TArray<TObjectPtr<UEquipmentInstance>> GetEquipments();
+	//TArray<TObjectPtr<UEquipmentInstance>> GetGemEquipments();
+	//void RestoreGemEquipments(const TArray<TObjectPtr<UEquipmentInstance>>& GemData);
 	void Clear();
 
 	// 아이템 장착 해제 시 스탯 수정
