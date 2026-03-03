@@ -93,7 +93,12 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	}
 	if (SkillComponent)
 	{
-		SkillComponent->AddSKillGems(MonsterData->Skills);
+		const TArray<TSoftObjectPtr<USkillDataAsset>>& Skills = MonsterData->Skills;
+
+		for (int32 i = 0; i < Skills.Num();++i)
+		{
+			SkillComponent->EquipSkillGem(i+1,Skills[i].LoadSynchronous());
+		}
 	}
 
 	if (USkeletalMeshComponent* SkeletalMeshComponent = GetMesh())

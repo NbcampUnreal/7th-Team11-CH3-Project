@@ -31,6 +31,7 @@ protected:
 private:
 	float ChargingTimer = 0.0f;
 	bool bIsDashing = false;
-	FVector Destination;
+	FVector NavDestination;
+	FVector DashingDir;
 };
 
