@@ -28,6 +28,33 @@ void ULocationSkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
 		SpawnLocation,
 		Owner->GetActorRotation()
 	);
+
+
+	if (IsValid(Owner) == false || IsValid(IndicatorClass) == false)
+		return;
+
+	APawn* Instigator = Cast<APawn>(Owner);
+	if (IsValid(Instigator) == false)
+		return;
+
+	SpawnLocation.Z -= 85.f; // 발밑으로 보정
+
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = Owner;
+
+	ASkillIndicatorActor* Indicator = Owner->GetWorld()->SpawnActor<ASkillIndicatorActor>(
+		IndicatorClass,
+		SpawnLocation,
+		FRotator::ZeroRotator,
+		SpawnParams
+	);
+
+	if (IsValid(Indicator) == false)
+		return;
+	// ㅁㅁ
+	Indicator->Initialize(Instigator, Range);
+	// ㅁㅁ
+	SpawnedIndicator = Indicator;
 }
 
 void ULocationSkillData::Execute()
@@ -51,33 +78,41 @@ void ULocationSkillData::Execute()
 void ULocationSkillData::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-	AActor* Owner = ActiveSkillSlot->GetOwner();
-	if (IsValid(SpawnedIndicator) || IsValid(Owner) == false || IsValid(IndicatorClass) == false)
+
+	if (!SpawnedIndicator)
+	{
 		return;
-
-	APawn* Instigator = Cast<APawn>(Owner);
-	if (IsValid(Instigator) == false)
+	}
+	APawn* Instigator = Cast<APawn>(ActiveSkillSlot->GetOwner());
+	if (!IsValid(Instigator))
+	{
 		return;
+	}
 
-	FVector SpawnLocation = Owner->GetActorLocation();
+	FVector TargetLocation = ActiveSkillSlot->GetTargetLocation();
 
-	SpawnLocation.Z -= 85.f; // 발밑으로 보정
+	FVector DiffVector = TargetLocation - Instigator->GetActorLocation();
+	FVector Dir = DiffVector.GetSafeNormal();
+	float Distance = FMath::Min(Range, DiffVector.Length());
+	TargetLocation = Instigator->GetActorLocation() + Dir * Distance;
+	
+	
 
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = Owner;
-
-	ASkillIndicatorActor* Indicator = Owner->GetWorld()->SpawnActor<ASkillIndicatorActor>(
-		IndicatorClass,
-		SpawnLocation,
-		FRotator::ZeroRotator,
-		SpawnParams
+	FVector End = TargetLocation - FVector(0.0f, 0.0f, 1000.0f);
+	FHitResult HitResult;
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(ActiveSkillSlot->GetTarget());
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		TargetLocation,
+		End,
+		ECC_WorldStatic, // 주로 바닥(Static Mesh)은 이 채널을 사용합니다.
+		QueryParams
 	);
-
-	if (IsValid(Indicator) == false)
-
-		return;
-	Indicator->Initialize(Instigator, Range);
-	SpawnedIndicator = Indicator;
+	if (bHit)
+	{
+		SpawnedIndicator->SetActorLocation(HitResult.ImpactPoint + FVector(0.f, 0.f, 5.f));
+	}
 }
 
 void ULocationSkillData::OnExit()
@@ -95,27 +130,8 @@ void ULocationSkillData::SpawnSkill()
 	if (IsValid(SpawnedIndicator) == false)
 		return;
 
-	FVector SkillLocation = SpawnedIndicator->GetIndicatorLocation();
-	if (ActiveSkillSlot->GetTarget() != nullptr)
-	{
-		FVector TargetLocation = ActiveSkillSlot->GetTargetLocation();
-		FVector End = TargetLocation - FVector(0.0f, 0.0f, 1000.0f);
+	FVector SkillLocation = SpawnedIndicator->GetActorLocation();
 
-		FHitResult HitResult;
-		FCollisionQueryParams QueryParams;
-		QueryParams.AddIgnoredActor(ActiveSkillSlot->GetTarget());
-		bool bHit = GetWorld()->LineTraceSingleByChannel(
-			HitResult,
-			TargetLocation,
-			End,
-			ECC_WorldStatic, // 주로 바닥(Static Mesh)은 이 채널을 사용합니다.
-			QueryParams
-		);
-		if (bHit)
-		{
-			SkillLocation = HitResult.ImpactPoint; 
-		}
-	}
 
 	SkillLocation.Z += 5;
 	if (IsValid(SkillEffectClass) == false)
