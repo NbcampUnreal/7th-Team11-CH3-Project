@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -17,6 +17,7 @@ class TEAM11_CH3_PROJECT_API UMonsterSubsystem : public UWorldSubsystem
 	GENERATED_BODY()
 public:
 	virtual void OnWorldBeginPlay(UWorld& InWorld) override;
+	virtual void Deinitialize() override;
 	UMonsterSubsystem();
 	void SpawnMonster(FMonsterData* MonsterData, const FVector& Location);
 	UFUNCTION(BlueprintCallable)

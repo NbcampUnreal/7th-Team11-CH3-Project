@@ -21,6 +21,7 @@
 #include "Components/CanvasPanel.h"
 #include "Components/Skills/SkillSlot.h"
 #include "UI/MainInventoryWidget.h"
+#include "UI/HUDWidget.h"
 
 AMainPlayerController::AMainPlayerController()
 {
@@ -49,7 +50,7 @@ void AMainPlayerController::BeginPlay()
 
 	if (HUDWidgetClass)
 	{
-		HUDWidgetInstance = CreateWidget<UUserWidget>(this, HUDWidgetClass);
+		HUDWidgetInstance = CreateWidget<UHUDWidget>(this, HUDWidgetClass);
 	}
 	if (LoadingWidgetClass)
 	{
@@ -289,7 +290,7 @@ void AMainPlayerController::HandlePlayerDeath()
 		TimerHandle,
 		[this]()
 		{
-			UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+			UGameplayStatics::OpenLevel(GetWorld(), "L_GameOver");
 		},
 		4.0f,
 		false
@@ -428,79 +429,72 @@ UUserWidget* AMainPlayerController::GetLoadingWidget() const
 
 void AMainPlayerController::UpdateMonsterCount(int32 MonsterCount)
 {
-	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	if (HUDWidgetInstance)
 	{
-		if (UTextBlock* MonsterCountText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("RemainingCount"))))
+		if (HUDWidgetInstance->RemainingCount)
 		{
-			MonsterCountText->SetText(FText::AsNumber(MonsterCount));
+			HUDWidgetInstance->RemainingCount->SetText(FText::AsNumber(MonsterCount));
 		}
 	}
 }
 
 void AMainPlayerController::UpdateStageInfo(int32 MaxWave)
 {
-	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	if (HUDWidgetInstance)
 	{
-		if (UTextBlock* StageNameText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("StageName"))))
+		if (HUDWidgetInstance->StageName)
 		{
 			FString CurrentWorldName = GetWorld()->GetName().RightChop(2);
-			StageNameText->SetText(FText::FromString(CurrentWorldName));
+			HUDWidgetInstance->StageName->SetText(FText::FromString(CurrentWorldName));
 		}
 		for (int32 WaveIndex = MaxWave + 1; WaveIndex <= 5; WaveIndex++)
 		{
-			if (UImage* WaveImage = Cast<UImage>(
-				HUDWidget->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
+			if (UImage* WaveImage = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
 			{
 				WaveImage->SetVisibility(ESlateVisibility::Collapsed);
 			}
 		}
 	}
-	if (UUserWidget* LoadingWidget = LoadingWidgetInstance)
-	{
-		//LoadingWidget->PlayAnimation(LoadingWidget->FadeOutBGAnim);
-	}
 }
 
 void AMainPlayerController::UpdateWaveInfo(int32 CurrentWaveIndex, int32 MaxWave)
 {
-	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	if (HUDWidgetInstance)
 	{
 		for (int32 WaveIndex = 1; WaveIndex < CurrentWaveIndex; WaveIndex++)
 		{
-			if (UImage* WaveImage = Cast<UImage>(
-				HUDWidget->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
+			if (UImage* WaveImage = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
 			{
 				UTexture2D* Texture = WaveYellowTexture.LoadSynchronous();
 				WaveImage->SetBrushFromTexture(Texture);
 			}
 		}
-		if (UImage* WaveImage = Cast<UImage>(
-			HUDWidget->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), CurrentWaveIndex)))))
+		if (UImage* WaveImage = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), CurrentWaveIndex)))))
 		{
 			UTexture2D* Texture = WaveRedTexture.LoadSynchronous();
 			WaveImage->SetBrushFromTexture(Texture);
 		}
 
-		if (UTextBlock* WaveIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Wave"))))
+		if (HUDWidgetInstance->Wave)
 		{
-			WaveIndexText->SetText(FText::FromString(FString::Printf(TEXT("WAVE %d/%d"), CurrentWaveIndex, MaxWave)));
+			HUDWidgetInstance->Wave->SetText(FText::FromString(FString::Printf(TEXT("WAVE %d/%d"), CurrentWaveIndex, MaxWave)));
 		}
 	}
 }
 
 void AMainPlayerController::UpdateHP(float CurrentHP, float MaxHP)
 {
-	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	if (HUDWidgetInstance)
 	{
-		if (UTextBlock* WaveIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("CurrentHP"))))
+		if (HUDWidgetInstance->CurrentHP)
 		{
-			WaveIndexText->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), int32(CurrentHP), int32(MaxHP))));
+			HUDWidgetInstance->CurrentHP->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), int32(CurrentHP), int32(MaxHP))));
 		}
 
-		if (UProgressBar* HPBar = Cast<UProgressBar>(HUDWidget->GetWidgetFromName(TEXT("HPBar"))))
+		if (HUDWidgetInstance->HPBar)
 		{
 			float HealthPercent = (MaxHP > 0.0f) ? (CurrentHP / MaxHP) : 0.0f;
-			HPBar->SetPercent(HealthPercent);
+			HUDWidgetInstance->HPBar->SetPercent(HealthPercent);
 		}
 	}
 }

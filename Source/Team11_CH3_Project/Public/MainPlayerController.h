@@ -13,6 +13,7 @@ class UInputMappingContext;
 class UInputAction;
 class UCanvasPanel;
 class UMainInventoryWidget;
+class UHUDWidget;
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API AMainPlayerController : public APlayerController, public IGenericTeamAgentInterface
@@ -119,10 +120,10 @@ public:
 	bool bIsInvenOpened = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HUD")
-	UUserWidget* HUDWidgetInstance;
+	UHUDWidget* HUDWidgetInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
-	TSubclassOf<UUserWidget> HUDWidgetClass;
+	TSubclassOf<UHUDWidget> HUDWidgetClass;
 
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;
