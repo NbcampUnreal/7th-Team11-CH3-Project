@@ -23,20 +23,22 @@ void UInteractableItemSlotWidget::Init(UMainInventoryWidget* InMainInventoryWidg
 }
 
 
-FReply UInteractableItemSlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+FReply UInteractableItemSlotWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry,
+                                                            const FPointerEvent& InMouseEvent)
 {
 	bIsDraging = false;
 	if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
 	{
-		return UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent,this, EKeys::LeftMouseButton).NativeReply;
+		return UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton).NativeReply;
 	}
 	return Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
 }
 
-FReply UInteractableItemSlotWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+FReply UInteractableItemSlotWidget::NativeOnMouseButtonUp(const FGeometry& InGeometry,
+                                                          const FPointerEvent& InMouseEvent)
 {
 	if (!bIsDraging && ItemSlot.IsValid())
-	{	
+	{
 		UItemInstance* ItemInstance = ItemSlot->GetItemInstance();
 		if (ItemInstance && ItemInstance->GetItemType() == EItemType::Equipment)
 		{
@@ -48,7 +50,7 @@ FReply UInteractableItemSlotWidget::NativeOnMouseButtonUp(const FGeometry& InGeo
 }
 
 void UInteractableItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent,
-	UDragDropOperation*& OutOperation)
+                                                       UDragDropOperation*& OutOperation)
 {
 	if (!ItemSlot.IsValid())
 	{
@@ -59,15 +61,17 @@ void UInteractableItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeomet
 	{
 		return;
 	}
-	
+
 	bIsDraging = true;
 	SetRenderOpacity(0.5f);
 	MainInventoryWidget->GetItemOverlayWidget()->ClearOverlayWidget();
-	
-	UItemDragDropOperation* DragOperation = Cast<UItemDragDropOperation>(UWidgetBlueprintLibrary::CreateDragDropOperation(UItemDragDropOperation::StaticClass()));
+
+	UItemDragDropOperation* DragOperation = Cast<UItemDragDropOperation>(
+		UWidgetBlueprintLibrary::CreateDragDropOperation(UItemDragDropOperation::StaticClass()));
 	DragOperation->OriginSlot = this;
 	DragOperation->Pivot = EDragPivot::MouseDown;
-	if (UItemSlotWidget* DragSlotWidget = CreateWidget<UItemSlotWidget>(this, MainInventoryWidget->GetDragItemSLotWidgetClass()))
+	if (UItemSlotWidget* DragSlotWidget = CreateWidget<UItemSlotWidget>(
+		this, MainInventoryWidget->GetDragItemSLotWidgetClass()))
 	{
 		DragSlotWidget->SetRenderOpacity(0.5f);
 		DragSlotWidget->UpdateSlot(ItemSlot.Get());
@@ -75,14 +79,13 @@ void UInteractableItemSlotWidget::NativeOnDragDetected(const FGeometry& InGeomet
 	}
 	OutOperation = DragOperation;
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
-	
 }
 
 bool UInteractableItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent,
-	UDragDropOperation* InOperation)
+                                               UDragDropOperation* InOperation)
 {
 	bIsDraging = false;
-	
+
 	UItemDragDropOperation* DragOperation = Cast<UItemDragDropOperation>(InOperation);
 	if (!DragOperation || !DragOperation->OriginSlot.IsValid())
 	{
@@ -96,20 +99,20 @@ bool UInteractableItemSlotWidget::NativeOnDrop(const FGeometry& InGeometry, cons
 	int32 DestinationIndex = ItemSlot->GetIndex();
 
 	bool bSuccess = Origin->SwapItems(OriginIndex, Destination, DestinationIndex);
-	if (bSuccess && MainInventoryWidget.IsValid())
-	{
-		MainInventoryWidget->HandleItemSlotChanged(DragOperation->OriginSlot->GetItemSlot());
-		MainInventoryWidget->HandleItemSlotChanged(ItemSlot.Get());
-
-	}
+	// if (bSuccess && MainInventoryWidget.IsValid())
+	// {
+		// MainInventoryWidget->HandleItemSlotChanged(DragOperation->OriginSlot->GetItemSlot());
+		// MainInventoryWidget->HandleItemSlotChanged(ItemSlot.Get());
+	// }
 	return bSuccess;
 }
 
-void UInteractableItemSlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+void UInteractableItemSlotWidget::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent,
+                                                        UDragDropOperation* InOperation)
 {
 	Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
 	bIsDraging = false;
-	
+
 	UItemDragDropOperation* DragOperation = Cast<UItemDragDropOperation>(InOperation);
 	if (DragOperation && DragOperation->OriginSlot.IsValid())
 	{
@@ -117,6 +120,4 @@ void UInteractableItemSlotWidget::NativeOnDragCancelled(const FDragDropEvent& In
 		DragOperation->OriginSlot.Reset();
 	}
 	SetRenderOpacity(1.0f);
-	
-	
 }

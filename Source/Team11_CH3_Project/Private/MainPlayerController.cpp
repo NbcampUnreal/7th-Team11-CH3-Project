@@ -19,6 +19,7 @@
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanel.h"
+#include "Components/Skills/SkillSlot.h"
 #include "UI/MainInventoryWidget.h"
 #include "UI/HUDWidget.h"
 
@@ -29,8 +30,10 @@ AMainPlayerController::AMainPlayerController()
 void AMainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = 
+#pragma region TESTCODE
+	SkillCooldownTimerHandles.SetNum(4);
+#pragma endregion
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
 		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
@@ -44,7 +47,7 @@ void AMainPlayerController::BeginPlay()
 	// Input Mode 설정
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
-	
+
 	if (HUDWidgetClass)
 	{
 		HUDWidgetInstance = CreateWidget<UHUDWidget>(this, HUDWidgetClass);
@@ -53,12 +56,18 @@ void AMainPlayerController::BeginPlay()
 	{
 		LoadingWidgetInstance = CreateWidget<UUserWidget>(this, LoadingWidgetClass);
 	}
-	if (InventoryWidgetClass)
+	//TODO Move To OnPossess
+	if (APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetPawn()))
 	{
-		InventoryWidgetInstance = CreateWidget<UMainInventoryWidget>(this, InventoryWidgetClass);
-		if (APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetPawn()))
+		if (InventoryWidgetClass)
 		{
-			InventoryWidgetInstance->Init(20, PlayerChar->FindComponentByClass<UInventoryComponent>(), PlayerChar->FindComponentByClass<UItemManager>());
+			InventoryWidgetInstance = CreateWidget<UMainInventoryWidget>(this, InventoryWidgetClass);
+			InventoryWidgetInstance->Init(20, PlayerChar->FindComponentByClass<UInventoryComponent>(),
+			                              PlayerChar->FindComponentByClass<UItemManager>());
+		}
+		if (USkillManager* SkillComponent = PlayerChar->FindComponentByClass<USkillManager>())
+		{
+			SkillComponent->OnSkillSlotChanged.AddDynamic(this, &AMainPlayerController::UpdateSkillHUD);
 		}
 	}
 
@@ -80,7 +89,8 @@ void AMainPlayerController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainPlayerController::HandleMove);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainPlayerController::HandleLook);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleJump);
-	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AMainPlayerController::HandleStopJumping);
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this,
+	                                   &AMainPlayerController::HandleStopJumping);
 	EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleDodge);
 
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AMainPlayerController::AimPressed);
@@ -88,13 +98,16 @@ void AMainPlayerController::SetupInputComponent()
 
 
 	if (InventoryAction)
-		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleOpenInventory);
+		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this,
+		                                   &AMainPlayerController::HandleOpenInventory);
 
 	if (Skill1Action)
-		EnhancedInputComponent->BindAction(Skill1Action, ETriggerEvent::Started, this, &AMainPlayerController::HandleUseSkill1);
+		EnhancedInputComponent->BindAction(Skill1Action, ETriggerEvent::Started, this,
+		                                   &AMainPlayerController::HandleUseSkill1);
 
 	if (Consumable1Action)
-		EnhancedInputComponent->BindAction(Consumable1Action, ETriggerEvent::Started, this, &AMainPlayerController::HandleUseConsumable1);
+		EnhancedInputComponent->BindAction(Consumable1Action, ETriggerEvent::Started, this,
+		                                   &AMainPlayerController::HandleUseConsumable1);
 }
 
 void AMainPlayerController::OnPossess(APawn* InPawn)
@@ -138,6 +151,7 @@ void AMainPlayerController::OnPossess(APawn* InPawn)
 	UI->ShowWidget(Tag);
 	bHUDShown = true;
 }
+
 FGenericTeamId AMainPlayerController::GetGenericTeamId() const
 {
 	return TeamID;
@@ -147,7 +161,8 @@ ETeamAttitude::Type AMainPlayerController::GetTeamAttitudeTowards(const AActor& 
 {
 	if (const APawn* OtherPawn = Cast<APawn>(&Other))
 	{
-		if (const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(OtherPawn->GetController()))
+		if (const IGenericTeamAgentInterface* OtherTeamID = Cast<
+			IGenericTeamAgentInterface>(OtherPawn->GetController()))
 		{
 			return (TeamID == OtherTeamID->GetGenericTeamId()) ? ETeamAttitude::Friendly : ETeamAttitude::Hostile;
 		}
@@ -238,10 +253,12 @@ void AMainPlayerController::HandleOpenInventory()
 }
 
 void AMainPlayerController::UseSkillSlot(int32 Index)
-{ }
+{
+}
 
 void AMainPlayerController::UseConsumableSlot(int32 Index)
-{ }
+{
+}
 
 void AMainPlayerController::HandleUseSkill1() { UseSkillSlot(0); }
 
@@ -468,6 +485,60 @@ void AMainPlayerController::UpdateHP(float CurrentHP, float MaxHP)
 	}
 }
 
+void AMainPlayerController::UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbnailChanged, bool bIsCooldownStart)
+{
+	int32 Index = SkillSlot->GetIndex() - 1;
+	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	{
+		if (bIsThumbnailChanged)
+		{
+			FString WidgetName = FString::Printf(TEXT("SkillSlotImage%d"), Index);
+			FName WidgetFName = FName(*WidgetName);
+			if (UImage* SkillImage = Cast<UImage>(HUDWidget->GetWidgetFromName(WidgetFName)))
+			{
+				if (SkillSlot->GetEquippedSkill())
+				{
+					SkillImage->SetBrushFromTexture(SkillSlot->GetEquippedSkill()->GetThumbnail());
+					SkillImage->SetVisibility(ESlateVisibility::Visible);
+				}
+				else
+				{
+					SkillImage->SetVisibility(ESlateVisibility::Hidden);
+				}
+			}
+		}	
+		if (bIsCooldownStart)
+		{	
+			FString WidgetName = FString::Printf(TEXT("SkillProgressBar%d"), Index);
+			FName WidgetFName = FName(*WidgetName);
+			if (UProgressBar* SkillCooldownBar = Cast<UProgressBar>(HUDWidget->GetWidgetFromName(WidgetFName)))
+			{
+				TWeakObjectPtr<UProgressBar> WeakSkillCooldownBar = SkillCooldownBar;
+				TWeakObjectPtr<USkillSlot> WeakSkillSlot = SkillSlot;
+				;
+				GetWorldTimerManager().SetTimer(SkillCooldownTimerHandles[Index], [this,Index,WeakSkillSlot,WeakSkillCooldownBar]()
+				{
+					if (!WeakSkillCooldownBar.IsValid())
+					{
+						GetWorldTimerManager().ClearTimer(SkillCooldownTimerHandles[Index]);
+						return;
+					}
+					if (!WeakSkillSlot.IsValid())
+					{
+						WeakSkillCooldownBar->SetPercent(1.0f);
+						return;
+					}
+					float TotalCooldown = WeakSkillSlot->GetEquippedSkill()->GetCooldownTime();
+					float RemainCooldown = WeakSkillSlot->GetCooldownRemaining();
+					
+					WeakSkillCooldownBar->SetPercent((TotalCooldown - RemainCooldown)/TotalCooldown);
+					
+				}, 0.03, true);
+			}
+		}
+	}
+}
+
 void AMainPlayerController::UpdateLevelFinished(FString TargetLevel)
 {
 	HUDWidgetInstance->RemoveFromParent();
@@ -476,9 +547,10 @@ void AMainPlayerController::UpdateLevelFinished(FString TargetLevel)
 		this->PlayerCameraManager->StartCameraFade(0.f, 1.f, 1.0f, FLinearColor::Black, false, true);
 
 		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, TargetLevel]() {
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, TargetLevel]()
+		{
 			UGameplayStatics::OpenLevel(GetWorld(), FName(*TargetLevel));
-			}, 1.0f, false);
+		}, 1.0f, false);
 	}
 }
 
@@ -497,6 +569,7 @@ void AMainPlayerController::SetHUD()
 	if (APlayerCharacter* PlayerCharacter =
 		Cast<APlayerCharacter>(GetPawn()))
 	{
-		PlayerCharacter->FindComponentByClass<UStatComponent>()->OnHPChanged.AddDynamic(this, &AMainPlayerController::UpdateHP);
+		PlayerCharacter->FindComponentByClass<UStatComponent>()->OnHPChanged.AddDynamic(
+			this, &AMainPlayerController::UpdateHP);
 	}
 }

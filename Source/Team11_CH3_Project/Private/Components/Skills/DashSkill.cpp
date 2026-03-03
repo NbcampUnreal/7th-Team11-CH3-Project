@@ -96,7 +96,7 @@ void UDashSkill::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* Activ
 		FHitResult Hit;
 		Actor->SetActorLocation(NextLoc, true, &Hit);
 
-		if (FVector::DistSquared(NextLoc, NavDestination) < 100.0f)
+		if (FVector::DistSquared(NextLoc, NavDestination) < 10000.0f)
 		{
 			AnimInstance->Montage_Stop(0.2f, SkillMontage);
 			return; 

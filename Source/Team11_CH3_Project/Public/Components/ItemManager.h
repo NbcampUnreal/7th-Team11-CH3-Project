@@ -17,6 +17,8 @@ class UWeaponItemDataAsset;
 class AWeaponActor;
 class UEquipmentItemDataAsset;
 
+
+
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TEAM11_CH3_PROJECT_API UItemManager : public UActorComponent, public IItemContainer
 {
@@ -56,6 +58,12 @@ public:
 	UFUNCTION()
 	void OnEquipmentStatChanged(EEquipmentType Type, UEquipmentInstance* Instance);
 
+	UPROPERTY(BlueprintAssignable)
+	FOnItemSlotChanged OnEquipmentSlotChanged;
+
+	
+	
+	
 private:
 
 
