@@ -109,6 +109,8 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	}
 	GetCharacterMovement()->MaxWalkSpeed = StatComponent->GetBaseStat(EStat::MoveSpeed);
 	BlackboardUpdate();
+	SetActorScale3D({1.f, 1.f, 1.f});
+	
 }
 
 void AMonsterBase::Clear()

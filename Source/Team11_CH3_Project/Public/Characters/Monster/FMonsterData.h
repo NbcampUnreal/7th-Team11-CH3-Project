@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/StatComponent.h"
 #include "FMonsterData.generated.h"
+class AMonsterBase;
 class UWeaponItemDataAsset;
 /**
  * 
@@ -37,4 +38,7 @@ struct TEAM11_CH3_PROJECT_API FMonsterData : public FTableRowBase
 	
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
 	int32 ScoreValue = 0;
+	
+	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category="Monster")
+	TSubclassOf<AMonsterBase> MonsterActorClass;
 };

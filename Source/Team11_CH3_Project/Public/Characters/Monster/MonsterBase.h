@@ -35,7 +35,7 @@ public:
 	
 	void DealDamage();
 	void BlackboardUpdate();
-	void Init(const FMonsterData* MonsterData);
+	virtual void Init(const FMonsterData* MonsterData);
 	void Clear();
 	// Getter
 	int32 GetScoreValue() const { return ScoreValue; }

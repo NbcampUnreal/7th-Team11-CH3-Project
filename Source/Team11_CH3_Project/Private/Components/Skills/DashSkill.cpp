@@ -75,11 +75,7 @@ void UDashSkill::Tick(float DeltaSeconds)
 	}
 	//적과 충돌
 	//TODO Optimization TargetActor
-	if (FVector::DistSquared(Owner->GetActorLocation(), ActiveSkillSlot->GetTargetLocation()) < 10000.f)
-	{
-		// if (Actor->GetOverlappingActors())
-		AnimInstance->Montage_Stop(0.2f);
-	}
+
 	//Dashing
 	if (bIsDashing)
 	{
@@ -94,7 +90,7 @@ void UDashSkill::Tick(float DeltaSeconds)
 		FHitResult Hit;
 		Owner->SetActorLocation(NextLoc, true, &Hit);
 
-		if (FVector::DistSquared(NextLoc, NavDestination) < 10000.0f)
+		if (FVector::DistSquared(Owner->GetActorLocation(), ActiveSkillSlot->GetTargetLocation()) < 250000.f)
 		{
 			APawn* Instigator = Cast<APawn> (ActiveSkillSlot->GetOwner());
 			if (!Instigator)
@@ -123,7 +119,7 @@ void UDashSkill::Tick(float DeltaSeconds)
 				BaseDamage += StatComp->GetCurrentStat(EStat::AttackDamage);
 			}
 	
-	
+			bool bIsHit = false;
 			for (AActor* HitActor : OverlappingActors)
 			{
 				if (IsValid(HitActor) == false || HitActor == Instigator)
@@ -143,7 +139,7 @@ void UDashSkill::Tick(float DeltaSeconds)
 						continue;
 					}
 				}
-
+				bIsHit = true;
 				float ActualDamage = BaseDamage;
 				if (IsValid(StatComp))
 				{
@@ -167,6 +163,17 @@ void UDashSkill::Tick(float DeltaSeconds)
 				UE_LOG(LogTemp, Warning, TEXT("Hit : %s, Damage : %0.1f"), *HitActor->GetName(), ActualDamage);
 			}
 			
+			if (bIsHit)
+			{
+				AnimInstance->Montage_Stop(0.2f);
+			}
+			
+		}
+		
+		
+		
+		if (FVector::DistSquared(NextLoc, NavDestination) < 250000.0f)
+		{
 			AnimInstance->Montage_Stop(0.2f, SkillMontage);
 			return; 
 		}

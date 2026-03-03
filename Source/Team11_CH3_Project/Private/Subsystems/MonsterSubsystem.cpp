@@ -63,7 +63,7 @@ void UMonsterSubsystem::SpawnMonster(FMonsterData* MonsterData, const FVector& L
 	{
 		FActorSpawnParameters SpawnParameters;
 		SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		Monster = GetWorld()->SpawnActor<AMonsterBase>(MonsterClass.LoadSynchronous(), SpawnParameters);
+		Monster = GetWorld()->SpawnActor<AMonsterBase>( MonsterData->MonsterActorClass , SpawnParameters);
 		Monsters.Add(Monster);
 	}
 	if (Monster)

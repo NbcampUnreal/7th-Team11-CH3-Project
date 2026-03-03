@@ -4,19 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "MonsterBase.h"
-#include "MeleeBossMonster.generated.h"
+#include "BossMonster.generated.h"
 
 UCLASS()
-class TEAM11_CH3_PROJECT_API AMeleeBossMonster : public AMonsterBase
+class TEAM11_CH3_PROJECT_API ABossMonster : public AMonsterBase
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
-	AMeleeBossMonster();
+	ABossMonster();
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual bool TryAttack(AActor* Target) override;
-	
+	virtual void Init(const FMonsterData* MonsterData) override;
 protected:
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="MeleeBossMonster|Attack")
 	float MeleeRange;

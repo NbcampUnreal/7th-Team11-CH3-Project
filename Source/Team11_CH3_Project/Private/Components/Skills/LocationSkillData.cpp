@@ -20,7 +20,10 @@ void ULocationSkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
 		return;
 	AActor* Owner = InActiveSkillSlot->GetOwner();
 	FVector SpawnLocation = Owner->GetActorLocation();
-	SpawnLocation.Z -= 85.f;
+	FVector Origin,BoxExtent;
+	Owner->GetActorBounds(true,Origin,BoxExtent);
+	SpawnLocation.Z -= BoxExtent.Z;
+	// SpawnLocation.Z -= 85.f;
 
 	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		Owner->GetWorld(),
