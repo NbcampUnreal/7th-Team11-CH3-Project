@@ -14,7 +14,7 @@ class TEAM11_CH3_PROJECT_API AMeleeBossMonster : public AMonsterBase
 public:
 	// Sets default values for this character's properties
 	AMeleeBossMonster();
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual bool TryAttack(AActor* Target) override;
 	
 protected:

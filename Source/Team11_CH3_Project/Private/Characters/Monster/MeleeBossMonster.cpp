@@ -17,6 +17,11 @@ AMeleeBossMonster::AMeleeBossMonster()
 	MiddleRange = 10000.0f;
 }
 
+void AMeleeBossMonster::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+}
+
 bool AMeleeBossMonster::TryAttack(AActor* Target)
 {
 	

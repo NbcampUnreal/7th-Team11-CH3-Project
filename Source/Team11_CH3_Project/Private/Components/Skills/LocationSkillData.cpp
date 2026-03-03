@@ -9,6 +9,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "GameFramework/Character.h"
 #include "Characters/PlayerCharacter.h"
+#include "Characters/Monster/MonsterBase.h"
 
 void ULocationSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
 {
@@ -22,7 +23,7 @@ void ULocationSkillData::Enter(AActor* Actor, const FVector& TargetLocation)
 	UNiagaraSystem* MagicCircle = GetMagicCircleEffect();
 	if (IsValid(MagicCircle) == false)
 		return;
-
+	Owner = Actor;
 	FVector SpawnLocation = Actor->GetActorLocation();
 	SpawnLocation.Z -= 85.f;
 
@@ -62,6 +63,11 @@ void ULocationSkillData::Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlo
 		return;
 
 	FVector SpawnLocation = Actor->GetActorLocation();
+	//TODO
+	// if (Owner->IsA(AMonsterBase::StaticClass()))
+	// {
+	// 	SpawnLocation =  
+	// }
 	SpawnLocation.Z -= 85.f;  // 발밑으로 보정
 
 	FActorSpawnParameters SpawnParams;
@@ -98,6 +104,7 @@ void ULocationSkillData::SpawnSkill()
 		return;
 
 	FVector SkillLocation = SpawnedIndicator->GetIndicatorLocation();
+	
 	SkillLocation.Z += 5;
 	if (IsValid(SkillEffectClass) == false)
 		return;
@@ -140,6 +147,15 @@ void ULocationSkillData::SpawnSkill()
 
 	SpawnedIndicator->Destroy();
 	SpawnedIndicator = nullptr;
+}
+
+float ULocationSkillData::GetScore(const AActor* Actor, const AActor* Target) const
+{
+	if (FVector::DistSquared(Target->GetActorLocation(), Actor->GetActorLocation()) < Range*Range)
+	{
+		return 100.0f;
+	}
+	return Super::GetScore(Actor, Target);
 }
 
 void ULocationSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name)

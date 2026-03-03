@@ -24,7 +24,8 @@ public:
 	virtual void OnExit()  override;
 	// 공격용 액터 스폰
 	void SpawnSkill();
-
+	virtual float GetScore(const AActor* Actor, const AActor* Target) const override;
+	
 	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name) override;
 
 protected:
@@ -40,4 +41,7 @@ private:
 	UPROPERTY()
 	mutable TObjectPtr<ASkillIndicatorActor> SpawnedIndicator;
 	bool bIsExecuted = false;
+	
+	UPROPERTY()
+	TWeakObjectPtr<AActor> Owner;
 };
