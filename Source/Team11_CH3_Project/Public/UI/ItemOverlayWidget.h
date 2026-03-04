@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -42,15 +42,18 @@ protected:
 	TObjectPtr<UTextBlock> ItemType;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> DESC_Text;
-	
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> Border_1;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UVerticalBox> StatBox;
 	TArray<TObjectPtr<UStatRowWidget>> StatRows;
 	
-	
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> Border_3;
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UVerticalBox> PartsBox;
-	
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UHorizontalBox> SocketBox;
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="InventoryWidget")

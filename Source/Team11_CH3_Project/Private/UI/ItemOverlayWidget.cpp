@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "UI/ItemOverlayWidget.h"
@@ -153,11 +153,13 @@ void UItemOverlayWidget::UpdateSocketBox(UEquipmentInstance* EquipmentInstance)
 
 void UItemOverlayWidget::CollapseStatBox()
 {
+	Border_1->SetVisibility(ESlateVisibility::Collapsed);
 	StatBox->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void UItemOverlayWidget::CollapseSocketBox()
 {
+	Border_3->SetVisibility(ESlateVisibility::Collapsed);
 	PartsBox->SetVisibility(ESlateVisibility::Collapsed);
 	SocketBox->SetVisibility(ESlateVisibility::Collapsed);
 }
