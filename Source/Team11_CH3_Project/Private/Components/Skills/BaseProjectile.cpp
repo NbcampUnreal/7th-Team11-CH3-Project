@@ -6,6 +6,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Components/StatComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
 
 // Sets default values
 ABaseProjectile::ABaseProjectile()
@@ -134,6 +135,15 @@ void ABaseProjectile::ProcessImpact(AActor* OtherActor)
         UDamageType::StaticClass()
     );
     UE_LOG(LogTemp, Warning, TEXT("Hit : %s, Damage : %0.1f"), *OtherActor->GetName(), FinalDamage);
-
+    // HitVFX 스폰
+    if (IsValid(HitVFX))
+    {
+        UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+            GetWorld(),
+            HitVFX,
+            GetActorLocation(),           // 프로젝타일 현재 위치 = 충돌 위치
+            GetActorRotation() + FRotator(0, -90, 0)      // 날아온 방향
+        );
+    }
     Destroy();
 }
