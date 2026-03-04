@@ -73,7 +73,7 @@ void UMainInventoryWidget::HandleStatChanged(UStatComponent* StatComp)
 		TMap<EStat, float> StatMap;
 		if (UEnum* EnumPtr = StaticEnum<EStat>())
 		{
-			for (int32 i = 0; i < EnumPtr->NumEnums(); ++i)
+			for (int32 i = 0; i < EnumPtr->NumEnums()-1; ++i)
 			{
 				EStat Type = static_cast<EStat>(EnumPtr->GetValueByIndex(i));
 				StatMap.Add(Type, StatComp->GetCurrentStat(Type));
