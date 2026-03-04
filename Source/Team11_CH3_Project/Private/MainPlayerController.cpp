@@ -64,7 +64,8 @@ void AMainPlayerController::BeginPlay()
 		{
 			InventoryWidgetInstance = CreateWidget<UMainInventoryWidget>(this, InventoryWidgetClass);
 			InventoryWidgetInstance->Init(20, PlayerChar->FindComponentByClass<UInventoryComponent>(),
-			                              PlayerChar->FindComponentByClass<UItemManager>(), PlayerChar->FindComponentByClass<UStatComponent>());
+			                              PlayerChar->FindComponentByClass<UItemManager>(),
+			                              PlayerChar->FindComponentByClass<UStatComponent>());
 		}
 		if (USkillManager* SkillComponent = PlayerChar->FindComponentByClass<USkillManager>())
 		{
@@ -450,7 +451,8 @@ void AMainPlayerController::UpdateStageInfo(int32 MaxWave)
 		}
 		for (int32 WaveIndex = MaxWave + 1; WaveIndex <= 5; WaveIndex++)
 		{
-			if (UImage* WaveImage = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
+			if (UImage* WaveImage = Cast<UImage>(
+				HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
 			{
 				WaveImage->SetVisibility(ESlateVisibility::Collapsed);
 			}
@@ -464,13 +466,15 @@ void AMainPlayerController::UpdateWaveInfo(int32 CurrentWaveIndex, int32 MaxWave
 	{
 		for (int32 WaveIndex = 1; WaveIndex < CurrentWaveIndex; WaveIndex++)
 		{
-			if (UImage* WaveImage = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
+			if (UImage* WaveImage = Cast<UImage>(
+				HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
 			{
 				UTexture2D* Texture = WaveYellowTexture.LoadSynchronous();
 				WaveImage->SetBrushFromTexture(Texture);
 			}
 		}
-		if (UImage* WaveImage = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), CurrentWaveIndex)))))
+		if (UImage* WaveImage = Cast<UImage>(
+			HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), CurrentWaveIndex)))))
 		{
 			UTexture2D* Texture = WaveRedTexture.LoadSynchronous();
 			WaveImage->SetBrushFromTexture(Texture);
@@ -478,7 +482,8 @@ void AMainPlayerController::UpdateWaveInfo(int32 CurrentWaveIndex, int32 MaxWave
 
 		if (HUDWidgetInstance->Wave)
 		{
-			HUDWidgetInstance->Wave->SetText(FText::FromString(FString::Printf(TEXT("WAVE %d/%d"), CurrentWaveIndex, MaxWave)));
+			HUDWidgetInstance->Wave->SetText(
+				FText::FromString(FString::Printf(TEXT("WAVE %d/%d"), CurrentWaveIndex, MaxWave)));
 		}
 	}
 }
@@ -489,7 +494,8 @@ void AMainPlayerController::UpdateHP(float CurrentHP, float MaxHP)
 	{
 		if (HUDWidgetInstance->CurrentHP)
 		{
-			HUDWidgetInstance->CurrentHP->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), int32(CurrentHP), int32(MaxHP))));
+			HUDWidgetInstance->CurrentHP->SetText(
+				FText::FromString(FString::Printf(TEXT("%d/%d"), int32(CurrentHP), int32(MaxHP))));
 		}
 
 		if (HUDWidgetInstance->HPBar)
@@ -521,48 +527,49 @@ void AMainPlayerController::UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbn
 					SkillImage->SetVisibility(ESlateVisibility::Hidden);
 				}
 			}
-		}	
+		}
 		if (bIsThumbnailChanged || bIsCooldownStart)
-		{	
+		{
 			FString WidgetName = FString::Printf(TEXT("SkillProgressBar%d"), Index);
 			FName WidgetFName = FName(*WidgetName);
 			if (UProgressBar* SkillCooldownBar = Cast<UProgressBar>(HUDWidget->GetWidgetFromName(WidgetFName)))
 			{
-
 				if (SkillSlot->GetEquippedSkill() && SkillSlot->GetEquippedSkill()->GetCooldownTime() > 0.2f)
-				{				
+				{
 					TWeakObjectPtr<UProgressBar> WeakSkillCooldownBar = SkillCooldownBar;
 					TWeakObjectPtr<USkillSlot> WeakSkillSlot = SkillSlot;
-					GetWorldTimerManager().SetTimer(SkillCooldownTimerHandles[Index], [this,Index,WeakSkillSlot,WeakSkillCooldownBar]()
-					{
-						if (!IsValid(this))
+					GetWorldTimerManager().SetTimer(
+						SkillCooldownTimerHandles[Index],
+						[this,Index,WeakSkillSlot,WeakSkillCooldownBar]()
 						{
-							return;
-						}
-						if (!WeakSkillCooldownBar.IsValid())
-						{
-							GetWorldTimerManager().ClearTimer(SkillCooldownTimerHandles[Index]);
-							return;
-						}
-						if (!WeakSkillSlot.IsValid())
-						{
-							WeakSkillCooldownBar->SetPercent(1.0f);
-							return;
-						}
-						float TotalCooldown = WeakSkillSlot->GetEquippedSkill()->GetCooldownTime();
-						float RemainCooldown = WeakSkillSlot->GetCooldownRemaining();
-					
-						if (RemainCooldown <= 0.0f)
-						{
-							WeakSkillCooldownBar->SetPercent(1.0f);
-							GetWorldTimerManager().ClearTimer(SkillCooldownTimerHandles[Index]);
-							return;
-						}
-						
-						WeakSkillCooldownBar->SetPercent((TotalCooldown - RemainCooldown)/TotalCooldown);
-					
-					}, 0.03, true);
-				}else
+							if (!IsValid(this))
+							{
+								return;
+							}
+							if (!WeakSkillCooldownBar.IsValid()|| !WeakSkillSlot.IsValid() || !WeakSkillSlot->GetEquippedSkill())
+							{
+								WeakSkillCooldownBar->SetPercent(1.0f);
+								GetWorldTimerManager().ClearTimer(
+									SkillCooldownTimerHandles[Index]);
+								return;
+							}
+							float TotalCooldown = WeakSkillSlot->GetEquippedSkill()->
+							                                     GetCooldownTime();
+							float RemainCooldown = WeakSkillSlot->GetCooldownRemaining();
+
+							if (RemainCooldown <= 0.0f)
+							{
+								WeakSkillCooldownBar->SetPercent(1.0f);
+								GetWorldTimerManager().ClearTimer(
+									SkillCooldownTimerHandles[Index]);
+								return;
+							}
+
+							WeakSkillCooldownBar->SetPercent(
+								(TotalCooldown - RemainCooldown) / TotalCooldown);
+						}, 0.03, true);
+				}
+				else
 				{
 					SkillCooldownBar->SetPercent(1.0f);
 				}

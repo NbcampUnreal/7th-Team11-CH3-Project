@@ -21,10 +21,8 @@ class TEAM11_CH3_PROJECT_API USkillManager : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this component's properties
 	USkillManager();
-	// Called every frame FTimerHandle 사용 예정(프로젝트에서 Tick으로 진행한다면 다시 주석 해제) 
-	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void Init();
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;
 	// Getter

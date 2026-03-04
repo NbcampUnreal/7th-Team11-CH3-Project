@@ -71,7 +71,10 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	StatComponent->InitStat(MonsterData->StatData);
 	// Monster의 점수 저장
 	ScoreValue = MonsterData->ScoreValue;
-
+	if (SkillComponent)
+	{
+		SkillComponent->Init();
+	}
 	OriginLocation = GetActorLocation();
 	GetMesh()->SetSkeletalMesh(MonsterData->SkeletalMesh.LoadSynchronous());
 
@@ -86,6 +89,7 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 		WeaponItemDataInstance = nullptr;
 	}
 	WeaponItemDataInstance = NewObject<UEquipmentInstance>(this);
+	
 	if (WeaponItemDataInstance)
 	{
 		WeaponItemDataInstance->Init(MonsterData->DefaultWeaponData.LoadSynchronous(), 1);
@@ -182,6 +186,8 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 
 	if (IsDead())
 	{
+		SetActorEnableCollision(false);
+		
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, *GetName().Append(TEXT("DEAD")));
 
 		if (AAIController* AIController = Cast<AAIController>(GetController()))
