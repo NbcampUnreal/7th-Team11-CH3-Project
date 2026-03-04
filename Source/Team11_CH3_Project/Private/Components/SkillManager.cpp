@@ -21,6 +21,19 @@ USkillManager::USkillManager()
 	// ...
 }
 
+void USkillManager::Init()
+{
+	SkillSlots.Empty();
+	for (int32 i = 0; i < 5; ++i)
+	{
+		USkillSlot* NewSlot = NewObject<USkillSlot>(this);
+		NewSlot->Init(this, i);
+		SkillSlots.Add(NewSlot);
+	}
+	ActiveSkillSlot = NewObject<UActiveSkillSlot>(this);
+	ActiveSkillSlot->Init(this);
+}
+
 void USkillManager::TickComponent(float DeltaTime, enum ELevelTick TickType,
                                   FActorComponentTickFunction* ThisTickFunction)
 {
@@ -33,17 +46,8 @@ void USkillManager::TickComponent(float DeltaTime, enum ELevelTick TickType,
 void USkillManager::BeginPlay()
 {
 	Super::BeginPlay();
+	Init();
 
-
-	SkillSlots.Empty();
-	for (int32 i = 0; i < 5; ++i)
-	{
-		USkillSlot* NewSlot = NewObject<USkillSlot>(this);
-		NewSlot->Init(this, i);
-		SkillSlots.Add(NewSlot);
-	}
-	ActiveSkillSlot = NewObject<UActiveSkillSlot>(this);
-	ActiveSkillSlot->Init(this);
 }
 
 

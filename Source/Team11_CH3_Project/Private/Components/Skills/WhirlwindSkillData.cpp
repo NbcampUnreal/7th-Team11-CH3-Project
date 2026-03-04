@@ -125,7 +125,7 @@ float UWhirlwindSkillData::GetScore(const AActor* Actor, const AActor* Target) c
 {
 	if (FVector::DistSquared(Actor->GetActorLocation(), Target->GetActorLocation()) < Range * Range)
 	{
-		return 100.0f;
+		return 120.0f;
 	}
 	return -1.0f;
 }

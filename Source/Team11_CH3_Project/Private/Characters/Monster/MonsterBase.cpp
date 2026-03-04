@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Characters/Monster/MonsterBase.h"
@@ -71,7 +71,10 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 	StatComponent->InitStat(MonsterData->StatData);
 	// Monster의 점수 저장
 	ScoreValue = MonsterData->ScoreValue;
-
+	if (SkillComponent)
+	{
+		SkillComponent->Init();
+	}
 	OriginLocation = GetActorLocation();
 	GetMesh()->SetSkeletalMesh(MonsterData->SkeletalMesh.LoadSynchronous());
 
@@ -86,6 +89,7 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 		WeaponItemDataInstance = nullptr;
 	}
 	WeaponItemDataInstance = NewObject<UEquipmentInstance>(this);
+	
 	if (WeaponItemDataInstance)
 	{
 		WeaponItemDataInstance->Init(MonsterData->DefaultWeaponData.LoadSynchronous(), 1);
@@ -107,7 +111,13 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 		StopAnimMontage();
 		SkeletalMeshComponent->GetAnimInstance()->InitializeAnimation();
 	}
-	GetCharacterMovement()->MaxWalkSpeed = StatComponent->GetBaseStat(EStat::MoveSpeed);
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		CharacterMovementComponent->MaxWalkSpeed = StatComponent->GetBaseStat(EStat::MoveSpeed);
+		CharacterMovementComponent->bUseControllerDesiredRotation = false;
+		CharacterMovementComponent->bOrientRotationToMovement = true;
+	}
+	
 	BlackboardUpdate();
 	SetActorScale3D({1.f, 1.f, 1.f});
 	
@@ -157,6 +167,13 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 	{
 		return ActualDamage;
 	}
+
+	if (IsValid(EventInstigator) == false)
+	{
+		StatComponent->TakeDamage(ActualDamage);
+		return ActualDamage;
+	}
+
 	StatComponent->TakeDamage(ActualDamage);
 	UAISense_Damage::ReportDamageEvent(
 		GetWorld(),
@@ -169,6 +186,8 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 
 	if (IsDead())
 	{
+		SetActorEnableCollision(false);
+		
 		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, *GetName().Append(TEXT("DEAD")));
 
 		if (AAIController* AIController = Cast<AAIController>(GetController()))

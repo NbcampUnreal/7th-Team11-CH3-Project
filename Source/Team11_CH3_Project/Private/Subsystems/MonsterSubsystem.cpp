@@ -95,7 +95,6 @@ void UMonsterSubsystem::OnMonsterDeath(AMonsterBase* DeadMonster)
 		5.0f,
 		false
 	);
-	DeadMonster->SetActorEnableCollision(false);
 	if (AT11_GameState* GameState = GetWorld()->GetGameState<AT11_GameState>())
 	{
 		// 아이템 드랍을 위해서 몬스터 위치 매개변수(완료) 및 점수 데이터 추가(예정)
@@ -106,7 +105,7 @@ void UMonsterSubsystem::OnMonsterDeath(AMonsterBase* DeadMonster)
 void UMonsterSubsystem::DespawnMonster(AMonsterBase* DeadMonster)
 {
 	if (!IsValid(this)) return;
-
+	
 	int32 Index = Monsters.Find(DeadMonster);
 	if (Index != INDEX_NONE && Index < SpawnedMonsterCount)
 	{

@@ -15,6 +15,7 @@ void UDashSkill::Activate(UActiveSkillSlot* InActiveSkillSlot)
 	Super::Activate(InActiveSkillSlot);
 	ChargingTimer = 0.0f;
 	bIsDashing = false;
+	bIsHit = false;
 	NavDestination = ActiveSkillSlot->GetTargetLocation();
 }
 
@@ -90,7 +91,7 @@ void UDashSkill::Tick(float DeltaSeconds)
 		FHitResult Hit;
 		Owner->SetActorLocation(NextLoc, true, &Hit);
 
-		if (FVector::DistSquared(Owner->GetActorLocation(), ActiveSkillSlot->GetTargetLocation()) < 250000.f)
+		if (!bIsHit && FVector::DistSquared(Owner->GetActorLocation(), ActiveSkillSlot->GetTargetLocation()) < 250000.f)
 		{
 			APawn* Instigator = Cast<APawn> (ActiveSkillSlot->GetOwner());
 			if (!Instigator)
@@ -119,7 +120,7 @@ void UDashSkill::Tick(float DeltaSeconds)
 				BaseDamage += StatComp->GetCurrentStat(EStat::AttackDamage);
 			}
 	
-			bool bIsHit = false;
+	
 			for (AActor* HitActor : OverlappingActors)
 			{
 				if (IsValid(HitActor) == false || HitActor == Instigator)
@@ -177,11 +178,11 @@ void UDashSkill::Tick(float DeltaSeconds)
 			AnimInstance->Montage_Stop(0.2f, SkillMontage);
 			return; 
 		}
-		// if (Hit.bBlockingHit)
-		// {
-		// 	AnimInstance->Montage_Stop(0.2f, SkillMontage);
-		// 	return;
-		// }
+		if (Hit.bBlockingHit)
+		{
+			AnimInstance->Montage_Stop(0.2f, SkillMontage);
+			return;
+		}
 	}
 	
 }
@@ -193,13 +194,28 @@ void UDashSkill::OnExit()
 
 float UDashSkill::GetScore(const AActor* Actor, const AActor* Target) const
 {
+	if (!Actor || !Target)
+	{
+		return -1.0f;
+	}
+	float DistanceSq = FVector::DistSquared(Actor->GetActorLocation(), Target->GetActorLocation());
+	if (DistanceSq > Range * Range || DistanceSq < FMath::Square(500.0f)) 
+	{
+		return -1.0f;
+	}
+	
 	UNavigationSystemV1* NavigationSystemV1 = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Actor->GetWorld());
+	if (!NavigationSystemV1)
+	{
+		return -1.0f;
+	}
+	
 	FVector HitResult;
 	NavigationSystemV1->NavigationRaycast(Actor->GetWorld(), Actor->GetActorLocation(), Target->GetActorLocation(),
 	                                      HitResult);
 	if (FVector::DistSquared(HitResult, Target->GetActorLocation()) < 10.0f)
 	{
-		return 100.0f;
+		return 110.0f;
 	}
 	return -1.0f;
 }

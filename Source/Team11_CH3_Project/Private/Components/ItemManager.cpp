@@ -239,6 +239,8 @@ void UItemManager::EquipTo(int32 Index, UEquipmentInstance* EquipmentInstance)
 void UItemManager::EquipGemTo(int32 Index, UEquipmentInstance* EquipmentInstance)
 {
 	GemSlots[Index]->SetItemInstance(EquipmentInstance);
+	OnEquipmentSlotChanged.Broadcast(GemSlots[Index]);
+
 	if (AActor* Owner = GetOwner())
 	{
 		if (USkillManager* SkillComponent = Owner->FindComponentByClass<USkillManager>())
