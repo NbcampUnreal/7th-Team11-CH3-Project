@@ -23,7 +23,8 @@ void UItemOverlayWidget::Init(UMainInventoryWidget* InMainInventoryWidget)
 	{
 		return;
 	}
-	SetVisibility(ESlateVisibility::HitTestInvisible);
+	SetVisibility(ESlateVisibility::Hidden);
+	
 	ItemName->SetText(FText::FromString(TEXT("NOITEM")));
 	
 	if (!ItemSlotWidgetClass)
@@ -43,11 +44,12 @@ void UItemOverlayWidget::Init(UMainInventoryWidget* InMainInventoryWidget)
 	}
 	StatRows.Empty();
 	StatBox->ClearChildren();
+	
 }
 
 void UItemOverlayWidget::UpdateOverlayWidget(FVector2D ScreenPosition, UItemInstance* ItemInstance)
 {
-	SetVisibility(ESlateVisibility::Visible);
+	SetVisibility(ESlateVisibility::HitTestInvisible);
 	
 	if (UCanvasPanelSlot* CanvasPanelSlot =  Cast<UCanvasPanelSlot> (Slot))
 	{

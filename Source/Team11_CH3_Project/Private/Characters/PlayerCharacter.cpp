@@ -670,3 +670,8 @@ void APlayerCharacter::PerformSkill(USkillSlot* SkillSlot, const FVector& Target
 void APlayerCharacter::OnAttackEnded()
 {
 }
+
+void APlayerCharacter::HearingNotifyToEnemy(float Distance)
+{
+	MakeNoise(1,this,GetActorLocation(),Distance);
+}
