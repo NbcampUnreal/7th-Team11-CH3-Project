@@ -7,6 +7,8 @@
 #include "Types/StatTypes.h"
 #include "ItemOverlayWidget.generated.h"
 
+class URarityColorDataAsset;
+class UImage;
 class UEquipmentInstance;
 class UStatRowWidget;
 class UItemInstance;
@@ -32,6 +34,7 @@ private:
 	void CollapseStatBox();
 	void CollapseSocketBox();
 	void UpdateStatBoxFromStats(const TMap<EStat, float>& Stats);
+	void UpdateItemRarity(UEquipmentInstance* EquipmentInstance);
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> ItemName;
@@ -53,10 +56,22 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="InventoryWidget")
 	TArray<TObjectPtr<UItemSlotWidget>> Sockets;
 	
+	
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> ItemRateBar;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> ItemTypeImage;
+	
+	
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InventoryWidget")
 	TSubclassOf<UItemSlotWidget> ItemSlotWidgetClass;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InventoryWidget")
 	TSubclassOf<UStatRowWidget> StatRowWidgetClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="InventoryWidget")
+	TObjectPtr<URarityColorDataAsset> RarityColorDataAsset;
+
+
 private:
 	TWeakObjectPtr<UMainInventoryWidget> MainInventoryWidget;
 };
