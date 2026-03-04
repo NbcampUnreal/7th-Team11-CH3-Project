@@ -76,7 +76,7 @@ void UDashSkill::Tick(float DeltaSeconds)
 				if (IsValid(MeshComp))
 				{
 					FRotator DashRotation = (-DashingDir).Rotation();
-					ActiveDashVFXComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+					UNiagaraFunctionLibrary::SpawnSystemAttached(
 						DashVFX,
 						MeshComp,
 						NAME_None,         
