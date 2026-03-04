@@ -20,9 +20,10 @@ void ULocationSkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
 		return;
 	AActor* Owner = InActiveSkillSlot->GetOwner();
 	FVector SpawnLocation = Owner->GetActorLocation();
-	FVector Origin,BoxExtent;
-	Owner->GetActorBounds(true,Origin,BoxExtent);
-	SpawnLocation.Z -= 85.f;
+	FVector Origin, BoxExtent;
+	Owner->GetActorBounds(true, Origin, BoxExtent);
+	SpawnLocation.Z -= BoxExtent.Z/2;
+	SpawnLocation.Z += 10.0f;
 
 	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
 		Owner->GetWorld(),
@@ -97,8 +98,7 @@ void ULocationSkillData::Tick(float DeltaSeconds)
 	FVector Dir = DiffVector.GetSafeNormal();
 	float Distance = FMath::Min(Range, DiffVector.Length()) - 10.0f;
 	TargetLocation = Instigator->GetActorLocation() + Dir * Distance;
-	
-	
+
 
 	FVector End = TargetLocation - FVector(0.0f, 0.0f, 1000.0f);
 	FHitResult HitResult;
@@ -108,7 +108,7 @@ void ULocationSkillData::Tick(float DeltaSeconds)
 		HitResult,
 		TargetLocation,
 		End,
-		ECC_Visibility, 
+		ECC_Visibility,
 		QueryParams
 	);
 	if (bHit)

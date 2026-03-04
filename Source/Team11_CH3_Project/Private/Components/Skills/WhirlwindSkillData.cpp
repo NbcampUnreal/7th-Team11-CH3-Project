@@ -106,7 +106,7 @@ void UWhirlwindSkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
 					WhirlwindVFX,
 					MeshComp,
 					NAME_None,          
-					Owner->GetActorLocation(),
+					Owner->GetActorLocation() -FVector(0,0,100.0f),
 					FRotator::ZeroRotator,
 					EAttachLocation::KeepWorldPosition,
 					true                       
