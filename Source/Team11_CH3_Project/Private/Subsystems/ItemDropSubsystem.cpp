@@ -2,25 +2,31 @@
 
 
 #include "Subsystems/ItemDropSubsystem.h"
+#include "Components/Items/DropTableTypes.h"
+#include "Components/Items/PickupActor.h"
+#include "Components/Items/ItemDataAsset.h"
 #include "Core/T11_GameInstance.h"
 
 void UItemDropSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
-	// Game Start -> 난이도 선택 + 조작법 UI 선택 -> 시작
-	// 아직 레벨완성이 안돼서 테스트용스테이지 1 2 쉬움만
-	// 1. 데이터 테이블을 불러오는 데이터 테이블만들어서(테이블 핸들) 로드
-	// 2. UDataTable* DropTable = DropTables.FindRef({ GI->CurrentStageIndex, GI->CurrentDifficulty }); 불러오기
-	DropTables.Add({ 0, 0 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DataTable/DT_DropItem")));
-	//DropTables.Add({ 0, 1 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DT_Drop_Stage1_Normal")));
-	DropTables.Add({ 1, 0 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DataTable/DT_DropItem")));
-	//DropTables.Add({ 1, 1 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DT_Drop_Stage1_Normal")));
-	//DropTables.Add({ 2, 0 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DT_Drop_Stage1_Normal")));
-	//DropTables.Add({ 2, 1 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DT_Drop_Stage1_Normal")));
-	//DropTables.Add({ 3, 0 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DT_Drop_Stage1_Normal")));
-	//DropTables.Add({ 3, 1 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DT_Drop_Stage1_Normal")));
-	//DropTables.Add({ 4, 0 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DT_Drop_Stage1_Normal")));
-	//DropTables.Add({ 4, 1 }, LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DT_Drop_Stage1_Normal")));
+
+	// 마스터 DataTable 로드
+	MasterDropTable = LoadObject<UDataTable>(nullptr, TEXT("/Game/Data/DataTable/DT_MasterDropTable"));
+	if (IsValid(MasterDropTable) == false)
+		return;
+
+	static const FString Context(TEXT("MasterDropTable"));
+	TArray<FDropTableRow*> AllRows;
+	MasterDropTable->GetAllRows(Context, AllRows);
+
+	for (FDropTableRow* Row : AllRows)
+	{
+		if (Row == nullptr || IsValid(Row->DropTable) == false)
+			continue;
+
+		CachedDropTables.Add({ Row->StageIndex, Row->Difficulty }, Row->DropTable);
+	}
 }
 
 void UItemDropSubsystem::TryDropItem(FVector DropLocation)
@@ -28,51 +34,59 @@ void UItemDropSubsystem::TryDropItem(FVector DropLocation)
 	UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetWorld()->GetGameInstance());
 	if (IsValid(GI) == false)
 		return;
-
-	UDataTable* DropTable = DropTables.FindRef({ GI->CurrentStageIndex, GI->CurrentDifficulty });
+	// 현재 스테이지 + 난이도에 맞는 서브 DT 조회
+	UDataTable* DropTable = CachedDropTables.FindRef({ GI->CurrentStageIndex, GI->CurrentDifficulty });
 	if (IsValid(DropTable) == false)
 		return;
-	//
-	// TArray<FDropItemData*> AllRows;
-	// static const FString Context(TEXT("DropTable"));
-	// DropTable->GetAllRows(Context, AllRows);
-	// if (AllRows.IsEmpty())
-	// 	return;
-	//
-	// float TotalChance = 0.f;
-	// for (FDropItemData* Row : AllRows)
-	// {
-	// 	TotalChance += Row->DropChance;
-	// }
-	//
-	// float Rand = FMath::FRandRange(0.f, TotalChance);
-	// float Accumulated = 0.f;
-	// FDropItemData* SelectedItem = nullptr;
-	// for (FDropItemData* Row : AllRows)
-	// {
-	// 	Accumulated += Row->DropChance;
-	// 	if (Rand <= Accumulated)
-	// 	{
-	// 		SelectedItem = Row;
-	// 		break;
-	// 	}
-	// }
-	//
-	// if (SelectedItem == nullptr)
-	// 	return;
-	// if (SelectedItem->PickupActorClass.IsNull())
-	// 	return;
-	//
-	// APickupActor* Pickup = GetWorld()->SpawnActor<APickupActor>(
-	// 	SelectedItem->PickupActorClass.LoadSynchronous(),
-	// 	DropLocation,
-	// 	FRotator::ZeroRotator
-	// );
-	//
-	// if (IsValid(Pickup) == false)
-	// 	return;
-	//
-	// Pickup->Init()
+	// 서브 DT 전체 행 가져오기
+	static const FString Context(TEXT("DropTable")); 
+	TArray<FDropItemRow*> AllRows;
+	DropTable->GetAllRows(Context, AllRows);
+	if (AllRows.IsEmpty())
+		return;
+	// 가중치 합산
+	float TotalChance = 0.f;
+	for (FDropItemRow* Row : AllRows)
+	{
+		TotalChance += Row->DropChance;
+	}
+	// 랜덤 선택
+	float Rand = FMath::FRandRange(0.f, TotalChance);
+	float Accumulated = 0.f;
+	FDropItemRow* SelectedRow = nullptr;
+	for (FDropItemRow* Row : AllRows)
+	{
+		Accumulated += Row->DropChance;
+		if (Rand <= Accumulated)
+		{
+			SelectedRow = Row;
+			break;
+		}
+	}
+	
+	if (SelectedRow == nullptr)
+		return;
+	if (SelectedRow->ItemDataAsset.IsNull())
+		return;
+
+	// Soft 참조 로드
+	UItemDataAsset* ItemAsset = SelectedRow->ItemDataAsset.LoadSynchronous();
+	if (IsValid(ItemAsset) == false)
+		return;
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	APickupActor* Pickup = GetWorld()->SpawnActor<APickupActor>(
+		APickupActor::StaticClass(),
+		DropLocation,
+		FRotator::ZeroRotator,
+		SpawnParams
+	);
+	
+	if (IsValid(Pickup) == false)
+		return;
+	
+	Pickup->Init(ItemAsset, 1);
 
 	UE_LOG(LogTemp, Log, TEXT("아이템 드랍"));
 }

@@ -19,6 +19,8 @@ class UItemSlot;
 class UItemOverlayWidget;
 class UEquipmentDetailWidget;
 class UInventoryWidget;
+class UStatDetailWidget;
+class UStatComponent;
 /**
  * 
  */
@@ -29,7 +31,7 @@ class TEAM11_CH3_PROJECT_API UMainInventoryWidget : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void Init(int32 InventorySize, UInventoryComponent* InInventoryComponent, UItemManager* InEquipmentComponent);
+	void Init(int32 InventorySize, UInventoryComponent* InInventoryComponent, UItemManager* InEquipmentComponent, UStatComponent* InStatComponent);
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateEquipmentDetailWidget(UItemSlot* EquipmentSlot);
@@ -38,6 +40,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void HandleItemSlotChanged(UItemSlot* SlotData);
+
+	UFUNCTION(BlueprintCallable)
+	void HandleStatChanged(UStatComponent* StatComp);
 
 	virtual FReply NativeOnKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 
@@ -66,6 +71,9 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UItemOverlayWidget> ItemOverlayWidget;
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
+	TObjectPtr<UStatDetailWidget> StatDetailWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<UItemSlotWidget> DragItemSlotWidgetClass;

@@ -6,18 +6,38 @@
 #include "GenericTeamAgentInterface.h"
 #include "MeshPassProcessor.inl"
 #include "WeaponActor.h"
+#include "Characters/PlayerCharacter.h"
+#include "Characters/Monster/MonsterBase.h"
 #include "Components/StatComponent.h"
 #include "Kismet/GameplayStatics.h"
 
-void UMeleeSimpleAttackSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
+void UMeleeSimpleAttackSkillData::DealDamage()
 {
-	// StatComp 불러오기
-	if (!IsValid(Instigator) || !IsValid(WeaponActor))
+	Super::Execute();
+
+	APawn* Instigator = Cast<APawn>(ActiveSkillSlot->GetOwner());;
+	if (!Instigator)
 	{
 		return;
 	}
-	UStatComponent* StatComp = Instigator->FindComponentByClass<UStatComponent>();
 	
+	AWeaponActor* WeaponActor = nullptr;
+	if (APlayerCharacter* PlayerCharacter = Cast<APlayerCharacter>(Instigator))
+	{
+		WeaponActor = PlayerCharacter->GetWeaponActor();
+	}
+	if (AMonsterBase* MonsterBase = Cast<AMonsterBase>(Instigator))
+	{
+		WeaponActor = MonsterBase->GetWeaponActor();
+	}
+	if ( !IsValid(WeaponActor))
+	{
+		return;
+	}
+	// StatComp 불러오기
+
+	UStatComponent* StatComp = Instigator->FindComponentByClass<UStatComponent>();
+
 
 	// Damage & ProjectileSpeed 계산
 	float BaseDamage = Damage;
@@ -44,8 +64,8 @@ void UMeleeSimpleAttackSkillData::Activate(APawn* Instigator, AWeaponActor* Weap
 		{
 			continue;
 		}
-		
-		if (const IGenericTeamAgentInterface* InstigatorTeam =  Cast<IGenericTeamAgentInterface>(InstigatorController))
+
+		if (const IGenericTeamAgentInterface* InstigatorTeam = Cast<IGenericTeamAgentInterface>(InstigatorController))
 		{
 			if (InstigatorTeam->GetTeamAttitudeTowards(*HitActor) != ETeamAttitude::Hostile)
 			{
@@ -74,22 +94,24 @@ void UMeleeSimpleAttackSkillData::Activate(APawn* Instigator, AWeaponActor* Weap
 			UDamageType::StaticClass()
 		);
 		UE_LOG(LogTemp, Warning, TEXT("Hit : %s, Damage : %0.1f"), *HitActor->GetName(), ActualDamage);
-
 	}
-	
+
 	// 사운드 출력
 	if (SwordSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), SwordSound, Instigator->GetActorLocation(), 0.5f);
 	}
-	
-	
-	
+}
+
+
+void UMeleeSimpleAttackSkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
+{
+	Super::Activate(InActiveSkillSlot);
 }
 
 float UMeleeSimpleAttackSkillData::GetScore(const AActor* Actor, const AActor* Target) const
 {
-	if (FVector::DistSquared(Actor->GetActorLocation(), Target->GetActorLocation()) < Range*Range)
+	if (FVector::DistSquared(Actor->GetActorLocation(), Target->GetActorLocation()) < Range * Range)
 	{
 		return 100.0f;
 	}
@@ -97,11 +119,11 @@ float UMeleeSimpleAttackSkillData::GetScore(const AActor* Actor, const AActor* T
 }
 
 void UMeleeSimpleAttackSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
-	const FVector& TargetLocation, FName Name)
+                                         const FVector& TargetLocation, FName Name)
 {
 	Super::Notify(Instigator, WeaponActor, Origin, TargetLocation, Name);
 	if (Name == TEXT("DealDamage"))
 	{
-		Activate(Instigator,WeaponActor,Origin,TargetLocation);
+		DealDamage();
 	}
 }

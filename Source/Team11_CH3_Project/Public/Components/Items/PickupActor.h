@@ -8,6 +8,7 @@
 #include "PickupActor.generated.h"
 
 class UItemDataAsset;
+class UMaterialInterface;
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API APickupActor : public AActor
@@ -30,6 +31,14 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OverlapSphere")
 	TObjectPtr<class USphereComponent> OverlapSphere;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh")
+	TObjectPtr<class UStaticMeshComponent> ItemMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Material")
+	TObjectPtr<UMaterialInterface> ThumbnailMaterial;
+
+	TObjectPtr<UMaterialInstanceDynamic> DynamicMaterial;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UItemDataAsset> ItemDataAsset;
 	int32 ItemCount;

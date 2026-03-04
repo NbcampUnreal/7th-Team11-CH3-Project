@@ -19,7 +19,10 @@
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanel.h"
+#include "Components/SkillManager.h"
+#include "Components/Skills/SkillSlot.h"
 #include "UI/MainInventoryWidget.h"
+#include "UI/HUDWidget.h"
 
 AMainPlayerController::AMainPlayerController()
 {
@@ -28,8 +31,10 @@ AMainPlayerController::AMainPlayerController()
 void AMainPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = 
+#pragma region TESTCODE
+	SkillCooldownTimerHandles.SetNum(4);
+#pragma endregion
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
 		ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
@@ -43,21 +48,27 @@ void AMainPlayerController::BeginPlay()
 	// Input Mode 설정
 	FInputModeGameOnly InputMode;
 	SetInputMode(InputMode);
-	
+
 	if (HUDWidgetClass)
 	{
-		HUDWidgetInstance = CreateWidget<UUserWidget>(this, HUDWidgetClass);
+		HUDWidgetInstance = CreateWidget<UHUDWidget>(this, HUDWidgetClass);
 	}
 	if (LoadingWidgetClass)
 	{
 		LoadingWidgetInstance = CreateWidget<UUserWidget>(this, LoadingWidgetClass);
 	}
-	if (InventoryWidgetClass)
+	//TODO Move To OnPossess
+	if (APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetPawn()))
 	{
-		InventoryWidgetInstance = CreateWidget<UMainInventoryWidget>(this, InventoryWidgetClass);
-		if (APlayerCharacter* PlayerChar = Cast<APlayerCharacter>(GetPawn()))
+		if (InventoryWidgetClass)
 		{
-			InventoryWidgetInstance->Init(20, PlayerChar->FindComponentByClass<UInventoryComponent>(), PlayerChar->FindComponentByClass<UItemManager>());
+			InventoryWidgetInstance = CreateWidget<UMainInventoryWidget>(this, InventoryWidgetClass);
+			InventoryWidgetInstance->Init(20, PlayerChar->FindComponentByClass<UInventoryComponent>(),
+			                              PlayerChar->FindComponentByClass<UItemManager>(), PlayerChar->FindComponentByClass<UStatComponent>());
+		}
+		if (USkillManager* SkillComponent = PlayerChar->FindComponentByClass<USkillManager>())
+		{
+			SkillComponent->OnSkillSlotChanged.AddDynamic(this, &AMainPlayerController::UpdateSkillHUD);
 		}
 	}
 
@@ -65,6 +76,20 @@ void AMainPlayerController::BeginPlay()
 
 	LoadingToHUD();
 	SetHUD();
+}
+
+void AMainPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+	UWorld* World = GetWorld();
+	if (World)
+	{
+		FTimerManager& TimerManager = World->GetTimerManager();
+		for (FTimerHandle& TimerHandle : SkillCooldownTimerHandles)
+		{
+			TimerManager.ClearTimer(TimerHandle);
+		}
+	}
 }
 
 void AMainPlayerController::SetupInputComponent()
@@ -79,7 +104,8 @@ void AMainPlayerController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AMainPlayerController::HandleMove);
 	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMainPlayerController::HandleLook);
 	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleJump);
-	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &AMainPlayerController::HandleStopJumping);
+	EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this,
+	                                   &AMainPlayerController::HandleStopJumping);
 	EnhancedInputComponent->BindAction(DodgeAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleDodge);
 
 	EnhancedInputComponent->BindAction(AimAction, ETriggerEvent::Started, this, &AMainPlayerController::AimPressed);
@@ -87,13 +113,16 @@ void AMainPlayerController::SetupInputComponent()
 
 
 	if (InventoryAction)
-		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMainPlayerController::HandleOpenInventory);
+		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this,
+		                                   &AMainPlayerController::HandleOpenInventory);
 
 	if (Skill1Action)
-		EnhancedInputComponent->BindAction(Skill1Action, ETriggerEvent::Started, this, &AMainPlayerController::HandleUseSkill1);
+		EnhancedInputComponent->BindAction(Skill1Action, ETriggerEvent::Started, this,
+		                                   &AMainPlayerController::HandleUseSkill1);
 
 	if (Consumable1Action)
-		EnhancedInputComponent->BindAction(Consumable1Action, ETriggerEvent::Started, this, &AMainPlayerController::HandleUseConsumable1);
+		EnhancedInputComponent->BindAction(Consumable1Action, ETriggerEvent::Started, this,
+		                                   &AMainPlayerController::HandleUseConsumable1);
 }
 
 void AMainPlayerController::OnPossess(APawn* InPawn)
@@ -137,6 +166,7 @@ void AMainPlayerController::OnPossess(APawn* InPawn)
 	UI->ShowWidget(Tag);
 	bHUDShown = true;
 }
+
 FGenericTeamId AMainPlayerController::GetGenericTeamId() const
 {
 	return TeamID;
@@ -146,7 +176,8 @@ ETeamAttitude::Type AMainPlayerController::GetTeamAttitudeTowards(const AActor& 
 {
 	if (const APawn* OtherPawn = Cast<APawn>(&Other))
 	{
-		if (const IGenericTeamAgentInterface* OtherTeamID = Cast<IGenericTeamAgentInterface>(OtherPawn->GetController()))
+		if (const IGenericTeamAgentInterface* OtherTeamID = Cast<
+			IGenericTeamAgentInterface>(OtherPawn->GetController()))
 		{
 			return (TeamID == OtherTeamID->GetGenericTeamId()) ? ETeamAttitude::Friendly : ETeamAttitude::Hostile;
 		}
@@ -218,7 +249,7 @@ void AMainPlayerController::HandleOpenInventory()
 		}
 		else
 		{
-			InventoryWidgetInstance->AddToViewport();
+			InventoryWidgetInstance->AddToViewport(1);
 			FInputModeUIOnly InputMode;
 			InputMode.SetWidgetToFocus(InventoryWidgetInstance->TakeWidget());
 			SetInputMode(InputMode);
@@ -237,10 +268,12 @@ void AMainPlayerController::HandleOpenInventory()
 }
 
 void AMainPlayerController::UseSkillSlot(int32 Index)
-{ }
+{
+}
 
 void AMainPlayerController::UseConsumableSlot(int32 Index)
-{ }
+{
+}
 
 void AMainPlayerController::HandleUseSkill1() { UseSkillSlot(0); }
 
@@ -258,7 +291,7 @@ void AMainPlayerController::HandlePlayerDeath()
 		TimerHandle,
 		[this]()
 		{
-			UGameplayStatics::OpenLevel(this, FName(*GetWorld()->GetName()));
+			UGameplayStatics::OpenLevel(GetWorld(), "L_GameOver");
 		},
 		4.0f,
 		false
@@ -397,76 +430,136 @@ UUserWidget* AMainPlayerController::GetLoadingWidget() const
 
 void AMainPlayerController::UpdateMonsterCount(int32 MonsterCount)
 {
-	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	if (HUDWidgetInstance)
 	{
-		if (UTextBlock* MonsterCountText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("RemainingCount"))))
+		if (HUDWidgetInstance->RemainingCount)
 		{
-			MonsterCountText->SetText(FText::AsNumber(MonsterCount));
+			HUDWidgetInstance->RemainingCount->SetText(FText::AsNumber(MonsterCount));
 		}
 	}
 }
 
 void AMainPlayerController::UpdateStageInfo(int32 MaxWave)
 {
-	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	if (HUDWidgetInstance)
 	{
-		if (UTextBlock* StageNameText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("StageName"))))
+		if (HUDWidgetInstance->StageName)
 		{
 			FString CurrentWorldName = GetWorld()->GetName().RightChop(2);
-			StageNameText->SetText(FText::FromString(CurrentWorldName));
+			HUDWidgetInstance->StageName->SetText(FText::FromString(CurrentWorldName));
 		}
 		for (int32 WaveIndex = MaxWave + 1; WaveIndex <= 5; WaveIndex++)
 		{
-			if (UImage* WaveImage = Cast<UImage>(HUDWidget->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
+			if (UImage* WaveImage = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
 			{
 				WaveImage->SetVisibility(ESlateVisibility::Collapsed);
 			}
 		}
 	}
-	if (UUserWidget* LoadingWidget = LoadingWidgetInstance)
-	{
-		//LoadingWidget->PlayAnimation(LoadingWidget->FadeOutBGAnim);
-	}
 }
 
 void AMainPlayerController::UpdateWaveInfo(int32 CurrentWaveIndex, int32 MaxWave)
 {
-	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	if (HUDWidgetInstance)
 	{
 		for (int32 WaveIndex = 1; WaveIndex < CurrentWaveIndex; WaveIndex++)
 		{
-			if (UImage* WaveImage = Cast<UImage>(HUDWidget->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
+			if (UImage* WaveImage = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), WaveIndex)))))
 			{
 				UTexture2D* Texture = WaveYellowTexture.LoadSynchronous();
 				WaveImage->SetBrushFromTexture(Texture);
 			}
 		}
-		if (UImage* WaveImage = Cast<UImage>(HUDWidget->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), CurrentWaveIndex)))))
+		if (UImage* WaveImage = Cast<UImage>(HUDWidgetInstance->GetWidgetFromName(FName(*FString::Printf(TEXT("Wave%d"), CurrentWaveIndex)))))
 		{
 			UTexture2D* Texture = WaveRedTexture.LoadSynchronous();
 			WaveImage->SetBrushFromTexture(Texture);
 		}
 
-		if (UTextBlock* WaveIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("Wave"))))
+		if (HUDWidgetInstance->Wave)
 		{
-			WaveIndexText->SetText(FText::FromString(FString::Printf(TEXT("WAVE %d/%d"), CurrentWaveIndex, MaxWave)));
+			HUDWidgetInstance->Wave->SetText(FText::FromString(FString::Printf(TEXT("WAVE %d/%d"), CurrentWaveIndex, MaxWave)));
 		}
 	}
 }
 
 void AMainPlayerController::UpdateHP(float CurrentHP, float MaxHP)
 {
-	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	if (HUDWidgetInstance)
 	{
-		if (UTextBlock* WaveIndexText = Cast<UTextBlock>(HUDWidget->GetWidgetFromName(TEXT("CurrentHP"))))
+		if (HUDWidgetInstance->CurrentHP)
 		{
-			WaveIndexText->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), int32(CurrentHP), int32(MaxHP))));
+			HUDWidgetInstance->CurrentHP->SetText(FText::FromString(FString::Printf(TEXT("%d/%d"), int32(CurrentHP), int32(MaxHP))));
 		}
 
-		if (UProgressBar* HPBar = Cast<UProgressBar>(HUDWidget->GetWidgetFromName(TEXT("HPBar"))))
+		if (HUDWidgetInstance->HPBar)
 		{
 			float HealthPercent = (MaxHP > 0.0f) ? (CurrentHP / MaxHP) : 0.0f;
-			HPBar->SetPercent(HealthPercent);
+			HUDWidgetInstance->HPBar->SetPercent(HealthPercent);
+		}
+	}
+}
+
+void AMainPlayerController::UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbnailChanged, bool bIsCooldownStart)
+{
+	int32 Index = SkillSlot->GetIndex() - 1;
+	if (UUserWidget* HUDWidget = HUDWidgetInstance)
+	{
+		if (bIsThumbnailChanged)
+		{
+			FString WidgetName = FString::Printf(TEXT("SkillSlotImage%d"), Index);
+			FName WidgetFName = FName(*WidgetName);
+			if (UImage* SkillImage = Cast<UImage>(HUDWidget->GetWidgetFromName(WidgetFName)))
+			{
+				if (SkillSlot->GetEquippedSkill())
+				{
+					SkillImage->SetBrushFromTexture(SkillSlot->GetEquippedSkill()->GetThumbnail());
+					SkillImage->SetVisibility(ESlateVisibility::Visible);
+				}
+				else
+				{
+					SkillImage->SetVisibility(ESlateVisibility::Hidden);
+				}
+			}
+		}	
+		if (bIsThumbnailChanged || bIsCooldownStart)
+		{	
+			FString WidgetName = FString::Printf(TEXT("SkillProgressBar%d"), Index);
+			FName WidgetFName = FName(*WidgetName);
+			if (UProgressBar* SkillCooldownBar = Cast<UProgressBar>(HUDWidget->GetWidgetFromName(WidgetFName)))
+			{
+
+				if (SkillSlot->GetEquippedSkill() && SkillSlot->GetEquippedSkill()->GetCooldownTime() > 0.2f)
+				{				
+					TWeakObjectPtr<UProgressBar> WeakSkillCooldownBar = SkillCooldownBar;
+					TWeakObjectPtr<USkillSlot> WeakSkillSlot = SkillSlot;
+					GetWorldTimerManager().SetTimer(SkillCooldownTimerHandles[Index], [this,Index,WeakSkillSlot,WeakSkillCooldownBar]()
+					{
+						if (!IsValid(this))
+						{
+							return;
+						}
+						if (!WeakSkillCooldownBar.IsValid())
+						{
+							GetWorldTimerManager().ClearTimer(SkillCooldownTimerHandles[Index]);
+							return;
+						}
+						if (!WeakSkillSlot.IsValid())
+						{
+							WeakSkillCooldownBar->SetPercent(1.0f);
+							return;
+						}
+						float TotalCooldown = WeakSkillSlot->GetEquippedSkill()->GetCooldownTime();
+						float RemainCooldown = WeakSkillSlot->GetCooldownRemaining();
+					
+						WeakSkillCooldownBar->SetPercent((TotalCooldown - RemainCooldown)/TotalCooldown);
+					
+					}, 0.03, true);
+				}else
+				{
+					SkillCooldownBar->SetPercent(1.0f);
+				}
+			}
 		}
 	}
 }
@@ -479,9 +572,10 @@ void AMainPlayerController::UpdateLevelFinished(FString TargetLevel)
 		this->PlayerCameraManager->StartCameraFade(0.f, 1.f, 1.0f, FLinearColor::Black, false, true);
 
 		FTimerHandle TimerHandle;
-		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, TargetLevel]() {
+		GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this, TargetLevel]()
+		{
 			UGameplayStatics::OpenLevel(GetWorld(), FName(*TargetLevel));
-			}, 1.0f, false);
+		}, 1.0f, false);
 	}
 }
 
@@ -500,6 +594,7 @@ void AMainPlayerController::SetHUD()
 	if (APlayerCharacter* PlayerCharacter =
 		Cast<APlayerCharacter>(GetPawn()))
 	{
-		PlayerCharacter->FindComponentByClass<UStatComponent>()->OnHPChanged.AddDynamic(this, &AMainPlayerController::UpdateHP);
+		PlayerCharacter->FindComponentByClass<UStatComponent>()->OnHPChanged.AddDynamic(
+			this, &AMainPlayerController::UpdateHP);
 	}
 }

@@ -12,6 +12,9 @@ class UStatComponent;
 class USkillSlot;
 class USkillDataAsset;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnSkillSlotChanged, USkillSlot*, SlotData, bool, bIsThumbnailChanged, bool, bIsCooldownStart);
+
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class TEAM11_CH3_PROJECT_API USkillManager : public UActorComponent
 {
@@ -34,17 +37,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	int32 GetBestSkill(const AActor* Actor, const AActor* Target) const;
 
-	// 스킬 실행
-	UFUNCTION(BlueprintCallable)
-	void StartSkillCooldown(int32 Index);
-
 	// 스킬 보석 교체
 	UFUNCTION(BlueprintCallable)
 	void EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData);
 	UFUNCTION(BlueprintCallable)
 	void UnEquipSkillGem(int32 SlotIndex);
-	UFUNCTION(BlueprintCallable)
-	void AddSKillGems(TArray<TSoftObjectPtr<USkillDataAsset>> Skills);
 	// 쿨타임 조회
 	UFUNCTION(BlueprintCallable)
 	bool IsSkillOnCooldown(int32 SlotIndex) const;
@@ -54,13 +51,17 @@ public:
 	void Clear();
 
 	UActiveSkillSlot* GetActiveSkillSlot() const;
-	void ActiveSkill(AActor* Owner, const FVector& TargetLocation, USkillSlot* CurrentSlot);
+	void ActiveSkill(AActor* Owner,  AActor* Target, USkillSlot* CurrentSlot);
 	void TickActiveSkill(float DeltaSeconds);
 	void ExecuteActiveSkill();
 	void ExitActiveSkill();
 	bool IsSkillActive() const;
 	void OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
 
+	UPROPERTY(BlueprintAssignable)
+	FOnSkillSlotChanged OnSkillSlotChanged;
+	
+	
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

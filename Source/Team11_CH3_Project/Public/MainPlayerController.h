@@ -8,10 +8,12 @@
 #include "Types/StatTypes.h"
 #include "MainPlayerController.generated.h"
 
+class USkillSlot;
 class UInputMappingContext;
 class UInputAction;
 class UCanvasPanel;
 class UMainInventoryWidget;
+class UHUDWidget;
 
 UCLASS()
 class TEAM11_CH3_PROJECT_API AMainPlayerController : public APlayerController, public IGenericTeamAgentInterface
@@ -19,9 +21,14 @@ class TEAM11_CH3_PROJECT_API AMainPlayerController : public APlayerController, p
 	GENERATED_BODY()
 
 public:
+#pragma region TESTCODE
+	TArray<FTimerHandle> SkillCooldownTimerHandles;
+#pragma endregion
+	
 	AMainPlayerController();
 
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void SetupInputComponent() override;
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual ETeamAttitude::Type GetTeamAttitudeTowards(const AActor& Other) const override;
@@ -113,10 +120,10 @@ public:
 	bool bIsInvenOpened = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "HUD")
-	UUserWidget* HUDWidgetInstance;
+	UHUDWidget* HUDWidgetInstance;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "HUD")
-	TSubclassOf<UUserWidget> HUDWidgetClass;
+	TSubclassOf<UHUDWidget> HUDWidgetClass;
 
 	UFUNCTION(BlueprintPure, Category = "HUD")
 	UUserWidget* GetHUDWidget() const;
@@ -147,6 +154,10 @@ public:
 	void UpdateWaveInfo(int32 WaveIndex, int32 MaxWave);
 	UFUNCTION()
 	void UpdateHP(float CurrentHP, float MaxHP);
+	
+	UFUNCTION()
+	void UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbnailChanged, bool bIsCooldownStart);
+
 	UFUNCTION()
 	void UpdateLevelFinished(FString TargetLevel);
 

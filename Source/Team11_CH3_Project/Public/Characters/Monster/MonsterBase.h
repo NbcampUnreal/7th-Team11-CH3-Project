@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "FMonsterData.h"
-#include "GenericTeamAgentInterface.h"
 #include "MonsterControllerBase.h"
 #include "Components/Skills/SkillSlot.h"
 #include "GameFramework/Character.h"
@@ -26,16 +25,17 @@ public:
 	AMonsterBase();
 	void EquipWeapon(UEquipmentInstance* WeaponItemInstance);
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
-
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	void OnAttackEnded();
 	void OnDieMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted);
 	virtual bool TryAttack(AActor* Target);
 	virtual bool CanUseSkill(AActor* Target)const;
 	void PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLocation);
+	void PerformSkill(USkillSlot* SkillSlot, AActor* Target);
 	
 	void DealDamage();
 	void BlackboardUpdate();
-	void Init(const FMonsterData* MonsterData);
+	virtual void Init(const FMonsterData* MonsterData);
 	void Clear();
 	// Getter
 	int32 GetScoreValue() const { return ScoreValue; }
@@ -62,6 +62,7 @@ protected:
 	TObjectPtr<UEquipmentInstance> WeaponItemDataInstance;
 	int32 ScoreValue = 0;
 	
+	FTimerHandle ExecuteTimer;
 public:
 	UFUNCTION(BlueprintPure)
 	bool IsDead() const;

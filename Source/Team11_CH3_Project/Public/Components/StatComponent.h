@@ -28,7 +28,7 @@ struct TEAM11_CH3_PROJECT_API FStatData
 	float CriticalDamage;
 };
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStatChanged);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStatChanged, UStatComponent*, StatComp);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHPChanged, float, HP, float, MaxHP);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )

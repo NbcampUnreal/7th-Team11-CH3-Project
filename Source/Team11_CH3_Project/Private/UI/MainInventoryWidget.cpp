@@ -6,10 +6,12 @@
 #include "UI/EquipmentDetailWidget.h"
 #include "UI/InventoryWidget.h"
 #include "UI/ItemOverlayWidget.h"
+#include "UI/StatDetailWidget.h"
 #include "MainPlayerController.h"
+#include "Characters/PlayerCharacter.h"
 
 void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInventoryComponent,
-	UItemManager* InEquipmentComponent)
+	UItemManager* InEquipmentComponent, UStatComponent* InStatComponent)
 {
 	if (InventoryWidget)
 		InventoryWidget->Init(this, InInventoryComponent,InEquipmentComponent);
@@ -19,7 +21,9 @@ void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInve
 		ItemOverlayWidget->Init(this);
 	InventoryComponent = InInventoryComponent;
 	EquipmentComponent = InEquipmentComponent;
+	InStatComponent->OnStatChanged.AddDynamic(this, &UMainInventoryWidget::HandleStatChanged);
 	InventoryComponent->OnInventorySlotChanged.AddDynamic(this, &UMainInventoryWidget::HandleItemSlotChanged);
+	EquipmentComponent->OnEquipmentSlotChanged.AddDynamic(this, &UMainInventoryWidget::HandleItemSlotChanged);
 }
 
 void UMainInventoryWidget::UpdateEquipmentDetailWidget(UItemSlot* EquipmentSlot)
@@ -53,6 +57,24 @@ void UMainInventoryWidget::HandleItemSlotChanged(UItemSlot* SlotData)
 		break;
 	case EItemContainerType::Max:
 		break;
+	}
+}
+
+void UMainInventoryWidget::HandleStatChanged(UStatComponent* StatComp)
+{
+	UE_LOG(LogTemp, Warning, TEXT("StatChanged"));
+	if (StatDetailWidget)
+	{
+		TMap<EStat, float> StatMap;
+		if (UEnum* EnumPtr = StaticEnum<EStat>())
+		{
+			for (int32 i = 0; i < EnumPtr->NumEnums(); ++i)
+			{
+				EStat Type = static_cast<EStat>(EnumPtr->GetValueByIndex(i));
+				StatMap.Add(Type, StatComp->GetCurrentStat(Type));
+			}
+		}
+		StatDetailWidget->UpdateStatBox(StatMap);
 	}
 }
 

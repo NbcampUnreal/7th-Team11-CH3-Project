@@ -17,14 +17,14 @@ class TEAM11_CH3_PROJECT_API ULocationSkillData : public USkillDataAsset
 	GENERATED_BODY()
 	
 public:
-	virtual void Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation)  override;
-	virtual void Enter(AActor* Actor, const FVector& TargetLocation)  override;
+	virtual void Activate(UActiveSkillSlot* InActiveSkillSlot) override;
 	virtual void Execute()  override;
-	virtual void Tick(float DeltaSeconds, AActor* Actor, UActiveSkillSlot* ActiveSkillSlot)  override;
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void OnExit()  override;
 	// 공격용 액터 스폰
 	void SpawnSkill();
-
+	virtual float GetScore(const AActor* Actor, const AActor* Target) const override;
+	
 	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& Direction, FName Name) override;
 
 protected:
@@ -38,6 +38,7 @@ protected:
 private:
 
 	UPROPERTY()
-	mutable TObjectPtr<ASkillIndicatorActor> SpawnedIndicator;
+	TObjectPtr<ASkillIndicatorActor> SpawnedIndicator;
 	bool bIsExecuted = false;
+	
 };

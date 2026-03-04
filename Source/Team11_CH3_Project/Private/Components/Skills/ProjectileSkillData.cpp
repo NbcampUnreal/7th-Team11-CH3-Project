@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/Skills/ProjectileSkillData.h"
@@ -7,8 +7,18 @@
 #include "NiagaraFunctionLibrary.h"
 #include "Kismet/GameplayStatics.h"
 
-void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation)
+
+void UProjectileSkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
 {
+	Super::Activate(InActiveSkillSlot);
+}
+
+void UProjectileSkillData::SpawnProjectile()
+{
+	Super::Execute();
+
+	APawn* Instigator = Cast<APawn>(ActiveSkillSlot->GetOwner());
+
 	// StatComp 불러오기
 	if (!IsValid(Instigator))
 	{
@@ -19,20 +29,21 @@ void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor
 
 	// 마법진 소환
 	UNiagaraSystem* MagicCircle = GetMagicCircleEffect();
-	if (IsValid(MagicCircle) == false)
-		return;
+	if (IsValid(MagicCircle))
+	{
+		FVector SpawnLocation = Instigator->GetActorLocation();
+		SpawnLocation.Z -= 85.f;
 
-	FVector SpawnLocation = Instigator->GetActorLocation();
-	SpawnLocation.Z -= 85.f;
+		UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+			Instigator->GetWorld(),
+			MagicCircle,
+			SpawnLocation,
+			Instigator->GetActorRotation()
+		);
+	}
 
-	UNiagaraComponent* NiagaraComp = UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-		Instigator->GetWorld(),
-		MagicCircle,
-		SpawnLocation,
-		Instigator->GetActorRotation()
-	);
-
-	FVector Direction = TargetLocation - Origin;
+	FVector Origin = Instigator->GetActorLocation();
+	FVector Direction = ActiveSkillSlot->GetTargetLocation() - Origin;
 	// 손 -> 타겟 방향 계산
 	FRotator SpawnRotation = Direction.Rotation();
 	// 투사체 스폰
@@ -47,20 +58,19 @@ void UProjectileSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor
 		SpawnRotation,
 		SpawnParams
 	);
-
 	// Damage & ProjectileSpeed 계산
 	float ActualDamage = Damage;
 	if (IsValid(StatComp))
 	{
 		ActualDamage += StatComp->GetCurrentStat(EStat::AttackDamage);
 	}
-	
-	float ActualProjectileSpeed = ProjectileSpeed; 
+
+	float ActualProjectileSpeed = ProjectileSpeed;
 	if (IsValid(StatComp))
 	{
 		ActualProjectileSpeed += StatComp->GetCurrentStat(EStat::ProjectileSpeed);
 	}
-	
+
 	if (IsValid(Projectile))
 	{
 		Projectile->Initialize(ActualDamage, ActualProjectileSpeed);
@@ -78,11 +88,12 @@ float UProjectileSkillData::GetScore(const AActor* Actor, const AActor* Target) 
 	FHitResult Hit;
 	FCollisionQueryParams CollisionParams;
 	CollisionParams.AddIgnoredActor(Actor);
-	if (!IsValid(Actor)||!IsValid(Target))
+	if (!IsValid(Actor) || !IsValid(Target))
 	{
 		return -1.0f;
 	}
-	Actor->GetWorld()->LineTraceSingleByChannel(Hit,Actor->GetActorLocation(),Target->GetActorLocation(),ECollisionChannel::ECC_WorldStatic,CollisionParams);
+	Actor->GetWorld()->LineTraceSingleByChannel(Hit, Actor->GetActorLocation(), Target->GetActorLocation(),
+	                                            ECollisionChannel::ECC_WorldStatic, CollisionParams);
 
 	if (Hit.bBlockingHit)
 	{
@@ -91,19 +102,17 @@ float UProjectileSkillData::GetScore(const AActor* Actor, const AActor* Target) 
 			return 100.0f;
 		}
 	}
-	
+
 	return -1.0f;
 }
 
 
-
 void UProjectileSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin,
-	const FVector& TargetLocation, FName Name)
+                                  const FVector& TargetLocation, FName Name)
 {
 	Super::Notify(Instigator, WeaponActor, Origin, TargetLocation, Name);
 	if (Name == TEXT("DealDamage"))
 	{
-		Activate(Instigator,WeaponActor,Origin,TargetLocation);
+		SpawnProjectile();
 	}
-	
 }

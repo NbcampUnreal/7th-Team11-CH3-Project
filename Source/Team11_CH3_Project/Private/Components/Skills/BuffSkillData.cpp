@@ -4,8 +4,20 @@
 #include "Components/Skills/BuffSkillData.h"
 #include "NiagaraFunctionLibrary.h"
 
-void UBuffSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation) 
+
+void UBuffSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation, FName Name)
 {
+	Super::Notify(Instigator, WeaponActor, Origin, TargetLocation, Name);
+	if (Name == TEXT("DealDamage"))
+	{
+		DoBuff();
+	}
+}
+
+void UBuffSkillData::DoBuff()
+{
+	APawn* Instigator = Cast<APawn>(ActiveSkillSlot->GetOwner());;
+	
 	if (IsValid(Instigator) == false)
 		return;
 	UBuffManager* BuffManager = Instigator->FindComponentByClass<UBuffManager>();
@@ -29,13 +41,4 @@ void UBuffSkillData::Activate(APawn* Instigator, AWeaponActor* WeaponActor, cons
 
 	BuffManager->AddBuff(TargetStat, BuffType, BuffAmount, BuffDuration);
 	UE_LOG(LogTemp, Warning, TEXT("Buff : %s"), *Instigator->GetName());
-}
-
-void UBuffSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation, FName Name)
-{
-	Super::Notify(Instigator, WeaponActor, Origin, TargetLocation, Name);
-	if (Name == TEXT("DealDamage"))
-	{
-		Activate(Instigator, WeaponActor, Origin, TargetLocation);
-	}
 }

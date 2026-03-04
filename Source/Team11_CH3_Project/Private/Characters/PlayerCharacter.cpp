@@ -1,4 +1,4 @@
-#include "Characters/PlayerCharacter.h"
+﻿#include "Characters/PlayerCharacter.h"
 #include "Characters/InventoryComponent.h"
 #include "MainPlayerController.h"
 #include "Camera/CameraComponent.h"
@@ -246,7 +246,7 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// 스탯 변경 시 이동속도 업데이트
-	StatComponent->OnStatChanged.AddDynamic(this, &APlayerCharacter::UpdateMovementSpeed);
+	//StatComponent->OnStatChanged.AddDynamic(this, &APlayerCharacter::UpdateMovementSpeed);
 
 	UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
 	if (IsValid(GI) == false)
@@ -254,7 +254,7 @@ void APlayerCharacter::BeginPlay()
 
 	if (GI->HasSavedData())
 	{
-		GI->RestorePlayerData(StatComponent, ItemManager, SkillComponent);
+		GI->RestorePlayerData(StatComponent, ItemManager, SkillComponent, InventoryComponent);
 	}
 	else
 	{
@@ -596,7 +596,7 @@ float APlayerCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const
 
 	if (bDied)
 	{
-		//    Die();
+		Die();
 	}
 	else
 	{
@@ -663,7 +663,7 @@ void APlayerCharacter::PerformSkill(USkillSlot* SkillSlot, const FVector& Target
 	if (IsValid(SkillSlot->GetEquippedSkill()->GetSkillMontage()) == false)
 		return;
 
-	SkillComponent->ActiveSkill(this, TargetLocation, SkillSlot);
+	SkillComponent->ActiveSkill(this, nullptr, SkillSlot);
 }
 
 
