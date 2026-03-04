@@ -6,8 +6,8 @@
 #include "Characters/PlayerCharacter.h"
 #include "Core/T11_GameInstance.h"
 #include "Components/StatComponent.h"
-#include "Components/ItemManager.h"
-#include "Components/SkillManager.h"
+#include "Components/EquipmentComponent.h"
+#include "Components/SkillComponent.h"
 #include "Subsystems/ItemDropSubsystem.h"
 #include "MainPlayerController.h"
 #include "Components/TextBlock.h"
@@ -231,8 +231,8 @@ void AT11_GameState::UsePortal(FString Difficulty, FString TargetLevel)
     APawn* Pawn = PC->GetPawn();
     GI->SavePlayerData(
         Pawn->FindComponentByClass<UStatComponent>(),
-        Pawn->FindComponentByClass<UItemManager>(),
-        Pawn->FindComponentByClass<USkillManager>(),
+        Pawn->FindComponentByClass<UEquipmentComponent>(),
+        Pawn->FindComponentByClass<USkillComponent>(),
         Pawn->FindComponentByClass<UInventoryComponent>()
     );
 

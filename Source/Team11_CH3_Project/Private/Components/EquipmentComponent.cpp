@@ -1,9 +1,9 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Components/ItemManager.h"
-#include "Components/Skillmanager.h"
-#include "Components/BuffManager.h"
+#include "Components/EquipmentComponent.h"
+#include "Components/SkillComponent.h"
+#include "Components/BuffComponent.h"
 #include "Components/StatComponent.h"
 #include "Characters/PlayerCharacter.h"
 #include "Subsystems/ItemWorldSubsystem.h"
@@ -16,7 +16,7 @@
 #include "Components/Items/Equipments/EquipmentInstance.h"
 
 // Sets default values for this component's properties
-UItemManager::UItemManager()
+UEquipmentComponent::UEquipmentComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -26,7 +26,7 @@ UItemManager::UItemManager()
 	// ...
 }
 
-void UItemManager::InitializeComponent()
+void UEquipmentComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 	if (UEnum* EnumPtr = StaticEnum<EEquipmentType>())
@@ -48,7 +48,7 @@ void UItemManager::InitializeComponent()
 	}
 }
 
-TArray<TObjectPtr<UEquipmentInstance>> UItemManager::GetEquipments()
+TArray<TObjectPtr<UEquipmentInstance>> UEquipmentComponent::GetEquipments()
 {
 	TArray<TObjectPtr<UEquipmentInstance>> Ret;
 	for (TObjectPtr<UEquipmentSlot>& EquipmentSlot : EquipmentSlots)
@@ -79,7 +79,7 @@ TArray<TObjectPtr<UEquipmentInstance>> UItemManager::GetEquipments()
 //	}
 //}
 
-void UItemManager::Clear()
+void UEquipmentComponent::Clear()
 {
 	UnequipWeapon();
 	for (int32 i = 0; i < EquipmentSlots.Num(); ++i)
@@ -92,7 +92,7 @@ void UItemManager::Clear()
 	}
 }
 
-void UItemManager::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
+void UEquipmentComponent::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 {
 	UnequipWeapon();
 	if (!WeaponItemInstance)
@@ -118,14 +118,14 @@ void UItemManager::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 
 		if (APlayerCharacter* Player = Cast<APlayerCharacter>(GetOwner()))
 		{
-			if (USkillManager* SkillComponent = Player->FindComponentByClass<USkillManager>())
+			if (USkillComponent* SkillComponent = Player->FindComponentByClass<USkillComponent>())
 			{
 				SkillComponent->EquipSkillGem(0, Weapon->GetDefaultSkillData());
 			}
 		}
 		if (AMonsterBase* Monster = Cast<AMonsterBase>(GetOwner()))
 		{
-			if (USkillManager* SkillComponent = Monster->FindComponentByClass<USkillManager>())
+			if (USkillComponent* SkillComponent = Monster->FindComponentByClass<USkillComponent>())
 			{
 				SkillComponent->EquipSkillGem(0, Weapon->GetDefaultSkillData());
 			}
@@ -133,13 +133,13 @@ void UItemManager::EquipWeapon(UEquipmentInstance* WeaponItemInstance)
 	}
 }
 
-EItemContainerType UItemManager::GetItemContainerType() const
+EItemContainerType UEquipmentComponent::GetItemContainerType() const
 {
 	return EItemContainerType::Equipment;
 }
 
 
-UItemInstance* UItemManager::GetItem(int32 Index)
+UItemInstance* UEquipmentComponent::GetItem(int32 Index)
 {
 	if (Index < 0)
 	{
@@ -166,7 +166,7 @@ UItemInstance* UItemManager::GetItem(int32 Index)
 	return nullptr;
 }
 
-void UItemManager::UnequipAt(int32 Index)
+void UEquipmentComponent::UnequipAt(int32 Index)
 {
 	if (Index < EquipmentSlots.Num())
 	{
@@ -174,7 +174,7 @@ void UItemManager::UnequipAt(int32 Index)
 		{
 			CurrentEquipmentInstance->SetIsEquipped(false);
 
-			UBuffManager* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
+			UBuffComponent* BuffManager = GetOwner()->FindComponentByClass<UBuffComponent>();
 			if (IsValid(BuffManager))
 			{
 				if (TArray<int32>* IDs = EquipmentBuffIDs.Find(EquipmentSlots[Index]->GetEquipmentType()))
@@ -186,7 +186,7 @@ void UItemManager::UnequipAt(int32 Index)
 					IDs->Empty();
 				}
 			}
-			CurrentEquipmentInstance->OnStatsRecalculated.RemoveDynamic(this, &UItemManager::OnEquipmentStatChanged);
+			CurrentEquipmentInstance->OnStatsRecalculated.RemoveDynamic(this, &UEquipmentComponent::OnEquipmentStatChanged);
 			EquipmentSlots[Index]->SetItemInstance(nullptr);
 		}
 	}
@@ -201,7 +201,7 @@ void UItemManager::UnequipAt(int32 Index)
 
 		if (AActor* Owner = GetOwner())
 		{
-			if (USkillManager* SkillComponent = Owner->FindComponentByClass<USkillManager>())
+			if (USkillComponent* SkillComponent = Owner->FindComponentByClass<USkillComponent>())
 			{
 				SkillComponent->UnEquipSkillGem(GemIndex + 1);
 			}
@@ -209,7 +209,7 @@ void UItemManager::UnequipAt(int32 Index)
 	}
 }
 
-void UItemManager::EquipTo(int32 Index, UEquipmentInstance* EquipmentInstance)
+void UEquipmentComponent::EquipTo(int32 Index, UEquipmentInstance* EquipmentInstance)
 {
 	if (EquipmentSlots[Index] &&
 		(
@@ -223,7 +223,7 @@ void UItemManager::EquipTo(int32 Index, UEquipmentInstance* EquipmentInstance)
 		if (EquipmentInstance)
 		{
 			// OnEquipmentStatChanged 바인딩 및 장비 장착 여부 수정 set 스탯 계산
-			EquipmentInstance->OnStatsRecalculated.AddDynamic(this, &UItemManager::OnEquipmentStatChanged);
+			EquipmentInstance->OnStatsRecalculated.AddDynamic(this, &UEquipmentComponent::OnEquipmentStatChanged);
 			EquipmentInstance->SetIsEquipped(true);
 			// 장착하고 스탯 계산 -> OnEquipmentStatChanged 호출
 			EquipmentInstance->CalculateStats();
@@ -236,14 +236,14 @@ void UItemManager::EquipTo(int32 Index, UEquipmentInstance* EquipmentInstance)
 	}
 }
 
-void UItemManager::EquipGemTo(int32 Index, UEquipmentInstance* EquipmentInstance)
+void UEquipmentComponent::EquipGemTo(int32 Index, UEquipmentInstance* EquipmentInstance)
 {
 	GemSlots[Index]->SetItemInstance(EquipmentInstance);
 	OnEquipmentSlotChanged.Broadcast(GemSlots[Index]);
 
 	if (AActor* Owner = GetOwner())
 	{
-		if (USkillManager* SkillComponent = Owner->FindComponentByClass<USkillManager>())
+		if (USkillComponent* SkillComponent = Owner->FindComponentByClass<USkillComponent>())
 		{
 			if (EquipmentInstance)
 			{
@@ -259,7 +259,7 @@ void UItemManager::EquipGemTo(int32 Index, UEquipmentInstance* EquipmentInstance
 }
 
 // 비우는것도 여기서 있는거랑 있는거 바꿀때 구현X 
-bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
+bool UEquipmentComponent::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 {
 	UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemInstance);
 
@@ -288,7 +288,7 @@ bool UItemManager::SetItemAt(UItemInstance* ItemInstance, int32 Index)
 }
 
 
-bool UItemManager::CanReceiveItem(UItemInstance* ItemInstance, int32 Index)
+bool UEquipmentComponent::CanReceiveItem(UItemInstance* ItemInstance, int32 Index)
 {
 	if (Index < 0)
 	{
@@ -323,7 +323,7 @@ bool UItemManager::CanReceiveItem(UItemInstance* ItemInstance, int32 Index)
 	return false;
 }
 
-bool UItemManager::SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int32 OtherIndex)
+bool UEquipmentComponent::SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int32 OtherIndex)
 {
 	if (OtherContainer == nullptr)
 	{
@@ -344,7 +344,7 @@ bool UItemManager::SwapItems(int32 MyIndex, IItemContainer* OtherContainer, int3
 	return true;
 }
 
-TArray<FSavedEquipmentData> UItemManager::GetEquipmentSaveData()
+TArray<FSavedEquipmentData> UEquipmentComponent::GetEquipmentSaveData()
 {
 	TArray<FSavedEquipmentData> Result;
 	// 장비 슬롯 저장
@@ -369,7 +369,7 @@ TArray<FSavedEquipmentData> UItemManager::GetEquipmentSaveData()
 	return Result;
 }
 
-TArray<FSavedEquipmentData> UItemManager::GetGemSaveData()
+TArray<FSavedEquipmentData> UEquipmentComponent::GetGemSaveData()
 {
 	TArray<FSavedEquipmentData> Result;
 	// 스킬 젬 슬롯 저장
@@ -387,7 +387,7 @@ TArray<FSavedEquipmentData> UItemManager::GetGemSaveData()
 	return Result;
 }
 
-void UItemManager::RestoreFromSaveData(const TArray<FSavedEquipmentData>& Data)
+void UEquipmentComponent::RestoreFromSaveData(const TArray<FSavedEquipmentData>& Data)
 {
 	//UObject* GI = GetWorld()->GetGameInstance();
 	for (int32 i = 0; i < Data.Num(); i++)
@@ -421,7 +421,7 @@ void UItemManager::RestoreFromSaveData(const TArray<FSavedEquipmentData>& Data)
 	}
 }
 
-void UItemManager::RestoreGemFromSaveData(const TArray<FSavedEquipmentData>& Data)
+void UEquipmentComponent::RestoreGemFromSaveData(const TArray<FSavedEquipmentData>& Data)
 {
 	//UObject* GI = GetWorld()->GetGameInstance();
 	for (int32 i = 0; i < Data.Num(); i++)
@@ -438,7 +438,7 @@ void UItemManager::RestoreGemFromSaveData(const TArray<FSavedEquipmentData>& Dat
 	}
 }
 
-void UItemManager::UnequipWeapon()
+void UEquipmentComponent::UnequipWeapon()
 {
 	if (IsValid(CurrentWeapon) == false)
 		return;
@@ -448,13 +448,13 @@ void UItemManager::UnequipWeapon()
 	CurrentWeapon = nullptr;
 }
 
-TArray<TObjectPtr<UEquipmentSlot>>& UItemManager::GetSkillGemSlots()
+TArray<TObjectPtr<UEquipmentSlot>>& UEquipmentComponent::GetSkillGemSlots()
 {
 	return GemSlots;
 }
 
 
-UEquipmentSlot* UItemManager::GetEquipmentSlot(EEquipmentType EquipmentType)
+UEquipmentSlot* UEquipmentComponent::GetEquipmentSlot(EEquipmentType EquipmentType)
 {
 	int64 Index = static_cast<int64>(EquipmentType);
 	if (EquipmentSlots.IsValidIndex(Index))
@@ -464,9 +464,9 @@ UEquipmentSlot* UItemManager::GetEquipmentSlot(EEquipmentType EquipmentType)
 	return nullptr;
 }
 
-void UItemManager::OnEquipmentStatChanged(EEquipmentType Type, UEquipmentInstance* Instance)
+void UEquipmentComponent::OnEquipmentStatChanged(EEquipmentType Type, UEquipmentInstance* Instance)
 {
-	UBuffManager* BuffManager = GetOwner()->FindComponentByClass<UBuffManager>();
+	UBuffComponent* BuffManager = GetOwner()->FindComponentByClass<UBuffComponent>();
 	if (IsValid(BuffManager) == false)
 		return;
 

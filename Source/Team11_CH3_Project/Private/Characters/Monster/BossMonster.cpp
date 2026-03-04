@@ -4,9 +4,9 @@
 #include "Characters/Monster/BossMonster.h"
 
 #include "WeaponActor.h"
-#include "Components/SkillManager.h"
+#include "Components/SkillComponent.h"
 #include "NavigationSystem.h"
-#include "Components/ItemManager.h"
+#include "Components/EquipmentComponent.h"
 
 // Sets default values
 ABossMonster::ABossMonster()

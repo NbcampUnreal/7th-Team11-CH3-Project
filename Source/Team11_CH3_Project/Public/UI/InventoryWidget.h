@@ -8,7 +8,7 @@
 #include "InventoryWidget.generated.h"
 
 class UHorizontalBox;
-class UItemManager;
+class UEquipmentComponent;
 class UInventoryComponent;
 class UMainInventoryWidget;
 class UGridPanel;
@@ -26,7 +26,7 @@ class TEAM11_CH3_PROJECT_API UInventoryWidget : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void Init(UMainInventoryWidget* InMainInventoryWidget, UInventoryComponent* InventoryComponent, UItemManager* EquipmentComponent);
+	void Init(UMainInventoryWidget* InMainInventoryWidget, UInventoryComponent* InventoryComponent, UEquipmentComponent* EquipmentComponent);
 	UFUNCTION(BlueprintCallable)
 	void HandleInventoryItemSlotChanged(UItemSlot* SlotData);
 	UFUNCTION(BlueprintCallable)

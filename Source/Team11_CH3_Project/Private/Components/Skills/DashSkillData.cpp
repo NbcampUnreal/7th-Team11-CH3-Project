@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Components/Skills/DashSkill.h"
+#include "Components/Skills/DashSkillData.h"
 
 #include "AIController.h"
 #include "NavigationSystem.h"
@@ -12,7 +12,7 @@
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 
-void UDashSkill::Activate(UActiveSkillSlot* InActiveSkillSlot)
+void UDashSkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
 {
 	Super::Activate(InActiveSkillSlot);
 	ChargingTimer = 0.0f;
@@ -23,12 +23,12 @@ void UDashSkill::Activate(UActiveSkillSlot* InActiveSkillSlot)
 
 
 
-void UDashSkill::Execute()
+void UDashSkillData::Execute()
 {
 	Super::Execute();
 }
 
-void UDashSkill::Tick(float DeltaSeconds)
+void UDashSkillData::Tick(float DeltaSeconds)
 {
 	ChargingTimer += DeltaSeconds;
 	UAnimInstance* AnimInstance = nullptr;
@@ -215,12 +215,12 @@ void UDashSkill::Tick(float DeltaSeconds)
 	
 }
 
-void UDashSkill::OnExit()
+void UDashSkillData::OnExit()
 {
 	Super::OnExit();
 }
 
-float UDashSkill::GetScore(const AActor* Actor, const AActor* Target) const
+float UDashSkillData::GetScore(const AActor* Actor, const AActor* Target) const
 {
 	if (!Actor || !Target)
 	{

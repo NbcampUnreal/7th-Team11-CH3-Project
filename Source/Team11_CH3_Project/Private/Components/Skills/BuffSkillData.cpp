@@ -20,7 +20,7 @@ void UBuffSkillData::DoBuff()
 	
 	if (IsValid(Instigator) == false)
 		return;
-	UBuffManager* BuffManager = Instigator->FindComponentByClass<UBuffManager>();
+	UBuffComponent* BuffManager = Instigator->FindComponentByClass<UBuffComponent>();
 
 	if (IsValid(BuffManager) == false)
 		return;

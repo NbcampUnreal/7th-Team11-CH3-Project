@@ -1,13 +1,13 @@
-﻿#include "Components/BuffManager.h"
+﻿#include "Components/BuffComponent.h"
 #include "Components/StatComponent.h"
 
-UBuffManager::UBuffManager()
+UBuffComponent::UBuffComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
 
 }
 
-void UBuffManager::BeginPlay()
+void UBuffComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -17,7 +17,7 @@ void UBuffManager::BeginPlay()
 
 }
 
-void UBuffManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UBuffComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -37,7 +37,7 @@ void UBuffManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	}
 }
 
-int32 UBuffManager::AddBuff(const EStat TargetStat, EBuffType BuffType, float Amount, float Duration)
+int32 UBuffComponent::AddBuff(const EStat TargetStat, EBuffType BuffType, float Amount, float Duration)
 {
 	int32 NewID = ++CurrentBuffID;
 	FBuffData Buff = { NewID, TargetStat, BuffType, Amount, Duration };
@@ -47,7 +47,7 @@ int32 UBuffManager::AddBuff(const EStat TargetStat, EBuffType BuffType, float Am
 	return NewID;
 }
 
-void UBuffManager::RemoveBuff(int32 BuffID)
+void UBuffComponent::RemoveBuff(int32 BuffID)
 {
 	for (int32 i = ActiveBuffs.Num() - 1; i >= 0; i--)
 	{
@@ -60,7 +60,7 @@ void UBuffManager::RemoveBuff(int32 BuffID)
 	}
 }
 
-float UBuffManager::CalculateBuffs(EStat Stat) const
+float UBuffComponent::CalculateBuffs(EStat Stat) const
 {
 	float Adds = 0.0f;
 	float Muls = 1.0f;
@@ -82,7 +82,7 @@ float UBuffManager::CalculateBuffs(EStat Stat) const
 	return (StatComp->GetBaseStat(Stat) + Adds) * Muls;
 }
 
-void UBuffManager::SetBuffs(EStat Stat)
+void UBuffComponent::SetBuffs(EStat Stat)
 {
 	StatComp->SetCurrentStat(Stat, CalculateBuffs(Stat));
 }

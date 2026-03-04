@@ -7,9 +7,9 @@
 #include "Characters/Monster/MonsterBase.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Components/Skills/SkillDataAsset.h"
-#include "Components/SkillManager.h"
+#include "Components/SkillComponent.h"
 
-void UActiveSkillSlot::Init(USkillManager* SkillManager)
+void UActiveSkillSlot::Init(USkillComponent* SkillManager)
 {
 	SkillComponent = SkillManager;
 }

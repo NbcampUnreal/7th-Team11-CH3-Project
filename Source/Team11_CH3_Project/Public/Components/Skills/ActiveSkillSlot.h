@@ -6,7 +6,7 @@
 #include "UObject/Object.h"
 #include "ActiveSkillSlot.generated.h"
 
-class USkillManager;
+class USkillComponent;
 class USkillDataAsset;
 class USkillSlot;
 /**
@@ -18,7 +18,7 @@ class TEAM11_CH3_PROJECT_API UActiveSkillSlot : public UObject
 	GENERATED_BODY()
 
 public:
-	void Init(USkillManager* SkillManager);
+	void Init(USkillComponent* SkillManager);
 	
 	void OnStartSkill(AActor* InOwner, AActor* InTarget, USkillSlot* SkillSlot);
 	void OnExecute();
@@ -42,7 +42,7 @@ private:
 	FVector TargetLocation;
 	float ElapsedTime;
 	UPROPERTY()
-	TWeakObjectPtr<USkillManager> SkillComponent;
+	TWeakObjectPtr<USkillComponent> SkillComponent;
 	bool bIsEnd;
 	// 현재 사용중인 스킬 슬롯데이터
 	TWeakObjectPtr<USkillSlot> CurrentActiveSkillSlot;

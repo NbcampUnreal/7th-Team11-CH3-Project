@@ -6,7 +6,7 @@
 #include "UI/ItemDragDropOperation.h"
 #include "Blueprint/DragDropOperation.h"
 #include "Characters/InventoryComponent.h"
-#include "Components/ItemManager.h"
+#include "Components/EquipmentComponent.h"
 #include "Components/Items/ItemSlot.h"
 #include "Components/Items/Equipments/EquipmentInstance.h"
 #include "Components/Items/Equipments/ItemInstance.h"

@@ -1,7 +1,7 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Components/SkillManager.h"
+#include "Components/SkillComponent.h"
 #include "Components/StatComponent.h"
 #include "Characters/PlayerCharacter.h"
 #include "Characters/Monster/MonsterBase.h"
@@ -12,7 +12,7 @@
 #include "GameFramework/Character.h"
 
 // Sets default values for this component's properties
-USkillManager::USkillManager()
+USkillComponent::USkillComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -21,7 +21,7 @@ USkillManager::USkillManager()
 	// ...
 }
 
-void USkillManager::Init()
+void USkillComponent::Init()
 {
 	SkillSlots.Empty();
 	for (int32 i = 0; i < 5; ++i)
@@ -34,7 +34,7 @@ void USkillManager::Init()
 	ActiveSkillSlot->Init(this);
 }
 
-void USkillManager::TickComponent(float DeltaTime, enum ELevelTick TickType,
+void USkillComponent::TickComponent(float DeltaTime, enum ELevelTick TickType,
                                   FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -43,7 +43,7 @@ void USkillManager::TickComponent(float DeltaTime, enum ELevelTick TickType,
 
 
 // Called when the game starts
-void USkillManager::BeginPlay()
+void USkillComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Init();
@@ -51,7 +51,7 @@ void USkillManager::BeginPlay()
 }
 
 
-TArray<int32> USkillManager::FindReadySlotIndexes() const
+TArray<int32> USkillComponent::FindReadySlotIndexes() const
 {
 	TArray<int32> Ret;
 	for (int32 i = 0; i < SkillSlots.Num(); i++)
@@ -65,7 +65,7 @@ TArray<int32> USkillManager::FindReadySlotIndexes() const
 	return Ret;
 }
 
-int32 USkillManager::GetBestSkill(const AActor* Actor, const AActor* Target) const
+int32 USkillComponent::GetBestSkill(const AActor* Actor, const AActor* Target) const
 {
 	TArray<int32> ReadySkillIndexes = FindReadySlotIndexes();
 	float MaxScore = -1;
@@ -93,7 +93,7 @@ int32 USkillManager::GetBestSkill(const AActor* Actor, const AActor* Target) con
 }
 
 
-void USkillManager::EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData)
+void USkillComponent::EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData)
 {
 	// 새로 장착할 Gem의 NewSkillData 체크
 	if (IsValid(NewSkillData) == false)
@@ -110,7 +110,7 @@ void USkillManager::EquipSkillGem(int32 SlotIndex, USkillDataAsset* NewSkillData
 	UE_LOG(LogTemp, Warning, TEXT("EquipGem : %s"), *NewSkillData->GetName());
 }
 
-void USkillManager::UnEquipSkillGem(int32 SlotIndex)
+void USkillComponent::UnEquipSkillGem(int32 SlotIndex)
 {
 	// 스킬 슬롯배열 체크
 	if (SkillSlots.IsValidIndex(SlotIndex) == false)
@@ -123,7 +123,7 @@ void USkillManager::UnEquipSkillGem(int32 SlotIndex)
 }
 
 
-bool USkillManager::IsSkillOnCooldown(int32 SlotIndex) const
+bool USkillComponent::IsSkillOnCooldown(int32 SlotIndex) const
 {
 	if (SkillSlots.IsValidIndex(SlotIndex) == false)
 	{
@@ -133,7 +133,7 @@ bool USkillManager::IsSkillOnCooldown(int32 SlotIndex) const
 	return SkillSlots[SlotIndex]->IsSkillOnCooldown();
 }
 
-float USkillManager::GetCooldownRemaining(int32 SlotIndex) const
+float USkillComponent::GetCooldownRemaining(int32 SlotIndex) const
 {
 	if (SkillSlots.IsValidIndex(SlotIndex) == false)
 	{
@@ -143,7 +143,7 @@ float USkillManager::GetCooldownRemaining(int32 SlotIndex) const
 	return SkillSlots[SlotIndex]->GetCooldownRemaining();
 }
 
-void USkillManager::Clear()
+void USkillComponent::Clear()
 {
 	for (int32 i = 0; i < SkillSlots.Num();++i)
 	{
@@ -156,12 +156,12 @@ void USkillManager::Clear()
 	}
 }
 
-UActiveSkillSlot* USkillManager::GetActiveSkillSlot() const
+UActiveSkillSlot* USkillComponent::GetActiveSkillSlot() const
 {
 	return ActiveSkillSlot.Get();
 }
 
-void USkillManager::ActiveSkill(AActor* Owner, AActor* Target, USkillSlot* SkillSlot)
+void USkillComponent::ActiveSkill(AActor* Owner, AActor* Target, USkillSlot* SkillSlot)
 {
 	USkeletalMeshComponent* SkeletalMeshComponent = nullptr;
 	if (ACharacter* Character = Cast<ACharacter>(Owner))
@@ -197,13 +197,13 @@ void USkillManager::ActiveSkill(AActor* Owner, AActor* Target, USkillSlot* Skill
 		return;
 	}
 	FOnMontageEnded EndDelegate;
-	EndDelegate.BindUObject(this, &USkillManager::OnAttackMontageEnded);
+	EndDelegate.BindUObject(this, &USkillComponent::OnAttackMontageEnded);
 	SkeletalMeshComponent->GetAnimInstance()->Montage_SetEndDelegate(EndDelegate, SkillMontage);
 
 	ActiveSkillSlot->OnStartSkill(Owner, Target, SkillSlot);
 }
 
-void USkillManager::TickActiveSkill(float DeltaSeconds)
+void USkillComponent::TickActiveSkill(float DeltaSeconds)
 {
 	ActiveSkillSlot->OnTick(DeltaSeconds);
 	if (ActiveSkillSlot->GetIsEnd())
@@ -212,14 +212,14 @@ void USkillManager::TickActiveSkill(float DeltaSeconds)
 	}
 }
 
-void USkillManager::ExecuteActiveSkill()
+void USkillComponent::ExecuteActiveSkill()
 {
 	if (ActiveSkillSlot){
 		ActiveSkillSlot->OnExecute();
 	}
 }
 
-void USkillManager::ExitActiveSkill()
+void USkillComponent::ExitActiveSkill()
 {
 	ActiveSkillSlot->OnExit();
 	if (AActor* Owner = GetOwner())
@@ -236,7 +236,7 @@ void USkillManager::ExitActiveSkill()
 	}
 }
 
-bool USkillManager::IsSkillActive() const
+bool USkillComponent::IsSkillActive() const
 {
 	if (ActiveSkillSlot->GetSkillSlot())
 	{
@@ -245,7 +245,7 @@ bool USkillManager::IsSkillActive() const
 	return false;
 }
 
-void USkillManager::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
+void USkillComponent::OnAttackMontageEnded(UAnimMontage* AnimMontage, bool bInterrupted)
 {
 	if (ActiveSkillSlot)
 	{

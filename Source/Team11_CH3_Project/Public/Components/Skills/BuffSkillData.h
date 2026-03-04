@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/Skills/SkillDataAsset.h"
-#include "Components/BuffManager.h"
+#include "Components/BuffComponent.h"
 #include "BuffSkillData.generated.h"
 
 /**

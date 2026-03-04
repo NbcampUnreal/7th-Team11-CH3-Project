@@ -7,7 +7,7 @@
 #include "Components/ActorComponent.h"
 #include "Types/ItemTypes.h"
 #include "Types/SaveTypes.h"
-#include "ItemManager.generated.h"
+#include "EquipmentComponent.generated.h"
 
 
 class UItemSlot;
@@ -21,13 +21,13 @@ class UEquipmentItemDataAsset;
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TEAM11_CH3_PROJECT_API UItemManager : public UActorComponent, public IItemContainer
+class TEAM11_CH3_PROJECT_API UEquipmentComponent : public UActorComponent, public IItemContainer
 {
 	GENERATED_BODY()
 
 public:	
 	// Sets default values for this component's properties
-	UItemManager();
+	UEquipmentComponent();
 	virtual void InitializeComponent() override;
 	// 장비 해제
 

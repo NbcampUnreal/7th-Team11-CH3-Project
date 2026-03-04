@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "SkillDataAsset.h"
-#include "DashSkill.generated.h"
+#include "DashSkillData.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TEAM11_CH3_PROJECT_API UDashSkill : public USkillDataAsset
+class TEAM11_CH3_PROJECT_API UDashSkillData : public USkillDataAsset
 {
 	GENERATED_BODY()
 public:

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "SkillManager.generated.h"
+#include "SkillComponent.generated.h"
 
 
 class UActiveSkillSlot;
@@ -16,12 +16,12 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FOnSkillSlotChanged, USkillSlot*,
 
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class TEAM11_CH3_PROJECT_API USkillManager : public UActorComponent
+class TEAM11_CH3_PROJECT_API USkillComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	USkillManager();
+	USkillComponent();
 	void Init();
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType,
 	                           FActorComponentTickFunction* ThisTickFunction) override;

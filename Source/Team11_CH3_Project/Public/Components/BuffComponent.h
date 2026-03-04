@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Types/StatTypes.h"
-#include "BuffManager.generated.h"
+#include "BuffComponent.generated.h"
 
 class UStatComponent;
 
@@ -33,12 +33,12 @@ struct TEAM11_CH3_PROJECT_API FBuffData
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TEAM11_CH3_PROJECT_API UBuffManager : public UActorComponent
+class TEAM11_CH3_PROJECT_API UBuffComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
 public:	
-	UBuffManager();
+	UBuffComponent();
 
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

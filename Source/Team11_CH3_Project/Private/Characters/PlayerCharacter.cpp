@@ -10,9 +10,9 @@
 #include "TimerManager.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StatComponent.h"
-#include "Components/BuffManager.h"
-#include "Components/SkillManager.h"
-#include "Components/ItemManager.h"
+#include "Components/BuffComponent.h"
+#include "Components/SkillComponent.h"
+#include "Components/EquipmentComponent.h"
 #include "Components/Items/Equipments/EquipmentInstance.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Core/T11_GameInstance.h"
@@ -57,9 +57,9 @@ APlayerCharacter::APlayerCharacter()
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 
 	StatComponent = CreateDefaultSubobject<UStatComponent>(TEXT("StatComponent"));
-	BuffManager = CreateDefaultSubobject<UBuffManager>(TEXT("BuffManager"));
-	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
-	ItemManager = CreateDefaultSubobject<UItemManager>(TEXT("ItemManager"));
+	BuffManager = CreateDefaultSubobject<UBuffComponent>(TEXT("BuffManager"));
+	SkillComponent = CreateDefaultSubobject<USkillComponent>("SkillComponent");
+	ItemManager = CreateDefaultSubobject<UEquipmentComponent>(TEXT("ItemManager"));
 
 	bIsDodging = false;
 	bCanDodge = true;

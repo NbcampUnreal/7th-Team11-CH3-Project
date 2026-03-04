@@ -11,7 +11,7 @@
 #include "Characters/PlayerCharacter.h"
 
 void UMainInventoryWidget::Init(int32 InventorySize, UInventoryComponent* InInventoryComponent,
-	UItemManager* InEquipmentComponent, UStatComponent* InStatComponent)
+	UEquipmentComponent* InEquipmentComponent, UStatComponent* InStatComponent)
 {
 	if (InventoryWidget)
 		InventoryWidget->Init(this, InInventoryComponent,InEquipmentComponent);

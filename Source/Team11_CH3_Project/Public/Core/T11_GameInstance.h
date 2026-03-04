@@ -11,8 +11,8 @@
 
 
 class UEquipmentInstance;
-class UItemManager;
-class USkillManager;
+class UEquipmentComponent;
+class USkillComponent;
 class USkillDataAsset;
 class UItemInstance;
 class UInventoryComponent;
@@ -28,9 +28,9 @@ public:
 	void InitData();
 	// 플레이어 데이터 저장 및 복구
 	UFUNCTION(BlueprintCallable)
-	void SavePlayerData(UStatComponent* StatComp, UItemManager* ItemManager, USkillManager* SkillManager, UInventoryComponent* InventoryComp);
+	void SavePlayerData(UStatComponent* StatComp, UEquipmentComponent* ItemManager, USkillComponent* SkillManager, UInventoryComponent* InventoryComp);
 	UFUNCTION(BlueprintCallable)
-	void RestorePlayerData(UStatComponent* StatComp, UItemManager* ItemManager, USkillManager* SkillManager, UInventoryComponent* InventoryComp);
+	void RestorePlayerData(UStatComponent* StatComp, UEquipmentComponent* ItemManager, USkillComponent* SkillManager, UInventoryComponent* InventoryComp);
 	UFUNCTION(BlueprintCallable)
 	bool HasSavedData() const { return CurrentStageIndex > 0; }
 

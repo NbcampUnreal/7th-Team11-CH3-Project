@@ -19,7 +19,7 @@
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/CanvasPanel.h"
-#include "Components/SkillManager.h"
+#include "Components/SkillComponent.h"
 #include "Components/Skills/SkillSlot.h"
 #include "UI/MainInventoryWidget.h"
 #include "UI/HUDWidget.h"
@@ -66,10 +66,10 @@ void AMainPlayerController::BeginPlay()
 		{
 			InventoryWidgetInstance = CreateWidget<UMainInventoryWidget>(this, InventoryWidgetClass);
 			InventoryWidgetInstance->Init(20, PlayerChar->FindComponentByClass<UInventoryComponent>(),
-			                              PlayerChar->FindComponentByClass<UItemManager>(),
+			                              PlayerChar->FindComponentByClass<UEquipmentComponent>(),
 			                              PlayerChar->FindComponentByClass<UStatComponent>());
 		}
-		if (USkillManager* SkillComponent = PlayerChar->FindComponentByClass<USkillManager>())
+		if (USkillComponent* SkillComponent = PlayerChar->FindComponentByClass<USkillComponent>())
 		{
 			SkillComponent->OnSkillSlotChanged.AddDynamic(this, &AMainPlayerController::UpdateSkillHUD);
 		}

@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "SkillSlot.generated.h"
 
-class USkillManager;
+class USkillComponent;
 class USkillDataAsset;
 /**
  * 
@@ -16,7 +16,7 @@ class TEAM11_CH3_PROJECT_API USkillSlot : public UObject
 	GENERATED_BODY()
 	
 public:
-	void Init(USkillManager* SkillManager, int32 InIndex);
+	void Init(USkillComponent* SkillManager, int32 InIndex);
 	// 보석 장착
 	UFUNCTION(BlueprintCallable)
 	void EquipGem(const USkillDataAsset* NewSkillData);
@@ -30,13 +30,13 @@ public:
 	bool IsSkillOnCooldown()const;
 	float GetCooldownRemaining() const;
 	float GetScore(const AActor* Actor, const AActor* Target) const;
-	USkillManager* GetSkillComponent()const;
+	USkillComponent* GetSkillComponent()const;
 	int32 GetIndex() const { return Index; }
 private:
 	UPROPERTY()
 	TObjectPtr<USkillDataAsset> EquippedSkill;
 	UPROPERTY()
-	TWeakObjectPtr<USkillManager> SkillComponent;	
+	TWeakObjectPtr<USkillComponent> SkillComponent;	
 	
 	FTimerHandle CooldownTimer;
 	bool bIsOnCooldown;

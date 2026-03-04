@@ -6,12 +6,12 @@
 #include "Blueprint/UserWidget.h"
 #include "Types/ItemContainerType.h"
 #include "Characters/InventoryComponent.h"
-#include "Components/ItemManager.h"
+#include "Components/EquipmentComponent.h"
 #include "Input/Reply.h"
 #include "MainInventoryWidget.generated.h"
 
 class UItemSlotWidget;
-class UItemManager;
+class UEquipmentComponent;
 class UInventoryComponent;
 class UEquipmentInstance;
 class UEquipmentSlot;
@@ -31,7 +31,7 @@ class TEAM11_CH3_PROJECT_API UMainInventoryWidget : public UUserWidget
 
 public:
 	UFUNCTION(BlueprintCallable)
-	void Init(int32 InventorySize, UInventoryComponent* InInventoryComponent, UItemManager* InEquipmentComponent, UStatComponent* InStatComponent);
+	void Init(int32 InventorySize, UInventoryComponent* InInventoryComponent, UEquipmentComponent* InEquipmentComponent, UStatComponent* InStatComponent);
 
 	UFUNCTION(BlueprintCallable)
 	void UpdateEquipmentDetailWidget(UItemSlot* EquipmentSlot);
@@ -53,7 +53,7 @@ public:
 	UInventoryComponent* GetInventoryComponent() { return InventoryComponent.Get(); }
 
 	UFUNCTION(BlueprintCallable)
-	UItemManager* GetEquipmentComponent() { return EquipmentComponent.Get(); }
+	UEquipmentComponent* GetEquipmentComponent() { return EquipmentComponent.Get(); }
 
 	const TSubclassOf<UItemSlotWidget>& GetDragItemSLotWidgetClass() const { return DragItemSlotWidgetClass; }
 
@@ -66,7 +66,7 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category="ItemContainer")
 	TWeakObjectPtr<UInventoryComponent> InventoryComponent;
 	UPROPERTY(VisibleAnywhere, Category="ItemContainer")
-	TWeakObjectPtr<UItemManager> EquipmentComponent;
+	TWeakObjectPtr<UEquipmentComponent> EquipmentComponent;
 
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))

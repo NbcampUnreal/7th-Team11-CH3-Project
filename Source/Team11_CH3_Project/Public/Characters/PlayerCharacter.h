@@ -16,15 +16,15 @@ class UEquipmentItemDataAsset;
 class UItemDataAsset;
 class USkillSlot;
 class AWeaponActor;
-class USkillManager;
+class USkillComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class UInventoryComponent;
-class UBuffManager;
+class UBuffComponent;
 class UStatComponent;
-class UItemManager;
+class UEquipmentComponent;
 // class AWeapon; // 일단 전방 선언
 
 struct FInputActionValue;
@@ -134,12 +134,12 @@ public:
 	TObjectPtr<UStatComponent> StatComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
-	TObjectPtr<UBuffManager> BuffManager;
+	TObjectPtr<UBuffComponent> BuffManager;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Component")
-	TObjectPtr<UItemManager> ItemManager;
+	TObjectPtr<UEquipmentComponent> ItemManager;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	TObjectPtr<USkillManager> SkillComponent;
+	TObjectPtr<USkillComponent> SkillComponent;
 #pragma endregion
 
 #pragma region Input

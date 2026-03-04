@@ -4,7 +4,7 @@
 #include "Components/Items/PickupActor.h"
 #include "Components/Items/ItemDataAsset.h"
 #include "Characters/InventoryComponent.h"
-#include "Components/ItemManager.h"
+#include "Components/EquipmentComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"

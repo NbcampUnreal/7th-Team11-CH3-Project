@@ -7,8 +7,8 @@
 #include "WeaponActor.h"
 #include "WeaponAnimInterface.h"
 #include "Characters/Monster/MonsterControllerBase.h"
-#include "Components/ItemManager.h"
-#include "Components/SkillManager.h"
+#include "Components/EquipmentComponent.h"
+#include "Components/SkillComponent.h"
 #include "Components/StatComponent.h"
 #include "Components/Items/WeaponItemDataAsset.h"
 #include "Components/Items/Equipments/EquipmentInstance.h"
@@ -26,8 +26,8 @@ AMonsterBase::AMonsterBase()
 	SetRootComponent(RootComponent);
 	GetMesh()->SetupAttachment(RootComponent);
 	StatComponent = CreateDefaultSubobject<UStatComponent>("StatComponent");
-	SkillComponent = CreateDefaultSubobject<USkillManager>("SkillComponent");
-	EquipmentComponent = CreateDefaultSubobject<UItemManager>("EquipmentComponent");
+	SkillComponent = CreateDefaultSubobject<USkillComponent>("SkillComponent");
+	EquipmentComponent = CreateDefaultSubobject<UEquipmentComponent>("EquipmentComponent");
 	ConstructorHelpers::FClassFinder<AMonsterControllerBase> MonsterControllerFinder(
 		TEXT("/Game/Characters/Monster/BP_MonsterControllerBase.BP_MonsterControllerBase_C"));
 	if (MonsterControllerFinder.Succeeded())
@@ -303,7 +303,7 @@ void AMonsterBase::PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLoca
 	}
 	if (SkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Aiming)
 	{
-		TWeakObjectPtr<USkillManager> WeakSkillComponent = SkillComponent;
+		TWeakObjectPtr<USkillComponent> WeakSkillComponent = SkillComponent;
 		GetWorldTimerManager().SetTimer(
 			ExecuteTimer,
 			[WeakSkillComponent]()
@@ -339,7 +339,7 @@ void AMonsterBase::PerformSkill(USkillSlot* SkillSlot, AActor* Target)
 	}
 	if (SkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Aiming)
 	{
-		TWeakObjectPtr<USkillManager> WeakSkillComponent = SkillComponent;
+		TWeakObjectPtr<USkillComponent> WeakSkillComponent = SkillComponent;
 		GetWorldTimerManager().SetTimer(
 			ExecuteTimer,
 			[WeakSkillComponent]()

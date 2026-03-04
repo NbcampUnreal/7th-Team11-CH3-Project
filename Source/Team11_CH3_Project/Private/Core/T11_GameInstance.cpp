@@ -2,8 +2,8 @@
 
 
 #include "Core/T11_GameInstance.h"
-#include "Components/ItemManager.h"
-#include "Components/SkillManager.h"
+#include "Components/EquipmentComponent.h"
+#include "Components/SkillComponent.h"
 #include "Components/Skills/SkillSlot.h"
 #include "Components/Skills/SkillDataAsset.h"
 #include "Characters/InventoryComponent.h"
@@ -23,7 +23,7 @@ void UT11_GameInstance::InitData()
 	TotalScore = 0;
 }
 
-void UT11_GameInstance::SavePlayerData(UStatComponent* StatComp, UItemManager* ItemManager, USkillManager* SkillManager, UInventoryComponent* InventoryComp)
+void UT11_GameInstance::SavePlayerData(UStatComponent* StatComp, UEquipmentComponent* ItemManager, USkillComponent* SkillManager, UInventoryComponent* InventoryComp)
 {
 	// 스탯 저장
 	if (IsValid(StatComp) == false)
@@ -71,7 +71,7 @@ void UT11_GameInstance::SavePlayerData(UStatComponent* StatComp, UItemManager* I
 	UE_LOG(LogTemp, Warning, TEXT("[GameInstance] 저장 완료 - 다음 스테이지: %d"), CurrentStageIndex);
 }
 
-void UT11_GameInstance::RestorePlayerData(UStatComponent* StatComp, UItemManager* ItemManager, USkillManager* SkillManager, UInventoryComponent* InventoryComp)
+void UT11_GameInstance::RestorePlayerData(UStatComponent* StatComp, UEquipmentComponent* ItemManager, USkillComponent* SkillManager, UInventoryComponent* InventoryComp)
 {
 	// 저장된 데이터 있는지 체크
 	if (HasSavedData() == false)

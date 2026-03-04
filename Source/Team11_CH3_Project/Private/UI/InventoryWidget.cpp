@@ -10,7 +10,7 @@
 #include "UI/InteractableItemSlotWidget.h"
 #include "UI/MainInventoryWidget.h"
 
-void UInventoryWidget::Init(UMainInventoryWidget* InMainInventoryWidget, UInventoryComponent* InventoryComponent, UItemManager* EquipmentComponent)
+void UInventoryWidget::Init(UMainInventoryWidget* InMainInventoryWidget, UInventoryComponent* InventoryComponent, UEquipmentComponent* EquipmentComponent)
 {
 	MainInventoryWidget = InMainInventoryWidget;
 	if (InventoryWidgets.Num() > 0)

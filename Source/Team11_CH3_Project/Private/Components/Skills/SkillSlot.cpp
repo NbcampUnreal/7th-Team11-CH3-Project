@@ -3,10 +3,11 @@
 
 #include "Components/Skills/SkillSlot.h"
 #include "Components/Skills/SkillDataAsset.h"
+#include "Components/SkillComponent.h"
 #include "Engine/Engine.h"
 
 
-void USkillSlot::Init(USkillManager* SkillManager, int32 InIndex)
+void USkillSlot::Init(USkillComponent* SkillManager, int32 InIndex)
 {
 	SkillComponent = SkillManager;
 	Index = InIndex;
@@ -73,7 +74,7 @@ float USkillSlot::GetScore(const AActor* Actor, const AActor* Target) const
 	return GetEquippedSkill()->GetScore(Actor, Target);
 }
 
-USkillManager* USkillSlot::GetSkillComponent() const
+USkillComponent* USkillSlot::GetSkillComponent() const
 {
 	return SkillComponent.Get();
 }

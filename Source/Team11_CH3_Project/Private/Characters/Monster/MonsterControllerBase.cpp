@@ -217,7 +217,6 @@ void AMonsterControllerBase::TargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 	}
 	else
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Green, Actor->GetName());
 	}
 }
 
@@ -229,7 +228,6 @@ void AMonsterControllerBase::TargetPerceptionForgotten(AActor* Actor)
 	{
 		return;
 	}
-	GEngine->AddOnScreenDebugMessage(-1, 10, FColor::Cyan, Actor->GetName());
 
 	if (UBlackboardComponent* BB = GetBlackboardComponent())
 	{

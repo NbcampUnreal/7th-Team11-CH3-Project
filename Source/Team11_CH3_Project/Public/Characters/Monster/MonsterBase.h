@@ -11,8 +11,8 @@
 
 
 class UEquipmentInstance;
-class UItemManager;
-class USkillManager;
+class UEquipmentComponent;
+class USkillComponent;
 class AWeaponActor;
 class UStatComponent;
 
@@ -52,10 +52,10 @@ protected:
 	TObjectPtr<UStatComponent> StatComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<USkillManager> SkillComponent;
+	TObjectPtr<USkillComponent> SkillComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TObjectPtr<UItemManager> EquipmentComponent;	
+	TObjectPtr<UEquipmentComponent> EquipmentComponent;	
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UAnimMontage> MonsterDieAnimMontage;
