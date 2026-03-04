@@ -14,7 +14,10 @@
 void UMeleeSimpleAttackSkillData::DealDamage()
 {
 	Super::Execute();
-
+	if(bIsHit)
+	{
+		return;
+	}
 	APawn* Instigator = Cast<APawn>(ActiveSkillSlot->GetOwner());;
 	if (!Instigator)
 	{
@@ -93,6 +96,7 @@ void UMeleeSimpleAttackSkillData::DealDamage()
 			WeaponActor,
 			UDamageType::StaticClass()
 		);
+		bIsHit = true;
 		UE_LOG(LogTemp, Warning, TEXT("Hit : %s, Damage : %0.1f"), *HitActor->GetName(), ActualDamage);
 	}
 
@@ -107,11 +111,16 @@ void UMeleeSimpleAttackSkillData::DealDamage()
 void UMeleeSimpleAttackSkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
 {
 	Super::Activate(InActiveSkillSlot);
+	bIsHit = false;
 }
 
 float UMeleeSimpleAttackSkillData::GetScore(const AActor* Actor, const AActor* Target) const
 {
-	if (FVector::DistSquared(Actor->GetActorLocation(), Target->GetActorLocation()) < Range * Range)
+	float ActorRadius = Actor->GetSimpleCollisionRadius();
+	float TargetRadius = Target->GetSimpleCollisionRadius();
+
+	float TotalRange = ActorRadius + TargetRadius + Range;
+	if (FVector::DistSquared(Actor->GetActorLocation(), Target->GetActorLocation()) < FMath::Square(TotalRange))
 	{
 		return 100.0f;
 	}

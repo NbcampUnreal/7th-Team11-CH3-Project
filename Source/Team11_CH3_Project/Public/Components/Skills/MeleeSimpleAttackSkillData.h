@@ -22,4 +22,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Sound")
 	class USoundBase* SwordSound;
+private:
+	bool bIsHit;
 };
