@@ -154,7 +154,7 @@ void AT11_GameState::ActivatePortals()
             UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
             if (IsValid(GI) == false) return;
 
-            if (GI->CurrentStageIndex + 1 < GI->MaxStageCount && CurrentStageIndex + 1 != GI->MidBossStage && PortalClass->Difficulty != "Boss")
+            if (GI->CurrentStageIndex + 1 < GI->MaxStageCount && CurrentStageIndex + 1 != GI->MidBossStage && (PortalClass->Difficulty == "Easy" || PortalClass->Difficulty == "Hard"))
             {
                 SetPortalLevel(PortalClass);
                 PortalClass->SetPortalActive(true);
@@ -170,7 +170,7 @@ void AT11_GameState::ActivatePortals()
                     PortalClass->SetPortalActive(true);
                 }
             }
-            else if (GI->CurrentStageIndex + 1 >= GI->MaxStageCount && PortalClass->Difficulty == "Boss")
+            else if (CurrentStageIndex + 1 >= GI->MaxStageCount && PortalClass->Difficulty == "Boss")
             {
                 TArray<FString> Keys;
                 BossMapDataConfig.GetKeys(Keys);
@@ -181,7 +181,7 @@ void AT11_GameState::ActivatePortals()
                     PortalClass->SetPortalActive(true);
                 }
             }
-            else if (GI->CurrentStageIndex + 1 >= GI->MaxStageCount && PortalClass->Difficulty == "Clear")
+            else if (CurrentStageIndex + 1 >= GI->MaxStageCount && PortalClass->Difficulty == "Clear")
             {
                 PortalClass->SetTargetLevel("L_GameClear");
                 PortalClass->SetPortalActive(true);
