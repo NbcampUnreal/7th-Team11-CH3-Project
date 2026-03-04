@@ -17,6 +17,10 @@ void UActiveSkillSlot::Init(USkillManager* SkillManager)
 void UActiveSkillSlot::OnStartSkill(AActor* InOwner, AActor* InTarget, USkillSlot* SkillSlot)
 // 여기서 슬롯을 받게
 {
+	if (!InOwner || !InTarget || !SkillSlot)
+	{
+		return;
+	}
 	Owner = InOwner;
 	Target = InTarget;
 	CurrentActiveSkillSlot = SkillSlot;
@@ -33,10 +37,13 @@ void UActiveSkillSlot::OnStartSkill(AActor* InOwner, AActor* InTarget, USkillSlo
 void UActiveSkillSlot::OnExecute()
 {
 	// Aiming인 경우에만 쿨타임시작
-	if (CurrentActiveSkillSlot->GetEquippedSkill()->GetSkillType() == ESkillType::Aiming)
+	if (USkillDataAsset* SkillDataAsset = CurrentActiveSkillSlot->GetEquippedSkill())
 	{
-		CurrentActiveSkillSlot->StartCooldown();
-		CurrentActiveSkillSlot->GetEquippedSkill()->Execute();
+		if (SkillDataAsset->GetSkillType() == ESkillType::Aiming)
+		{
+			CurrentActiveSkillSlot->StartCooldown();
+			SkillDataAsset->Execute();
+		}
 	}
 }
 
