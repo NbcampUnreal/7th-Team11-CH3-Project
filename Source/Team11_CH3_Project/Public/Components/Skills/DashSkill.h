@@ -26,10 +26,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Dash")
 	float DashSpeed;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Skill|VFX")
+	TObjectPtr<UNiagaraSystem> DashVFX;
+
+	//UPROPERTY(EditDefaultsOnly, Category = "Skill|VFX")
+	//FName DashVFXSocketName = NAME_None;
+
 private:
 	float ChargingTimer = 0.0f;
 	bool bIsDashing = false;
 	FVector NavDestination;
 	FVector DashingDir;
+
+	UPROPERTY()
+	TObjectPtr<UNiagaraComponent> ActiveDashVFXComp;
 };
 
