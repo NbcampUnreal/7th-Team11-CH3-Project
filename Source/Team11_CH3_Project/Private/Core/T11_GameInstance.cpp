@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Core/T11_GameInstance.h"
@@ -9,6 +9,19 @@
 #include "Characters/InventoryComponent.h"
 #include "Components/Items/ItemSlot.h"
 #include "Components/Items/Equipments/EquipmentInstance.h"
+#include "Kismet/GameplayStatics.h"
+
+void UT11_GameInstance::Init()
+{
+	InitData();
+}
+
+void UT11_GameInstance::InitData()
+{
+	CurrentStageIndex = 0;
+	CurrentDifficulty = 0;
+	TotalScore = 0;
+}
 
 void UT11_GameInstance::SavePlayerData(UStatComponent* StatComp, UItemManager* ItemManager, USkillManager* SkillManager, UInventoryComponent* InventoryComp)
 {
@@ -113,4 +126,12 @@ void UT11_GameInstance::RestorePlayerData(UStatComponent* StatComp, UItemManager
 	StatComp->SetCurrentHP(SavedHPData);
 
 	UE_LOG(LogTemp, Warning, TEXT("[GameInstance] 전체 복구 완료 - 현재 스테이지: %d"), CurrentStageIndex);
+}
+
+void UT11_GameInstance::PlayInputSound(USoundBase* Sound)
+{
+	if (Sound)
+	{
+		UGameplayStatics::PlaySound2D(this, Sound, 0.5f);
+	}
 }

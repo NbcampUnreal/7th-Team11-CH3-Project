@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/Items/PickupActor.h"
@@ -9,6 +9,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Engine/StaticMesh.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 APickupActor::APickupActor()
@@ -39,6 +40,10 @@ APickupActor::APickupActor()
 		TEXT("/Game/Thumbnail/M_PickupThumbnail.M_PickupThumbnail"));
 	if (MatFinder.Succeeded())
 		ThumbnailMaterial = MatFinder.Object;
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> SoundAsset(TEXT("/Game/Sounds/coin_3.coin_3"));
+	if (SoundAsset.Succeeded())
+		PickupSound = SoundAsset.Object;
 }
 
 void APickupActor::Init(UItemDataAsset* InItemDataAsset, int32 InCount)
@@ -61,6 +66,10 @@ void APickupActor::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 	UInventoryComponent* InventoryComponent = OtherActor->FindComponentByClass<UInventoryComponent>();
 	if (IsValid(InventoryComponent))
 	{
+		if (PickupSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), PickupSound, this->GetActorLocation(), 0.5f);
+		}
 		InventoryComponent->AddItem(ItemDataAsset,ItemCount);
 		Destroy();
 	}
