@@ -206,23 +206,13 @@ void AMonsterControllerBase::TargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 						USoundBase* HearingReactSound = MonsterBase->GetHearingReactSound();
 						if (HearingReactSound)
 						{
-							UGameplayStatics::PlaySoundAtLocation(GetWorld(), HearingReactSound, MonsterBase->GetActorLocation(), 100.0f);
+							UGameplayStatics::PlaySoundAtLocation(GetWorld(), HearingReactSound, MonsterBase->GetActorLocation(), 0.6f, 0.9f);
 						}
 					}		
 				}
 				BB->SetValueAsVector(TEXT("LastHearingLocation"), Actor->GetActorLocation());
 				BB->SetValueAsBool(TEXT("bIsTracking"), true);
-			}
-			
-			AMonsterBase* MonsterBase = Cast<AMonsterBase>(GetPawn());
-			if (MonsterBase)
-			{
-				USoundBase* HearingReactSound = MonsterBase->GetHearingReactSound();
-				if (HearingReactSound)
-				{
-					UGameplayStatics::PlaySoundAtLocation(GetWorld(), HearingReactSound, MonsterBase->GetActorLocation(), 0.6f, 0.9f);
-				}
-			}			
+			}	
 		}
 	}
 	else
