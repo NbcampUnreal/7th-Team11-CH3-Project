@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Characters/Monster/MonsterBase.h"
@@ -157,6 +157,13 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 	{
 		return ActualDamage;
 	}
+
+	if (IsValid(EventInstigator) == false)
+	{
+		StatComponent->TakeDamage(ActualDamage);
+		return ActualDamage;
+	}
+
 	StatComponent->TakeDamage(ActualDamage);
 	UAISense_Damage::ReportDamageEvent(
 		GetWorld(),
