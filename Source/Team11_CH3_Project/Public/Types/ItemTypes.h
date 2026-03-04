@@ -27,3 +27,15 @@ enum class EEquipmentType : uint8
     SkillGem,
     Max
 };
+
+
+UENUM(BlueprintType)
+enum class EItemRarity : uint8
+{
+    Common,
+    Uncommon,
+    Rare,
+    Heroic,
+    Unique,
+    Max
+};

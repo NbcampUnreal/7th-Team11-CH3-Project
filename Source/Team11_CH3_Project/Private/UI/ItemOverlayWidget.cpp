@@ -3,8 +3,10 @@
 
 #include "UI/ItemOverlayWidget.h"
 
+#include "RarityColorDataAsset.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/HorizontalBox.h"
+#include "Components/Image.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBox.h"
 #include "Components/Items/ItemDataAsset.h"
@@ -24,9 +26,9 @@ void UItemOverlayWidget::Init(UMainInventoryWidget* InMainInventoryWidget)
 		return;
 	}
 	SetVisibility(ESlateVisibility::Hidden);
-	
+
 	ItemName->SetText(FText::FromString(TEXT("NOITEM")));
-	
+
 	if (!ItemSlotWidgetClass)
 	{
 		return;
@@ -44,14 +46,13 @@ void UItemOverlayWidget::Init(UMainInventoryWidget* InMainInventoryWidget)
 	}
 	StatRows.Empty();
 	StatBox->ClearChildren();
-	
 }
 
 void UItemOverlayWidget::UpdateOverlayWidget(FVector2D ScreenPosition, UItemInstance* ItemInstance)
 {
 	SetVisibility(ESlateVisibility::HitTestInvisible);
-	
-	if (UCanvasPanelSlot* CanvasPanelSlot =  Cast<UCanvasPanelSlot> (Slot))
+
+	if (UCanvasPanelSlot* CanvasPanelSlot = Cast<UCanvasPanelSlot>(Slot))
 	{
 		FVector2D LocalPosition = MainInventoryWidget->GetCachedGeometry().AbsoluteToLocal(ScreenPosition);
 		CanvasPanelSlot->SetPosition(LocalPosition + FVector2D(20.0f, 20.0f));
@@ -85,7 +86,8 @@ void UItemOverlayWidget::UpdateOverlayWidget(FVector2D ScreenPosition, UItemInst
 			{
 				UpdateStatBox(EquipmentInstance);
 				CollapseSocketBox();
-			}else
+			}
+			else
 			{
 				UpdateStatBox(EquipmentInstance);
 				UpdateSocketBox(EquipmentInstance);
@@ -105,7 +107,8 @@ void UItemOverlayWidget::UpdateOverlayWidget(FVector2D ScreenPosition, UItemInst
 		{
 			StatBox->SetVisibility(ESlateVisibility::Visible);
 			UpdateStatBoxFromStats(Parts->GetStatBonuses());
-		}else
+		}
+		else
 		{
 			CollapseStatBox();
 		}
@@ -133,7 +136,9 @@ void UItemOverlayWidget::UpdateStatBox(UEquipmentInstance* EquipmentInstance)
 
 void UItemOverlayWidget::UpdateSocketBox(UEquipmentInstance* EquipmentInstance)
 {
+	PartsBox->SetVisibility(ESlateVisibility::Visible);
 	SocketBox->SetVisibility(ESlateVisibility::Visible);
+
 	TArray<TObjectPtr<UItemSlot>> PartsSlots = EquipmentInstance->GetPartsSlots();
 	for (int i = 0; i < 3; i++)
 	{
@@ -151,8 +156,8 @@ void UItemOverlayWidget::CollapseStatBox()
 
 void UItemOverlayWidget::CollapseSocketBox()
 {
+	PartsBox->SetVisibility(ESlateVisibility::Collapsed);
 	SocketBox->SetVisibility(ESlateVisibility::Collapsed);
-	
 }
 
 void UItemOverlayWidget::UpdateStatBoxFromStats(const TMap<EStat, float>& Stats)
@@ -168,5 +173,20 @@ void UItemOverlayWidget::UpdateStatBoxFromStats(const TMap<EStat, float>& Stats)
 		Row->Update(Pair.Key, Pair.Value);
 		StatBox->AddChildToVerticalBox(Row);
 		StatRows.Add(Row);
+	}
+}
+
+void UItemOverlayWidget::UpdateItemRarity(UEquipmentInstance* EquipmentInstance)
+{
+	if (!EquipmentInstance->GetItemDataAsset() || !RarityColorDataAsset)
+	{
+		return;
+	}
+	TMap<EItemRarity, FSlateColor> RarityColorMap = RarityColorDataAsset->GetRarityColorMap();
+	if (FSlateColor* Color = RarityColorMap.Find(EquipmentInstance->GetItemDataAsset()->GetRarity()))
+	{
+		ItemType->SetColorAndOpacity(*Color);
+		ItemRateBar->SetColorAndOpacity(Color->GetSpecifiedColor());
+		ItemTypeImage->SetColorAndOpacity(Color->GetSpecifiedColor());
 	}
 }

@@ -17,7 +17,7 @@ void UActiveSkillSlot::Init(USkillManager* SkillManager)
 void UActiveSkillSlot::OnStartSkill(AActor* InOwner, AActor* InTarget, USkillSlot* SkillSlot)
 // 여기서 슬롯을 받게
 {
-	if (!InOwner || !InTarget || !SkillSlot)
+	if (!InOwner || !SkillSlot)
 	{
 		return;
 	}
