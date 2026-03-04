@@ -118,8 +118,8 @@ void USkillManager::UnEquipSkillGem(int32 SlotIndex)
 		UE_LOG(LogTemp, Warning, TEXT("%d In Valid SKill Slot"), SlotIndex);
 		return;
 	}
-	OnSkillSlotChanged.Broadcast(SkillSlots[SlotIndex], true,false);
 	SkillSlots[SlotIndex]->ClearSlot();
+	OnSkillSlotChanged.Broadcast(SkillSlots[SlotIndex], true,false);
 }
 
 

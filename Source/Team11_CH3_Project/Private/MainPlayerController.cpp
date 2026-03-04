@@ -506,7 +506,7 @@ void AMainPlayerController::UpdateHP(float CurrentHP, float MaxHP)
 	}
 }
 
-void AMainPlayerController::UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbnailChanged, bool bIsCooldownStart)
+void AMainPlayerController:: UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbnailChanged, bool bIsCooldownStart)
 {
 	int32 Index = SkillSlot->GetIndex() - 1;
 	if (UUserWidget* HUDWidget = HUDWidgetInstance)

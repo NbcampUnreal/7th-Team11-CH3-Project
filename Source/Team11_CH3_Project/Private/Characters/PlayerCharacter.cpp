@@ -681,7 +681,7 @@ void APlayerCharacter::Hit()
 void APlayerCharacter::Die()
 {
 	Super::Die();
-
+	bIsDead = true;
 	if (DeathMontage)
 	{
 		PlayAnimMontage(DeathMontage);
