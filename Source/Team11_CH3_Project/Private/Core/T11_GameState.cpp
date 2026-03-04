@@ -226,29 +226,36 @@ void AT11_GameState::CreateSpawnTimer(FString TimerName, float Interval, int32 T
     NewState.RemainingCount = TotalCount;
     NewState.TargetVolume = SpawnVolume;
 
+    FTimerDelegate SpawnDelegate;
+    SpawnDelegate.BindUObject(this, &AT11_GameState::ExecuteSpawn, TimerName, SpawnVolume);
+
     FTimerHandle& Handle = SpawnTimerHandles.FindOrAdd(TimerName);
+    GetWorldTimerManager().SetTimer(Handle, SpawnDelegate, Interval, true);
+}
 
-    GetWorldTimerManager().SetTimer(Handle, [this, TimerName, SpawnVolume]()
+void AT11_GameState::ExecuteSpawn(FString TimerName, ASpawnVolume* SpawnVolume)
+{
+    FSpawnState* State = SpawnStates.Find(TimerName);
+    if (State && State->RemainingCount > 0)
+    {
+        // 실제 소환 로직
+        SpawnVolume->SpawnRandomMonster(CurrentStageIndex);
+        State->RemainingCount--;
+        SpawnedMonsterCount++;
+        MonsterSpawned.Broadcast(SpawnedMonsterCount);
+
+        UE_LOG(LogTemp, Log, TEXT("[%s] 남은 마리수: %d"), *State->WaveName, State->RemainingCount);
+
+        if (State->RemainingCount <= 0)
         {
-            FSpawnState* State = SpawnStates.Find(TimerName);
-            if (State && State->RemainingCount > 0)
+            if (FTimerHandle* HandlePtr = SpawnTimerHandles.Find(TimerName))
             {
-                // 실제 소환 로직
-                SpawnVolume->SpawnRandomMonster(CurrentStageIndex);
-                State->RemainingCount--;
-                SpawnedMonsterCount++;
-                MonsterSpawned.Broadcast(SpawnedMonsterCount);
-
-                UE_LOG(LogTemp, Log, TEXT("[%s] 남은 마리수: %d"), *State->WaveName, State->RemainingCount);
-
-                if (State->RemainingCount <= 0)
-                {
-                    GetWorldTimerManager().ClearTimer(SpawnTimerHandles[TimerName]);
-                    SpawnTimerHandles.Remove(TimerName);
-                    SpawnStates.Remove(TimerName);
-                }
+                GetWorldTimerManager().ClearTimer(*HandlePtr);
             }
-        }, Interval, true);
+            SpawnTimerHandles.Remove(TimerName);
+            SpawnStates.Remove(TimerName);
+        }
+    }
 }
 
 void AT11_GameState::OnMonsterKilled(FVector DropLocation, int32 ScoreValue)
