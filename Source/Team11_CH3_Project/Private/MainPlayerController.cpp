@@ -552,6 +552,13 @@ void AMainPlayerController::UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbn
 						float TotalCooldown = WeakSkillSlot->GetEquippedSkill()->GetCooldownTime();
 						float RemainCooldown = WeakSkillSlot->GetCooldownRemaining();
 					
+						if (RemainCooldown <= 0.0f)
+						{
+							WeakSkillCooldownBar->SetPercent(1.0f);
+							GetWorldTimerManager().ClearTimer(SkillCooldownTimerHandles[Index]);
+							return;
+						}
+						
 						WeakSkillCooldownBar->SetPercent((TotalCooldown - RemainCooldown)/TotalCooldown);
 					
 					}, 0.03, true);

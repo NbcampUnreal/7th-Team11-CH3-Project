@@ -106,7 +106,7 @@ void UMonsterSubsystem::OnMonsterDeath(AMonsterBase* DeadMonster)
 void UMonsterSubsystem::DespawnMonster(AMonsterBase* DeadMonster)
 {
 	if (!IsValid(this)) return;
-
+	
 	int32 Index = Monsters.Find(DeadMonster);
 	if (Index != INDEX_NONE && Index < SpawnedMonsterCount)
 	{

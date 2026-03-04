@@ -107,7 +107,13 @@ void AMonsterBase::Init(const FMonsterData* MonsterData)
 		StopAnimMontage();
 		SkeletalMeshComponent->GetAnimInstance()->InitializeAnimation();
 	}
-	GetCharacterMovement()->MaxWalkSpeed = StatComponent->GetBaseStat(EStat::MoveSpeed);
+	if (UCharacterMovementComponent* CharacterMovementComponent = GetCharacterMovement())
+	{
+		CharacterMovementComponent->MaxWalkSpeed = StatComponent->GetBaseStat(EStat::MoveSpeed);
+		CharacterMovementComponent->bUseControllerDesiredRotation = false;
+		CharacterMovementComponent->bOrientRotationToMovement = true;
+	}
+	
 	BlackboardUpdate();
 	SetActorScale3D({1.f, 1.f, 1.f});
 	

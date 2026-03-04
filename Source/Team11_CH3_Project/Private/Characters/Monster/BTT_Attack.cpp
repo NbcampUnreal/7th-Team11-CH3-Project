@@ -40,16 +40,17 @@ EBTNodeResult::Type UBTT_Attack::ExecuteTask(UBehaviorTreeComponent& OwnerComp, 
 		{
 			MonsterControllerBase->SetFocus(TargetActor);
 			MonsterBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
+			
+			TWeakObjectPtr<UBehaviorTreeComponent> WeakOwnerComp = &OwnerComp;
+			TWeakObjectPtr<UBTT_Attack> WeakThis = this;
+			
 			AttackMemory->OnAttackFinishedHandle = MonsterBase->OnAttackFinished.AddLambda(
-			[this, &OwnerComp, AttackMemory, MonsterBase]()
+			[WeakThis, WeakOwnerComp]()
 			{
-				MonsterBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
-				AttackMemory->OnAttackFinishedHandle.Reset();
-				if (AMonsterControllerBase* MonsterControllerBase = Cast<AMonsterControllerBase>(OwnerComp.GetAIOwner()))
+				if (WeakOwnerComp.IsValid() && WeakThis.IsValid())
 				{
-					MonsterControllerBase->ClearFocus(EAIFocusPriority::Gameplay);
+					WeakThis->FinishLatentTask(*WeakOwnerComp, EBTNodeResult::Succeeded);
 				}
-				FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
 			}	
 			);
 			return EBTNodeResult::InProgress;
@@ -76,27 +77,43 @@ void UBTT_Attack::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory,
 	if (UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent())
 	{
 		AActor* TargetActor  = Cast<AActor>(BB->GetValueAsObject(TargetActorSelector.SelectedKeyName));
-		MonsterBase->UpdateTargetLocation(TargetActor->GetActorLocation());
-		
+		if (TargetActor)
+		{
+			MonsterBase->UpdateTargetLocation(TargetActor->GetActorLocation());
+		}
 	}
 	
 	
 	
 }
 
-EBTNodeResult::Type UBTT_Attack::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+void UBTT_Attack::ClearDelegate(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	FBTT_AttackMemory* AttackMemory = CastInstanceNodeMemory<FBTT_AttackMemory>(NodeMemory);
 	AMonsterControllerBase* MonsterControllerBase = Cast<AMonsterControllerBase>(OwnerComp.GetAIOwner());
-	if (MonsterControllerBase && AttackMemory->OnAttackFinishedHandle.IsValid())
+	if (MonsterControllerBase)
 	{
-		if (AMonsterBase* MonsterBase = Cast<AMonsterBase>(MonsterControllerBase->GetPawn()))
+		MonsterControllerBase->ClearFocus(EAIFocusPriority::Gameplay);
+		if (AttackMemory->OnAttackFinishedHandle.IsValid())
 		{
-			MonsterBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
-			AttackMemory->OnAttackFinishedHandle.Reset();
+			if (AMonsterBase* MonsterBase = Cast<AMonsterBase>(MonsterControllerBase->GetPawn()))
+			{
+				MonsterBase->OnAttackFinished.Remove(AttackMemory->OnAttackFinishedHandle);
+				AttackMemory->OnAttackFinishedHandle.Reset();
+			}
 		}
 	}
-	
+}
+
+EBTNodeResult::Type UBTT_Attack::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	ClearDelegate(OwnerComp, NodeMemory);
 	return Super::AbortTask(OwnerComp, NodeMemory);
+}
+
+void UBTT_Attack::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+{
+	ClearDelegate(OwnerComp, NodeMemory);
+	Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
 }
 

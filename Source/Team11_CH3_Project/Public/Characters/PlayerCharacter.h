@@ -254,6 +254,7 @@ protected:
 public:
 	void DealDamage();
 	void OnAttackEnded();
+	void HearingNotifyToEnemy(float Distance);
 	
 private:
     bool bIsDead = false;
