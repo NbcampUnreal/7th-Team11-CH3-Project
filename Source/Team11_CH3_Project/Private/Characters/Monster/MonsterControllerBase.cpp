@@ -15,6 +15,7 @@
 
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Perception/AISenseConfig_Touch.h"
 #include "Perception/AISense_Team.h"
 #include "Perception/AISense_Touch.h"
@@ -200,6 +201,16 @@ void AMonsterControllerBase::TargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 				BB->SetValueAsVector(TEXT("LastHearingLocation"), Actor->GetActorLocation());
 				BB->SetValueAsBool(TEXT("bIsTracking"), true);
 			}
+			
+			AMonsterBase* MonsterBase = Cast<AMonsterBase>(GetPawn());
+			if (MonsterBase)
+			{
+				USoundBase* HearingReactSound = MonsterBase->GetHearingReactSound();
+				if (HearingReactSound)
+				{
+					UGameplayStatics::PlaySoundAtLocation(GetWorld(), HearingReactSound, MonsterBase->GetActorLocation(), 100.0f);
+				}
+			}			
 		}
 	}
 	else

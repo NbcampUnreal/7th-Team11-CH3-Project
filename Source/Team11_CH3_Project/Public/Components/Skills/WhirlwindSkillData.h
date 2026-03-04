@@ -28,7 +28,7 @@ protected:
 	float MoveSpeed = 300.0f;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Sound")
-	USoundBase* WhirlwindSound;
+	TObjectPtr<USoundBase> WhirlwindSound;
 private:
 	float Timer = 0.0f;
 	

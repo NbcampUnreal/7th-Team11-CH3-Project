@@ -43,6 +43,8 @@ public:
 	void UpdateTargetLocation(const FVector& Vector);
 	FOnAttackFinished OnAttackFinished;
 	
+	USoundBase* GetHearingReactSound()const;
+	
 protected:
 	
 	FVector OriginLocation;
@@ -61,6 +63,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TObjectPtr<UEquipmentInstance> WeaponItemDataInstance;
 	int32 ScoreValue = 0;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TArray<TObjectPtr<USoundBase>> HearingReactSound;
 	
 	FTimerHandle ExecuteTimer;
 public:

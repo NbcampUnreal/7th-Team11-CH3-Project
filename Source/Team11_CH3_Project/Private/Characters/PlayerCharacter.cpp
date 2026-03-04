@@ -89,6 +89,18 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 			ETriggerEvent::Triggered,
 			this,
 			&APlayerCharacter::SkillE);
+
+		EnhancedInput->BindAction(
+			SkillRAction,
+			ETriggerEvent::Triggered,
+			this,
+			&APlayerCharacter::SkillR);
+		
+		EnhancedInput->BindAction(
+			SkillTAction,
+			ETriggerEvent::Triggered,
+			this,
+			&APlayerCharacter::SkillT);
 	}
 }
 
@@ -184,7 +196,6 @@ void APlayerCharacter::SkillQ(const FInputActionValue& Value)
 	}
 
 
-
 	// if (SkillComponent->CurrentActiveSkill) 체크로 지금 활성화된 스킬이 있으면 return 
 
 
@@ -217,13 +228,67 @@ void APlayerCharacter::SkillE(const FInputActionValue& Value)
 	PerformSkill(SkillComponent->GetSkillSlot(2), TargetLocation);
 }
 
+void APlayerCharacter::SkillR(const FInputActionValue& Value)
+{
+	if (SkillComponent->GetActiveSkillSlot()->GetIsEnd() == false)
+		return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Skill E Used"));
+
+	if (IsValid(SkillComponent->GetSkillSlot(3)) == false)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Skill Empty!"));
+		return;
+	}
+
+	if (SkillComponent->IsSkillOnCooldown(3))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CoolTime Remaining : %0.1f"), SkillComponent->GetCooldownRemaining(3));
+		return;
+	}
+
+	FVector TargetLocation;
+	GetSkillTargetLocation(TargetLocation);
+	PerformSkill(SkillComponent->GetSkillSlot(3), TargetLocation);
+}
+
+void APlayerCharacter::SkillT(const FInputActionValue& Value)
+{
+	if (SkillComponent->GetActiveSkillSlot()->GetIsEnd() == false)
+		return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Skill E Used"));
+
+	if (IsValid(SkillComponent->GetSkillSlot(4)) == false)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Skill Empty!"));
+		return;
+	}
+
+	if (SkillComponent->IsSkillOnCooldown(4))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CoolTime Remaining : %0.1f"), SkillComponent->GetCooldownRemaining(4));
+		return;
+	}
+
+	FVector TargetLocation;
+	GetSkillTargetLocation(TargetLocation);
+	PerformSkill(SkillComponent->GetSkillSlot(4), TargetLocation);
+}
+
+
+
+
 void APlayerCharacter::SetAiming(bool bNewAiming)
 {
 	UActiveSkillSlot* ActiveSkillSlot = SkillComponent->GetActiveSkillSlot();
 	if (IsValid(ActiveSkillSlot) && ActiveSkillSlot->GetIsEnd() == false)
 	{
 		ActiveSkillSlot->Notify(TEXT("Cancel"));
-		return;
+		if (!bIsAiming)
+		{
+			return;
+		}
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("SetAiming: %d"), bNewAiming);
@@ -247,7 +312,7 @@ void APlayerCharacter::BeginPlay()
 
 	// 스탯 변경 시 이동속도 업데이트
 	StatComponent->OnStatChanged.AddDynamic(this, &APlayerCharacter::UpdateMovementSpeed);
-	
+
 	UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
 	if (IsValid(GI) == false)
 		return;
@@ -271,13 +336,12 @@ void APlayerCharacter::BeginPlay()
 		StatComponent->InitStat(InitialStat);
 		// 기본 장비 장착(시작은 기본 무기만)
 #pragma region TESTCODE
-		
+
 		UEquipmentInstance* EquipmentInstance = NewObject<UEquipmentInstance>(GetGameInstance());
 		EquipmentInstance->Init(TESTWEAPONDATAASSET, 1);
 		ItemManager->SetItemAt(EquipmentInstance, 0);
 #pragma endregion
 	}
-
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -286,11 +350,11 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	const FVector TargetOffset = bIsAiming ? AimSocketOffset : DefaultSocketOffset;
 	CameraBoom->SocketOffset = FMath::VInterpTo(CameraBoom->SocketOffset, TargetOffset, DeltaTime, CameraInterpSpeed);
-	
+
 	if (SkillComponent)
 	{
 		if (UActiveSkillSlot* ActiveSkillSlot = SkillComponent->GetActiveSkillSlot())
-		{	
+		{
 			FVector TargetLocation;
 			GetSkillTargetLocation(TargetLocation);
 			ActiveSkillSlot->SetTargetLocation(TargetLocation);
@@ -672,5 +736,5 @@ void APlayerCharacter::OnAttackEnded()
 
 void APlayerCharacter::HearingNotifyToEnemy(float Distance)
 {
-	MakeNoise(1,this,GetActorLocation(),Distance);
+	MakeNoise(1, this, GetActorLocation(), Distance);
 }

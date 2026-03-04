@@ -151,6 +151,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Input")
 	TObjectPtr<UInputAction> SkillEAction;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> SkillRAction;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<UInputAction> SkillTAction;
 #pragma endregion
 
 	/*
@@ -242,6 +248,8 @@ protected:
     void Attack(const FInputActionValue& Value);
     void SkillQ(const FInputActionValue& Value);
     void SkillE(const FInputActionValue& Value);
+	void SkillR(const FInputActionValue& Value);
+	void SkillT(const FInputActionValue& Value);
 	void PerformSkill(USkillSlot* SkillSlot, const FVector& TargetLocation);
 	void GetSkillTargetLocation(FVector& TargetLocation);
 

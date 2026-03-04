@@ -159,6 +159,15 @@ void AMonsterBase::UpdateTargetLocation(const FVector& Vector)
 	}
 }
 
+USoundBase* AMonsterBase::GetHearingReactSound() const
+{
+	if (HearingReactSound.IsEmpty())
+	{
+		return nullptr;
+	}
+	return HearingReactSound[FMath::RandRange(0, HearingReactSound.Num() - 1)];
+}
+
 float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent,
                                class AController* EventInstigator, AActor* DamageCauser)
 {
