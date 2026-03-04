@@ -1,10 +1,11 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/Skills/MobilitySkillData.h"
 #include "GameFramework/Character.h"
 #include "Components/CapsuleComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 
 void UMobilitySkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
@@ -89,4 +90,8 @@ void UMobilitySkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
 	}
 
 	Instigator->SetActorLocation(Destination, true);
+	if (Sound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound, Instigator->GetActorLocation(), 0.6f);
+	}
 }

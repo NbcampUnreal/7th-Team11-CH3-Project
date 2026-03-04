@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -71,6 +71,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Skill")
 	float Duration = 100.0f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill")
+	class USoundBase* Sound;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Animation")
 	TObjectPtr<UAnimMontage> SkillMontage = nullptr;

@@ -1,9 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Components/Skills/HealingSkillData.h"
 #include "Components/StatComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 
 void UHealingSkillData::DoHeal()
@@ -39,5 +40,9 @@ void UHealingSkillData::Notify(APawn* Instigator, AWeaponActor* WeaponActor, con
 	if (Name == TEXT("DealDamage"))
 	{
 		DoHeal();
+		if (Sound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound, Instigator->GetActorLocation(), 0.6f);
+		}
 	}
 }
