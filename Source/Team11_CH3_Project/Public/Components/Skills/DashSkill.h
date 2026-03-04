@@ -27,9 +27,10 @@ protected:
 	float DashSpeed;
 
 private:
-	float ChargingTimer = 0.0f;
-	bool bIsDashing = false;
+	float ChargingTimer;
+	bool bIsDashing;
 	FVector NavDestination;
 	FVector DashingDir;
+	bool bIsHit;
 };
 

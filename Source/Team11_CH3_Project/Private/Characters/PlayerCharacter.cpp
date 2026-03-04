@@ -662,7 +662,7 @@ void APlayerCharacter::PerformSkill(USkillSlot* SkillSlot, const FVector& Target
 		return;
 	if (IsValid(SkillSlot->GetEquippedSkill()->GetSkillMontage()) == false)
 		return;
-
+	HearingNotifyToEnemy(600.0f);
 	SkillComponent->ActiveSkill(this, nullptr, SkillSlot);
 }
 
