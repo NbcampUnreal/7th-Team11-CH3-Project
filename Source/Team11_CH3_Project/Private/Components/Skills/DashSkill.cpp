@@ -9,6 +9,8 @@
 #include "Components/StatComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 void UDashSkill::Activate(UActiveSkillSlot* InActiveSkillSlot)
 {
@@ -51,6 +53,7 @@ void UDashSkill::Tick(float DeltaSeconds)
 		UNavigationSystemV1* NavigationSystemV1 = FNavigationSystem::GetCurrent<UNavigationSystemV1>(Owner->GetWorld());
 		if (NavigationSystemV1)
 		{
+			
 			FNavLocation ResultLocation;
 			FVector NavDashingStartLocation = Owner->GetActorLocation();
 			NavDestination = ActiveSkillSlot->GetTargetLocation();
@@ -64,6 +67,28 @@ void UDashSkill::Tick(float DeltaSeconds)
 				NavDashingStartLocation = ResultLocation.Location; 
 			}
 			DashingDir = (NavDestination - NavDashingStartLocation).GetSafeNormal();
+		}
+		// 여기서 VFX 스폰 몬스터에 붙여서
+		if (IsValid(DashVFX))
+		{
+			if (ACharacter* Character = Cast<ACharacter>(Owner))
+			{
+				USkeletalMeshComponent* MeshComp = Character->GetMesh();
+				if (IsValid(MeshComp))
+				{
+					FRotator DashRotation = (-DashingDir).Rotation();
+					UNiagaraFunctionLibrary::SpawnSystemAttached(
+						DashVFX,
+						MeshComp,
+						NAME_None,         
+						Owner->GetActorLocation(),
+						DashRotation,
+						EAttachLocation::KeepWorldPosition,
+						true
+					);
+				}
+			}
+			UE_LOG(LogTemp, Warning, TEXT("Dash"));
 		}
 		// Destination = ActiveSkillSlot->GetTargetLocation();
 		AnimInstance->Montage_JumpToSection(TEXT("Dashing"),SkillMontage);
