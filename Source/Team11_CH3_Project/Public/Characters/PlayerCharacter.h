@@ -221,7 +221,7 @@ public:
 protected:
 	// 델리게이트 사용목적 UFUNCTION() 
 	UFUNCTION()
-	void UpdateMovementSpeed();
+	void UpdateMovementSpeed(UStatComponent* StatComp);
 	void EndDodge();
 	void ResetDodgeCooldown();
     // void AttachWeapon(TSubclassOf<AActor> WeaponClass);

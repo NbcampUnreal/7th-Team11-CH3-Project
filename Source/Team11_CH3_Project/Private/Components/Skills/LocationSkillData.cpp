@@ -95,7 +95,7 @@ void ULocationSkillData::Tick(float DeltaSeconds)
 
 	FVector DiffVector = TargetLocation - Instigator->GetActorLocation();
 	FVector Dir = DiffVector.GetSafeNormal();
-	float Distance = FMath::Min(Range, DiffVector.Length());
+	float Distance = FMath::Min(Range, DiffVector.Length()) - 10.0f;
 	TargetLocation = Instigator->GetActorLocation() + Dir * Distance;
 	
 	
@@ -108,12 +108,13 @@ void ULocationSkillData::Tick(float DeltaSeconds)
 		HitResult,
 		TargetLocation,
 		End,
-		ECC_WorldStatic, // 주로 바닥(Static Mesh)은 이 채널을 사용합니다.
+		ECC_Visibility, 
 		QueryParams
 	);
 	if (bHit)
 	{
-		SpawnedIndicator->SetActorLocation(HitResult.ImpactPoint + FVector(0.f, 0.f, 5.f));
+		UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
+		SpawnedIndicator->SetActorLocation(HitResult.ImpactPoint + FVector(0.f, 0.f, 10.f));
 	}
 }
 

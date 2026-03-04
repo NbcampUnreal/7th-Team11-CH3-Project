@@ -111,7 +111,7 @@ void APlayerCharacter::GetSkillTargetLocation(FVector& TargetLocation)
 		}
 
 		FHitResult HitResult;
-		if (PlayerController->GetHitResultAtScreenPosition(ScreenCenter, ECC_Camera, Params, HitResult))
+		if (PlayerController->GetHitResultAtScreenPosition(ScreenCenter, ECC_Visibility, Params, HitResult))
 		{
 			TargetLocation = HitResult.ImpactPoint;
 		}
@@ -233,7 +233,7 @@ void APlayerCharacter::SetAiming(bool bNewAiming)
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->MaxWalkSpeed = bIsAiming ? AimWalkSpeed : DefaultWalkSpeed;
-	UpdateMovementSpeed();
+	UpdateMovementSpeed(StatComponent);
 
 	if (AMainPlayerController* PC = Cast<AMainPlayerController>(GetController()))
 	{
@@ -246,8 +246,8 @@ void APlayerCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	// 스탯 변경 시 이동속도 업데이트
-	//StatComponent->OnStatChanged.AddDynamic(this, &APlayerCharacter::UpdateMovementSpeed);
-
+	StatComponent->OnStatChanged.AddDynamic(this, &APlayerCharacter::UpdateMovementSpeed);
+	
 	UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
 	if (IsValid(GI) == false)
 		return;
@@ -278,7 +278,6 @@ void APlayerCharacter::BeginPlay()
 #pragma endregion
 	}
 
-	UpdateMovementSpeed();
 }
 
 void APlayerCharacter::Tick(float DeltaTime)
@@ -372,13 +371,13 @@ void APlayerCharacter::PerformDodge()
 	ExecuteDodge();
 }
 
-void APlayerCharacter::UpdateMovementSpeed()
+void APlayerCharacter::UpdateMovementSpeed(UStatComponent* StatComp)
 {
-	if (!GetCharacterMovement() || !StatComponent) return;
+	if (!GetCharacterMovement() || !StatComp) return;
 	// 조준상태일때도 고려해서 최고속도 업데이트
 	GetCharacterMovement()->MaxWalkSpeed = bIsAiming
 		                                       ? AimWalkSpeed
-		                                       : WalkSpeed + StatComponent->GetCurrentStat(EStat::MoveSpeed);
+		                                       : WalkSpeed + StatComp->GetCurrentStat(EStat::MoveSpeed);
 }
 
 EDodgeDir APlayerCharacter::GetDodgeDirectionFromInput() const
