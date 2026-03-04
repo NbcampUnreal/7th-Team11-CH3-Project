@@ -61,6 +61,8 @@ void UItemOverlayWidget::UpdateOverlayWidget(FVector2D ScreenPosition, UItemInst
 	{
 		return;
 	}
+	UpdateItemRarity(ItemInstance);
+	
 	if (ItemName)
 	{
 		ItemName->SetText(ItemInstance->GetItemName());
@@ -84,7 +86,7 @@ void UItemOverlayWidget::UpdateOverlayWidget(FVector2D ScreenPosition, UItemInst
 		{
 			if (EquipmentInstance->GetEquipmentType() == EEquipmentType::SkillGem)
 			{
-				UpdateStatBox(EquipmentInstance);
+				CollapseStatBox();
 				CollapseSocketBox();
 			}
 			else
@@ -176,7 +178,7 @@ void UItemOverlayWidget::UpdateStatBoxFromStats(const TMap<EStat, float>& Stats)
 	}
 }
 
-void UItemOverlayWidget::UpdateItemRarity(UEquipmentInstance* EquipmentInstance)
+void UItemOverlayWidget::UpdateItemRarity(UItemInstance* EquipmentInstance)
 {
 	if (!EquipmentInstance->GetItemDataAsset() || !RarityColorDataAsset)
 	{

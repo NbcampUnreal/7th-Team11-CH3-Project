@@ -34,7 +34,7 @@ private:
 	void CollapseStatBox();
 	void CollapseSocketBox();
 	void UpdateStatBoxFromStats(const TMap<EStat, float>& Stats);
-	void UpdateItemRarity(UEquipmentInstance* EquipmentInstance);
+	void UpdateItemRarity(UItemInstance* EquipmentInstance);
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UTextBlock> ItemName;

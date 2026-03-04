@@ -198,7 +198,7 @@ void AMonsterControllerBase::TargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 		{
 			if (UBlackboardComponent* BB = GetBlackboardComponent())
 			{
-				if (!BB->GetValueAsBool(TEXT("bIsFighting")))
+				if (!BB->GetValueAsBool(TEXT("bIsFighting"))&&!BB->GetValueAsBool(TEXT("bIsTracking")))
 				{
 					AMonsterBase* MonsterBase = Cast<AMonsterBase>(GetPawn());
 					if (MonsterBase)

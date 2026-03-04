@@ -196,8 +196,6 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 	if (IsDead())
 	{
 		SetActorEnableCollision(false);
-		
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, *GetName().Append(TEXT("DEAD")));
 
 		if (AAIController* AIController = Cast<AAIController>(GetController()))
 		{
@@ -218,7 +216,7 @@ float AMonsterBase::TakeDamage(float DamageAmount, struct FDamageEvent const& Da
 			}
 		}
 	};
-	// GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("%f"), StatComponent->GetCurrentHP()));
+
 	return ActualDamage;
 }
 
