@@ -32,6 +32,9 @@ void UDashSkill::Tick(float DeltaSeconds)
 {
 	ChargingTimer += DeltaSeconds;
 	UAnimInstance* AnimInstance = nullptr;
+
+	if (ActiveSkillSlot.IsValid() == false)
+		return;
 	AActor* Owner = ActiveSkillSlot->GetOwner();
 	if (ACharacter* Character = Cast<ACharacter>(Owner))
 	{

@@ -43,6 +43,11 @@ void UMainInventoryWidget::SetVisibility(ESlateVisibility InVisibility)
 
 void UMainInventoryWidget::HandleItemSlotChanged(UItemSlot* SlotData)
 {
+	UItemSlot* CurrentEquipmentInstance = EquipmentDetailWidget->GetCurrentSlot();
+	if(CurrentEquipmentInstance && CurrentEquipmentInstance == SlotData){
+		EquipmentDetailWidget->SetVisibility(ESlateVisibility::Hidden);
+		
+	} 
 	switch (SlotData->GetItemContainer()->GetItemContainerType())
 	{
 	//장비와 인벤토리를 관리하는 위젯

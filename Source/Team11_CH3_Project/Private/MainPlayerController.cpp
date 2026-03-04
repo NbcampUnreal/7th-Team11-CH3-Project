@@ -235,6 +235,7 @@ void AMainPlayerController::HandleOpenInventory()
 		if (bIsInvenOpened)
 		{
 			InventoryWidgetInstance->RemoveFromParent();
+			InventoryWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 			FInputModeGameOnly InputMode;
 			SetInputMode(InputMode);
 
@@ -251,6 +252,7 @@ void AMainPlayerController::HandleOpenInventory()
 		else
 		{
 			InventoryWidgetInstance->AddToViewport(1);
+			InventoryWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 			FInputModeUIOnly InputMode;
 			InputMode.SetWidgetToFocus(InventoryWidgetInstance->TakeWidget());
 			SetInputMode(InputMode);

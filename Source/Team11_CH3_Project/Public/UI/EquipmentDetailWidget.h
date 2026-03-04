@@ -27,6 +27,7 @@ public:
 	void Init(UMainInventoryWidget* InMainInventoryWidget);
 	void Update(UItemSlot* ItemSlot);
 	void HandlePartsSlotChanged(UItemSlot* SlotData);
+	UItemSlot* GetCurrentSlot()const{return CurrentItemSlot.Get();}
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UItemSlotWidget> EquipmentThumbnail;
@@ -57,4 +58,5 @@ private:
 	void UpdateStatBox(const TMap<EStat, float>& Stats);
 	TWeakObjectPtr<UMainInventoryWidget> MainInventoryWidget;
 	TWeakObjectPtr<UEquipmentInstance> CurrentEquipment;
+	TWeakObjectPtr<UItemSlot> CurrentItemSlot;
 };

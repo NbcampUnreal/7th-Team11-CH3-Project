@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "NiagaraSystem.h" 
 #include "BaseProjectile.generated.h"
 
 UCLASS()
@@ -45,4 +46,7 @@ protected:
 	// 데미지
 	UPROPERTY()
 	float Damage;
+
+	UPROPERTY(EditDefaultsOnly, Category = "VFX")
+	TObjectPtr<UNiagaraSystem> HitVFX;
 };
