@@ -14,7 +14,7 @@
 #include "Blueprint/WidgetBlueprintLibrary.h"
 #include "UI/ItemOverlayWidget.h"
 #include "UI/MainInventoryWidget.h"
-
+#include "CommonGameViewportClient.h"
 
 void UInteractableItemSlotWidget::Init(UMainInventoryWidget* InMainInventoryWidget, UItemSlot* InSlot)
 {
@@ -117,6 +117,28 @@ void UInteractableItemSlotWidget::NativeOnDragCancelled(const FDragDropEvent& In
 	if (DragOperation && DragOperation->OriginSlot.IsValid())
 	{
 		DragOperation->OriginSlot->SetRenderOpacity(1.0f);
+
+
+		FVector2D ViewportSize;
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+		FVector2D MousePosition = InDragDropEvent.GetScreenSpacePosition();
+		if (MousePosition.X > (ViewportSize.X * 0.5f))
+		{
+			IItemContainer* OriginContainer = DragOperation->OriginSlot->GetItemSlot()->GetItemContainer();
+			int32 OriginIndex = DragOperation->OriginSlot->GetItemSlot()->GetIndex();
+
+			if (OriginContainer)
+			{
+				OriginContainer->SetItemAt(nullptr, OriginIndex);
+				if (MainInventoryWidget.IsValid())
+				{
+					
+					MainInventoryWidget->HandleItemSlotChanged(DragOperation->OriginSlot->GetItemSlot());
+				}
+			}
+		}
+
+
 		DragOperation->OriginSlot.Reset();
 	}
 	SetRenderOpacity(1.0f);

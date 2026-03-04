@@ -235,6 +235,7 @@ void AMainPlayerController::HandleOpenInventory()
 		if (bIsInvenOpened)
 		{
 			InventoryWidgetInstance->RemoveFromParent();
+			InventoryWidgetInstance->SetVisibility(ESlateVisibility::Hidden);
 			FInputModeGameOnly InputMode;
 			SetInputMode(InputMode);
 
@@ -251,6 +252,7 @@ void AMainPlayerController::HandleOpenInventory()
 		else
 		{
 			InventoryWidgetInstance->AddToViewport(1);
+			InventoryWidgetInstance->SetVisibility(ESlateVisibility::Visible);
 			FInputModeUIOnly InputMode;
 			InputMode.SetWidgetToFocus(InventoryWidgetInstance->TakeWidget());
 			SetInputMode(InputMode);
@@ -506,7 +508,7 @@ void AMainPlayerController::UpdateHP(float CurrentHP, float MaxHP)
 	}
 }
 
-void AMainPlayerController::UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbnailChanged, bool bIsCooldownStart)
+void AMainPlayerController:: UpdateSkillHUD(USkillSlot* SkillSlot, bool bIsThumbnailChanged, bool bIsCooldownStart)
 {
 	int32 Index = SkillSlot->GetIndex() - 1;
 	if (UUserWidget* HUDWidget = HUDWidgetInstance)

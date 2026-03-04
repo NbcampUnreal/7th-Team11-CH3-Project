@@ -35,7 +35,7 @@ void AT11_GameState::StartLevel()
     if (GI->CurrentDifficulty == 0) MapName = CurrentWorld->GetName() + "_Easy";
     else if (GI->CurrentDifficulty == 1) MapName = CurrentWorld->GetName() + "_Hard";
     else if (GI->CurrentDifficulty == 2) MapName = CurrentWorld->GetName();
-    if (CurrentStageIndex < GI->MaxStageCount)
+    if (CurrentStageIndex < GI->MaxStageCount && CurrentStageIndex != GI->MidBossStage)
     {
         if (CurrentWorld && MapDataConfigs.Contains(MapName))
         {
@@ -154,17 +154,34 @@ void AT11_GameState::ActivatePortals()
             UT11_GameInstance* GI = Cast<UT11_GameInstance>(GetGameInstance());
             if (IsValid(GI) == false) return;
 
-            if (GI->CurrentStageIndex + 1 < GI->MaxStageCount && PortalClass->Difficulty != "Boss")
+            if (GI->CurrentStageIndex + 1 < GI->MaxStageCount && CurrentStageIndex + 1 != GI->MidBossStage && (PortalClass->Difficulty == "Easy" || PortalClass->Difficulty == "Hard"))
             {
                 SetPortalLevel(PortalClass);
                 PortalClass->SetPortalActive(true);
             }
-            else if (GI->CurrentStageIndex + 1 >= GI->MaxStageCount && PortalClass->Difficulty == "Boss")
+            else if (CurrentStageIndex + 1 == GI->MidBossStage && PortalClass->Difficulty == "Boss")
             {
-                PortalClass->SetTargetLevel(BossMapDataConfig.CreateConstIterator()->Key);
-                PortalClass->SetPortalActive(true);
+                TArray<FString> Keys;
+                BossMapDataConfig.GetKeys(Keys);
+                if (Keys.IsValidIndex(0))
+                {
+                    FString FirstKey = Keys[0];
+                    PortalClass->SetTargetLevel(FirstKey);
+                    PortalClass->SetPortalActive(true);
+                }
             }
-            else if (PortalClass->Difficulty == "Clear")
+            else if (CurrentStageIndex + 1 >= GI->MaxStageCount && PortalClass->Difficulty == "Boss")
+            {
+                TArray<FString> Keys;
+                BossMapDataConfig.GetKeys(Keys);
+                if (Keys.IsValidIndex(0))
+                {
+                    FString SecondKey = Keys[1];
+                    PortalClass->SetTargetLevel(SecondKey);
+                    PortalClass->SetPortalActive(true);
+                }
+            }
+            else if (CurrentStageIndex + 1 >= GI->MaxStageCount && PortalClass->Difficulty == "Clear")
             {
                 PortalClass->SetTargetLevel("L_GameClear");
                 PortalClass->SetPortalActive(true);

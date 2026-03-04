@@ -26,11 +26,12 @@ void UEquipmentDetailWidget::Update(UItemSlot* ItemSlot)
 	UEquipmentInstance* EquipmentInstance = Cast<UEquipmentInstance>(ItemSlot->GetItemInstance());
 	if (IsValid(EquipmentInstance) == false)
 		return;
+	CurrentItemSlot = ItemSlot;
 	CurrentEquipment = EquipmentInstance;
 	UItemDataAsset* ItemData = EquipmentInstance->GetItemDataAsset();
 	if (IsValid(ItemData) == false)
 		return;
-
+	
 	// 이름, 설명
 	if (ItemName)
 	{

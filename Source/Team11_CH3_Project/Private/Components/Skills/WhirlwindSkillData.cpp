@@ -9,6 +9,8 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "LevelInstance/LevelInstanceTypes.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
 
 void UWhirlwindSkillData::DealDamage()
 {
@@ -85,6 +87,35 @@ void UWhirlwindSkillData::DealDamage()
 	
 }
 
+void UWhirlwindSkillData::Activate(UActiveSkillSlot* InActiveSkillSlot)
+{
+	Super::Activate(InActiveSkillSlot);
+	// VFX 스폰
+	if (ActiveSkillSlot.IsValid() == false)
+		return;
+	AActor* Owner = ActiveSkillSlot->GetOwner();
+
+	if (WhirlwindVFX)
+	{
+		if (ACharacter* Character = Cast<ACharacter>(Owner))
+		{
+			USkeletalMeshComponent* MeshComp = Character->GetMesh();
+			if (IsValid(MeshComp))
+			{
+				ActivateWhirlwindVFXComp = UNiagaraFunctionLibrary::SpawnSystemAttached(
+					WhirlwindVFX,
+					MeshComp,
+					NAME_None,          
+					Owner->GetActorLocation() -FVector(0,0,100.0f),
+					FRotator::ZeroRotator,
+					EAttachLocation::KeepWorldPosition,
+					true                       
+				);
+			}
+		}
+	}
+}
+
 
 void UWhirlwindSkillData::Tick(float DeltaSeconds)
 {
@@ -118,6 +149,12 @@ void UWhirlwindSkillData::Tick(float DeltaSeconds)
 void UWhirlwindSkillData::OnExit()
 {
 	Super::OnExit();
+	// 스킬 끝나면 VFX 제거
+	if (IsValid(ActivateWhirlwindVFXComp))
+	{
+		ActivateWhirlwindVFXComp->DestroyComponent();
+		ActivateWhirlwindVFXComp = nullptr;
+	}
 	
 }
 

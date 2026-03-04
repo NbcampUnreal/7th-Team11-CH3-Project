@@ -26,6 +26,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Dash")
 	float DashSpeed;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Skill|VFX")
+	TObjectPtr<UNiagaraSystem> DashVFX;
+
+
 private:
 	float ChargingTimer;
 	bool bIsDashing;

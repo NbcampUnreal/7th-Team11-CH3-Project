@@ -21,5 +21,7 @@ public:
 	virtual void Notify(APawn* Instigator, AWeaponActor* WeaponActor, const FVector& Origin, const FVector& TargetLocation, FName Name)  override;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Skill|Sound")
-	class USoundBase* SwordSound;
+	TObjectPtr<USoundBase> SwordSound;
+private:
+	bool bIsHit;
 };
