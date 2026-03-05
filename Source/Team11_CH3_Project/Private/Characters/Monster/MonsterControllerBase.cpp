@@ -178,7 +178,7 @@ void AMonsterControllerBase::TargetPerceptionUpdated(AActor* Actor, FAIStimulus 
 						if (PerceptionSystem && IsValid(Actor))
 						{
 							FAITeamStimulusEvent Event = FAITeamStimulusEvent(
-								this, Actor, Actor->GetActorLocation(), 1000.0f);
+								this, Actor, Actor->GetActorLocation(), 10000.0f);
 							PerceptionSystem->OnEvent(Event);
 						}
 						else
